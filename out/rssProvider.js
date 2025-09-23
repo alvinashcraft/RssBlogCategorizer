@@ -66,7 +66,7 @@ class RSSBlogProvider {
         if (!currentFeeds.includes(feedUrl)) {
             currentFeeds.push(feedUrl);
             await config.update('feeds', currentFeeds, vscode.ConfigurationTarget.Global);
-            this.refresh();
+            // Refresh will be called by the command handler
         }
     }
     async loadFeeds() {
@@ -156,7 +156,7 @@ class RSSBlogProvider {
                     title: item.title || 'Untitled',
                     link: link,
                     description: this.stripHtml(item.description || item.summary || ''),
-                    pubDate: item.pubDate || item.published || '',
+                    pubDate: item.pubDate || item.published || item.updated || '',
                     category: this.categorizePost(item.title || '', item.description || ''),
                     source: feedTitle
                 };
