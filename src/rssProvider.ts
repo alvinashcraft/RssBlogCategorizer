@@ -76,32 +76,36 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return this.posts;
     }
 
-    async addFeed(feedUrl: string): Promise<void> {
-        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
-        const currentFeeds = config.get<string[]>('feeds') || [];
-        
-        if (!currentFeeds.includes(feedUrl)) {
-            currentFeeds.push(feedUrl);
-            await config.update('feeds', currentFeeds, vscode.ConfigurationTarget.Global);
-            // Refresh will be called by the command handler
+    async setFeedUrl(feedUrl: string): Promise<void> {
+        // Validate URL before saving
+        try {
+            new URL(feedUrl);
+        } catch (error) {
+            throw new Error('Invalid URL format');
         }
+        
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        await config.update('feedUrl', feedUrl, vscode.ConfigurationTarget.Global);
+        // Refresh will be called by the command handler
     }
 
     private async loadFeeds(): Promise<void> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
-        const feeds = config.get<string[]>('feeds') || [];
-
+        const feedUrl = config.get<string>('feedUrl') || 'https://dev.to/feed';
+        const recordCount = config.get<number>('recordCount') || 20;
+        
         this.posts = [];
         this.categories.clear();
 
-        const feedPromises = feeds.map(feed => this.fetchFeed(feed));
-        const results = await Promise.allSettled(feedPromises);
-
-        results.forEach((result) => {
-            if (result.status === 'fulfilled') {
-                this.posts.push(...result.value);
-            }
-        });
+        try {
+            // Append record count parameter to URL
+            const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
+            const posts = await this.fetchFeed(urlWithParams);
+            const filteredPosts = this.filterPostsByDate(posts);
+            this.posts.push(...filteredPosts);
+        } catch (error) {
+            console.error('Error loading feed:', error);
+        }
 
         this.categorizePosts();
     }
@@ -240,6 +244,54 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         // Sort posts in each category by date (newest first)
         this.categories.forEach(posts => {
             posts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+        });
+    }
+
+    private appendRecordCount(feedUrl: string, recordCount: number): string {
+        const url = new URL(feedUrl);
+        url.searchParams.set('n', recordCount.toString());
+        return url.toString();
+    }
+
+    private filterPostsByDate(posts: BlogPost[]): BlogPost[] {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const minimumDateTimeStr = config.get<string>('minimumDateTime') || '';
+        
+        let minimumDateTime: Date;
+        
+        if (minimumDateTimeStr.trim() === '') {
+            // Default to last 24 hours
+            minimumDateTime = new Date();
+            minimumDateTime.setHours(minimumDateTime.getHours() - 24);
+        } else {
+            try {
+                minimumDateTime = new Date(minimumDateTimeStr);
+                if (isNaN(minimumDateTime.getTime())) {
+                    // Invalid date, fall back to 24 hours
+                    minimumDateTime = new Date();
+                    minimumDateTime.setHours(minimumDateTime.getHours() - 24);
+                }
+            } catch (error) {
+                // Invalid date, fall back to 24 hours
+                minimumDateTime = new Date();
+                minimumDateTime.setHours(minimumDateTime.getHours() - 24);
+            }
+        }
+
+        return posts.filter(post => {
+            if (!post.pubDate) {
+                return false; // Exclude posts without dates
+            }
+            
+            try {
+                const postDate = new Date(post.pubDate);
+                if (isNaN(postDate.getTime())) {
+                    return false; // Exclude posts with invalid dates
+                }
+                return postDate >= minimumDateTime;
+            } catch (error) {
+                return false; // Exclude posts with invalid dates
+            }
         });
     }
 

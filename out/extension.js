@@ -30,14 +30,23 @@ function activate(context) {
             vscode.env.openExternal(vscode.Uri.parse(post.link));
         }
     });
-    const addFeedCommand = vscode.commands.registerCommand('rssBlogCategorizer.addFeed', async () => {
+    const setFeedCommand = vscode.commands.registerCommand('rssBlogCategorizer.addFeed', async () => {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const currentFeedUrl = config.get('feedUrl') || 'https://dev.to/feed';
         const feedUrl = await vscode.window.showInputBox({
-            prompt: 'Enter RSS feed URL',
-            placeHolder: 'https://example.com/feed.xml'
+            prompt: 'Set RSS feed URL',
+            placeHolder: 'https://example.com/feed.xml',
+            value: currentFeedUrl
         });
-        if (feedUrl) {
-            await provider.addFeed(feedUrl);
-            await provider.refresh();
+        if (feedUrl && feedUrl !== currentFeedUrl) {
+            try {
+                await provider.setFeedUrl(feedUrl);
+                await provider.refresh();
+                vscode.window.showInformationMessage(`RSS feed updated to: ${feedUrl}`);
+            }
+            catch (error) {
+                vscode.window.showErrorMessage(`Invalid URL format: ${feedUrl}`);
+            }
         }
     });
     // Auto-refresh based on configuration
@@ -56,8 +65,14 @@ function activate(context) {
                 await provider.refresh();
             }, getRefreshInterval());
         }
+        // Auto-refresh when feed settings change
+        if (event.affectsConfiguration('rssBlogCategorizer.feedUrl') ||
+            event.affectsConfiguration('rssBlogCategorizer.recordCount') ||
+            event.affectsConfiguration('rssBlogCategorizer.minimumDateTime')) {
+            provider.refresh().catch(console.error);
+        }
     });
-    context.subscriptions.push(refreshCommand, exportMarkdownCommand, exportHtmlCommand, openPostCommand, addFeedCommand, treeView, configChangeHandler, { dispose: () => clearInterval(refreshInterval) });
+    context.subscriptions.push(refreshCommand, exportMarkdownCommand, exportHtmlCommand, openPostCommand, setFeedCommand, treeView, configChangeHandler, { dispose: () => clearInterval(refreshInterval) });
     // Initial refresh
     provider.refresh().catch(console.error);
 }

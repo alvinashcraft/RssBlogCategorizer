@@ -36,15 +36,24 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    const addFeedCommand = vscode.commands.registerCommand('rssBlogCategorizer.addFeed', async () => {
+    const setFeedCommand = vscode.commands.registerCommand('rssBlogCategorizer.addFeed', async () => {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const currentFeedUrl = config.get<string>('feedUrl') || 'https://dev.to/feed';
+        
         const feedUrl = await vscode.window.showInputBox({
-            prompt: 'Enter RSS feed URL',
-            placeHolder: 'https://example.com/feed.xml'
+            prompt: 'Set RSS feed URL',
+            placeHolder: 'https://example.com/feed.xml',
+            value: currentFeedUrl
         });
         
-        if (feedUrl) {
-            await provider.addFeed(feedUrl);
-            await provider.refresh();
+        if (feedUrl && feedUrl !== currentFeedUrl) {
+            try {
+                await provider.setFeedUrl(feedUrl);
+                await provider.refresh();
+                vscode.window.showInformationMessage(`RSS feed updated to: ${feedUrl}`);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Invalid URL format: ${feedUrl}`);
+            }
         }
     });
 
@@ -66,6 +75,13 @@ export function activate(context: vscode.ExtensionContext) {
                 await provider.refresh();
             }, getRefreshInterval());
         }
+        
+        // Auto-refresh when feed settings change
+        if (event.affectsConfiguration('rssBlogCategorizer.feedUrl') ||
+            event.affectsConfiguration('rssBlogCategorizer.recordCount') ||
+            event.affectsConfiguration('rssBlogCategorizer.minimumDateTime')) {
+            provider.refresh().catch(console.error);
+        }
     });
 
     context.subscriptions.push(
@@ -73,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
         exportMarkdownCommand,
         exportHtmlCommand,
         openPostCommand,
-        addFeedCommand,
+        setFeedCommand,
         treeView,
         configChangeHandler,
         { dispose: () => clearInterval(refreshInterval) }
