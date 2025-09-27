@@ -34,6 +34,53 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     constructor(private context: vscode.ExtensionContext) {}
 
+    private async getLastDewDropDate(): Promise<Date | null> {
+        try {
+            console.log('Fetching latest Dew Drop post date from Alvin\'s blog...');
+            const posts = await this.fetchFeed('https://www.alvinashcraft.com/feed/');
+            
+            if (posts.length === 0) {
+                console.log('No posts found in blog RSS feed');
+                return null;
+            }
+            
+            // Find the most recent post with title starting with "Dew D"
+            // Handle HTML entities in titles (like &#8211; for em-dash)
+            const dewDropPosts = posts.filter(post => {
+                const cleanTitle = post.title.toLowerCase()
+                    .replace(/&#8211;/g, '-')  // em-dash
+                    .replace(/&#8212;/g, '-')  // em-dash variant
+                    .replace(/&[a-z]+;/g, '')  // other HTML entities
+                    .trim();
+                return cleanTitle.startsWith('dew d');
+            });
+            
+            if (dewDropPosts.length === 0) {
+                console.log('No Dew Drop posts found in blog RSS feed (searched in first 20 posts)');
+                console.log('Available post titles:', posts.slice(0, 5).map(p => `"${p.title}"`).join(', '));
+                return null;
+            }
+
+            // Posts should already be sorted by date (newest first) from RSS feed
+            // But let's sort them to be sure
+            dewDropPosts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+            
+            const latestDewDrop = dewDropPosts[0];
+            const latestDate = new Date(latestDewDrop.pubDate);
+            
+            if (isNaN(latestDate.getTime())) {
+                console.log('Invalid date found in latest Dew Drop post');
+                return null;
+            }
+
+            console.log(`✅ Latest Dew Drop post found: "${latestDewDrop.title}" from ${latestDate.toISOString()}`);
+            return latestDate;
+        } catch (error) {
+            console.error('❌ Error fetching latest Dew Drop date:', error);
+            return null;
+        }
+    }
+
     private async loadCategoriesConfig(): Promise<void> {
         try {
             const categoriesPath = path.join(__dirname, 'categories.json');
@@ -132,7 +179,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
             const posts = await this.fetchFeed(urlWithParams);
             console.log(`Fetched ${posts.length} posts from feed`);
-            const filteredPosts = this.filterPostsByDate(posts);
+            const filteredPosts = await this.filterPostsByDate(posts);
             console.log(`Filtered to ${filteredPosts.length} posts after date filtering`);
             this.posts.push(...filteredPosts);
             console.log(`Total posts after loading: ${this.posts.length}`);
@@ -335,17 +382,25 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return url.toString();
     }
 
-    private filterPostsByDate(posts: BlogPost[]): BlogPost[] {
+    private async filterPostsByDate(posts: BlogPost[]): Promise<BlogPost[]> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const minimumDateTimeStr = config.get<string>('minimumDateTime') || '';
         
         let minimumDateTime: Date;
         
         if (minimumDateTimeStr.trim() === '') {
-            // Default to last 24 hours in UTC
-            minimumDateTime = new Date();
-            minimumDateTime.setUTCHours(minimumDateTime.getUTCHours() - 24);
-            console.log(`Using default UTC filter: posts newer than ${minimumDateTime.toISOString()}`);
+            // Try to use the date of the latest "Dew Drop" post from Alvin's blog
+            const lastDewDropDate = await this.getLastDewDropDate();
+            
+            if (lastDewDropDate) {
+                minimumDateTime = lastDewDropDate;
+                console.log(`Using latest Dew Drop post date as filter: posts newer than ${minimumDateTime.toISOString()}`);
+            } else {
+                // Fallback to last 24 hours in UTC if we can't get the Dew Drop date
+                minimumDateTime = new Date();
+                minimumDateTime.setUTCHours(minimumDateTime.getUTCHours() - 24);
+                console.log(`Could not fetch Dew Drop date, using default UTC filter: posts newer than ${minimumDateTime.toISOString()}`);
+            }
         } else {
             try {
                 minimumDateTime = new Date(minimumDateTimeStr);

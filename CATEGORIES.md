@@ -51,7 +51,8 @@ This file contains the categories and keywords used to automatically categorize 
 
 The extension filters posts by publication date using **UTC timezone**:
 
-- **Default behavior**: Shows posts from the last 24 hours (UTC)
+- **Smart default**: Automatically uses the date of the latest "Dew Drop" post from alvinashcraft.com
+- **Fallback**: If the blog date can't be fetched, uses posts from the last 24 hours (UTC)
 - **Custom filter**: Set `minimumDateTime` in VS Code settings using UTC format
 - **Format examples**:
   - `2025-01-01T00:00:00Z` (midnight UTC on Jan 1, 2025)
