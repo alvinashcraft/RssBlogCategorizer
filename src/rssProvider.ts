@@ -335,7 +335,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     private categorizePost(title: string, description: string): string {
-        const content = (title + ' ' + description).toLowerCase();
+        // Only search the title for better categorization accuracy
+        // Description content can contain misleading keywords not related to the main topic
+        const titleContent = title.toLowerCase();
         
         // Use loaded categories configuration
         if (!this.categoriesConfig) {
@@ -346,16 +348,16 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         // Iterate through categories in the order they appear in the JSON file
         // The first matching category wins - no further categories are checked
         for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
-            const matchedKeyword = keywords.find(keyword => content.includes(keyword));
+            const matchedKeyword = keywords.find(keyword => titleContent.includes(keyword));
             if (matchedKeyword) {
-                // Log the categorization for debugging (can be removed in production)
-                console.log(`Post categorized as "${category}" due to keyword: "${matchedKeyword}"`);
+                // Log the categorization for debugging
+                console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}"`);
                 return category; // Immediate return - no further categories checked
             }
         }
 
         // No category matched, use the default
-        console.log(`Post categorized as default: "${this.categoriesConfig.defaultCategory}"`);
+        console.log(`Post "${title}" categorized as default: "${this.categoriesConfig.defaultCategory}" (no title keywords matched)`);
         return this.categoriesConfig.defaultCategory;
     }
 

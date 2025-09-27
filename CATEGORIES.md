@@ -20,9 +20,10 @@ This file contains the categories and keywords used to automatically categorize 
 ## How It Works
 
 - Each category has a list of keywords and phrases
-- When categorizing a post, the system searches the title and description (case-insensitive)
-- The first matching category is assigned to the post
+- When categorizing a post, the system searches **only the title** (case-insensitive) for better accuracy
+- The first matching category is assigned to the post (based on JSON order priority)
 - If no keywords match, the post gets assigned to the `defaultCategory`
+- **Note**: Only titles are searched to avoid false matches from keywords in post descriptions
 
 ## Adding New Categories
 
@@ -61,7 +62,9 @@ The extension filters posts by publication date using **UTC timezone**:
 
 ## Tips
 
+- **Focus on title keywords**: Since only titles are searched, choose keywords that commonly appear in post titles
 - Use specific keywords to avoid false matches
 - Include common variations of terms (e.g., "javascript", "js")
-- Consider abbreviations and alternative names
+- Consider abbreviations and alternative names that appear in titles
+- Avoid overly generic terms that might appear in many different types of posts
 - Test your changes by refreshing the feed and checking categorization results
