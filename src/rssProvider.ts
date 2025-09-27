@@ -296,12 +296,19 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             return 'General';
         }
 
+        // Iterate through categories in the order they appear in the JSON file
+        // The first matching category wins - no further categories are checked
         for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
-            if (keywords.some(keyword => content.includes(keyword))) {
-                return category;
+            const matchedKeyword = keywords.find(keyword => content.includes(keyword));
+            if (matchedKeyword) {
+                // Log the categorization for debugging (can be removed in production)
+                console.log(`Post categorized as "${category}" due to keyword: "${matchedKeyword}"`);
+                return category; // Immediate return - no further categories checked
             }
         }
 
+        // No category matched, use the default
+        console.log(`Post categorized as default: "${this.categoriesConfig.defaultCategory}"`);
         return this.categoriesConfig.defaultCategory;
     }
 
