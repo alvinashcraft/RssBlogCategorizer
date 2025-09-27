@@ -342,39 +342,55 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         let minimumDateTime: Date;
         
         if (minimumDateTimeStr.trim() === '') {
-            // Default to last 24 hours
+            // Default to last 24 hours in UTC
             minimumDateTime = new Date();
-            minimumDateTime.setHours(minimumDateTime.getHours() - 24);
+            minimumDateTime.setUTCHours(minimumDateTime.getUTCHours() - 24);
+            console.log(`Using default UTC filter: posts newer than ${minimumDateTime.toISOString()}`);
         } else {
             try {
                 minimumDateTime = new Date(minimumDateTimeStr);
                 if (isNaN(minimumDateTime.getTime())) {
-                    // Invalid date, fall back to 24 hours
+                    // Invalid date, fall back to 24 hours UTC
                     minimumDateTime = new Date();
-                    minimumDateTime.setHours(minimumDateTime.getHours() - 24);
+                    minimumDateTime.setUTCHours(minimumDateTime.getUTCHours() - 24);
+                    console.warn(`Invalid minimumDateTime format: "${minimumDateTimeStr}". Using default UTC filter: ${minimumDateTime.toISOString()}`);
+                } else {
+                    console.log(`Using custom UTC filter: posts newer than ${minimumDateTime.toISOString()}`);
                 }
             } catch (error) {
-                // Invalid date, fall back to 24 hours
+                // Invalid date, fall back to 24 hours UTC
                 minimumDateTime = new Date();
-                minimumDateTime.setHours(minimumDateTime.getHours() - 24);
+                minimumDateTime.setUTCHours(minimumDateTime.getUTCHours() - 24);
+                console.warn(`Error parsing minimumDateTime: "${minimumDateTimeStr}". Using default UTC filter: ${minimumDateTime.toISOString()}`);
             }
         }
 
-        return posts.filter(post => {
+        const filteredPosts = posts.filter(post => {
             if (!post.pubDate) {
+                console.log(`Excluding post "${post.title}" - no publication date`);
                 return false; // Exclude posts without dates
             }
             
             try {
                 const postDate = new Date(post.pubDate);
                 if (isNaN(postDate.getTime())) {
+                    console.log(`Excluding post "${post.title}" - invalid date format: "${post.pubDate}"`);
                     return false; // Exclude posts with invalid dates
                 }
-                return postDate >= minimumDateTime;
+                
+                const isIncluded = postDate >= minimumDateTime;
+                if (!isIncluded) {
+                    console.log(`Excluding post "${post.title}" - too old: ${postDate.toISOString()} < ${minimumDateTime.toISOString()}`);
+                }
+                return isIncluded;
             } catch (error) {
+                console.log(`Excluding post "${post.title}" - date parsing error: ${error}`);
                 return false; // Exclude posts with invalid dates
             }
         });
+
+        console.log(`Date filtering: ${filteredPosts.length} of ${posts.length} posts passed the UTC date filter`);
+        return filteredPosts;
     }
 
     private stripHtml(html: any): string {

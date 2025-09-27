@@ -47,6 +47,17 @@ This file contains the categories and keywords used to automatically categorize 
 - Rename categories by changing the key names
 - Keywords are matched using case-insensitive substring matching
 
+## Date Filtering
+
+The extension filters posts by publication date using **UTC timezone**:
+
+- **Default behavior**: Shows posts from the last 24 hours (UTC)
+- **Custom filter**: Set `minimumDateTime` in VS Code settings using UTC format
+- **Format examples**:
+  - `2025-01-01T00:00:00Z` (midnight UTC on Jan 1, 2025)
+  - `2025-09-27T12:00:00.000Z` (noon UTC on Sep 27, 2025)
+- **Important**: All date comparisons use UTC to ensure consistency across timezones
+
 ## Tips
 
 - Use specific keywords to avoid false matches

@@ -89,7 +89,7 @@
         "rssBlogCategorizer.minimumDateTime": {
           "type": "string",
           "default": "",
-          "description": "Minimum datetime for blog posts (ISO format, e.g., 2025-01-01T00:00:00Z). Leave empty to use posts from last 24 hours"
+          "description": "Minimum datetime for blog posts in UTC (ISO format, e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00.000Z). Leave empty to use posts from last 24 hours (UTC). All date comparisons use UTC timezone."
         },
         "rssBlogCategorizer.refreshInterval": {
           "type": "number",
