@@ -1,0 +1,154 @@
+{
+  "categories": {
+    "Web Development": [
+      "html",
+      "css", 
+      "frontend",
+      "backend",
+      "api",
+      "rest",
+      "graphql",
+      "azure",
+      "aws",
+      "gcp",
+      "webassembly",
+      "wasm",
+      "javascript",
+      "js",
+      "node.js",
+      "nodejs",
+      "npm",
+      "react",
+      "vue",
+      "angular",
+      "typescript"
+    ],
+    "Windows Development": [
+      "windows desktop",
+      "uwp",
+      "winui",
+      "wpf",
+      "winforms",
+      "c++",
+      "windows app sdk"
+    ],
+    "Python": [
+      "python",
+      "django",
+      "flask",
+      "fastapi",
+      "pandas",
+      "numpy"
+    ],
+    "DevOps and Methodology": [
+      "docker",
+      "kubernetes",
+      "ci/cd",
+      "deployment",
+      "terraform",
+      "agile",
+      "scrum",
+      "kanban",
+      "patterns"
+    ],
+    "Mobile and Game Development": [
+      "ios",
+      "android",
+      "react native",
+      "flutter",
+      "swift",
+      "kotlin",
+      ".net maui",
+      "jetpack compose",
+      "unity",
+      "unreal",
+      "xbox",
+      "playstation",
+      "ps5",
+      "nintendo",
+      "game development",
+      "iot",
+      "raspberry pi",
+      "arduino"
+    ],
+    "Data Science": [
+      "machine learning",
+      "ai",
+      "data science",
+      "analytics",
+      "big data"
+    ],
+    "Programming": [
+      "algorithm",
+      "data structure",
+      "coding",
+      "programming",
+      "software"
+    ],
+    "AI": [
+      "ai",
+      "artificial intelligence",
+      "machine learning",
+      "deep learning",
+      "openai",
+      "perplexity",
+      "bard",
+      "claude",
+      "gemini",
+      "gpt",
+      "copilot",
+      "foundry local",
+      "windows ml"
+    ],
+    ".NET": [
+      ".net",
+      "c#",
+      "asp.net",
+      "blazor",
+      "entity framework",
+      "visual studio",
+      "f#"
+    ],
+    "Terminal": [
+      "bash",
+      "zsh",
+      "fish",
+      "terminal",
+      "cli",
+      "command line",
+      "powershell"
+    ],
+    "Microsoft 365": [
+      "microsoft 365",
+      "office 365",
+      "sharepoint",
+      "teams",
+      "onenote",
+      "outlook",
+      "microsoft graph",
+      "excel",
+      "onedrive"
+    ],
+    "Database": [
+      "sql",
+      "database",
+      "mysql",
+      "postgresql",
+      "mongodb",
+      "redis",
+      "sqlite",
+      "nosql",
+      "fabric",
+      "couchbase",
+      "ravendb"
+    ],
+    "Tools": [
+      "git",
+      "vscode",
+      "ide",
+      "editor",
+      "productivity"
+    ]
+  },
+  "defaultCategory": "General"
+}

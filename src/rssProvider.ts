@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as https from 'https';
+import * as fs from 'fs';
+import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
 
 export interface BlogPost {
@@ -17,14 +19,36 @@ export interface CategoryNode {
     collapsibleState: vscode.TreeItemCollapsibleState;
 }
 
+interface CategoriesConfig {
+    categories: Record<string, string[]>;
+    defaultCategory: string;
+}
+
 export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private _onDidChangeTreeData: vscode.EventEmitter<any | undefined | null | void> = new vscode.EventEmitter<any | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<any | undefined | null | void> = this._onDidChangeTreeData.event;
 
     private posts: BlogPost[] = [];
     private categories: Map<string, BlogPost[]> = new Map();
+    private categoriesConfig: CategoriesConfig | null = null;
 
     constructor(private context: vscode.ExtensionContext) {}
+
+    private async loadCategoriesConfig(): Promise<void> {
+        try {
+            const categoriesPath = path.join(__dirname, 'categories.json');
+            const categoriesData = await fs.promises.readFile(categoriesPath, 'utf8');
+            this.categoriesConfig = JSON.parse(categoriesData) as CategoriesConfig;
+            console.log('Categories configuration loaded successfully');
+        } catch (error) {
+            console.error('Error loading categories configuration:', error);
+            // Fallback to empty config if file can't be loaded
+            this.categoriesConfig = {
+                categories: {},
+                defaultCategory: 'General'
+            };
+        }
+    }
 
     async refresh(): Promise<void> {
         await this.loadFeeds();
@@ -90,6 +114,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     private async loadFeeds(): Promise<void> {
+        // Load categories configuration if not already loaded
+        if (!this.categoriesConfig) {
+            await this.loadCategoriesConfig();
+        }
+
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const feedUrl = config.get<string>('feedUrl') || 'https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft';
         const recordCount = config.get<number>('recordCount') || 100;
@@ -261,29 +290,19 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private categorizePost(title: string, description: string): string {
         const content = (title + ' ' + description).toLowerCase();
         
-        const categories = {
-            'JavaScript': ['javascript', 'js', 'node.js', 'nodejs', 'npm', 'react', 'vue', 'angular', 'typescript'],
-            'Python': ['python', 'django', 'flask', 'fastapi', 'pandas', 'numpy'],
-            'DevOps and Methodology': ['docker', 'kubernetes', 'ci/cd', 'deployment', 'terraform', 'agile', 'scrum', 'kanban', 'patterns'],
-            'Web Development': ['html', 'css', 'frontend', 'backend', 'api', 'rest', 'graphql', 'azure', 'aws', 'gcp', 'webassembly', 'wasm'],
-            'Mobile': ['ios', 'android', 'react native', 'flutter', 'swift', 'kotlin', '.net maui', 'jetpack compose'],
-            'Data Science': ['machine learning', 'ai', 'data science', 'analytics', 'big data'],
-            'Programming': ['algorithm', 'data structure', 'coding', 'programming', 'software'],
-            'AI': ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'openai', 'perplexity', 'bard', 'claude', 'gemini', 'gpt', 'copilot', 'foundry local', 'windows ml'],
-            '.NET': ['.net', 'c#', 'asp.net', 'blazor', 'entity framework', 'visual studio', 'f#'],
-            'Terminal': ['bash', 'zsh', 'fish', 'terminal', 'cli', 'command line', 'powershell'],
-            'Microsoft 365': ['microsoft 365', 'office 365', 'sharepoint', 'teams', 'onenote', 'outlook', 'microsoft graph', 'excel', 'onedrive'],
-            'Database': ['sql', 'database', 'mysql', 'postgresql', 'mongodb', 'redis', 'sqlite', 'nosql', 'fabric', 'couchbase', 'ravendb'],
-            'Tools': ['git', 'vscode', 'ide', 'editor', 'productivity']
-        };
+        // Use loaded categories configuration
+        if (!this.categoriesConfig) {
+            console.warn('Categories configuration not loaded, using default category');
+            return 'General';
+        }
 
-        for (const [category, keywords] of Object.entries(categories)) {
+        for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
             if (keywords.some(keyword => content.includes(keyword))) {
                 return category;
             }
         }
 
-        return 'General';
+        return this.categoriesConfig.defaultCategory;
     }
 
     private categorizePosts(): void {
