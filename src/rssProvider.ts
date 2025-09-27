@@ -91,8 +91,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     private async loadFeeds(): Promise<void> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
-        const feedUrl = config.get<string>('feedUrl') || 'https://dev.to/feed';
-        const recordCount = config.get<number>('recordCount') || 20;
+        const feedUrl = config.get<string>('feedUrl') || 'https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft';
+        const recordCount = config.get<number>('recordCount') || 100;
         
         this.posts = [];
         this.categories.clear();
@@ -114,7 +114,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return new Promise((resolve, reject) => {
             const options = {
                 headers: {
-                    'User-Agent': 'RSS Blog Categorizer Extension/1.0'
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
                 }
             };
 
@@ -163,11 +163,22 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         const posts: BlogPost[] = [];
         
         try {
+            // Handle both RSS and Atom feeds
             const channel = rssData.rss?.channel || rssData.feed;
+            if (!channel) {
+                console.warn('No RSS channel or Atom feed found in data');
+                return posts;
+            }
+
             const items = Array.isArray(channel.item) ? channel.item : 
                          channel.item ? [channel.item] : 
                          Array.isArray(channel.entry) ? channel.entry : 
                          channel.entry ? [channel.entry] : [];
+
+            if (items.length === 0) {
+                console.warn('No items/entries found in feed');
+                return posts;
+            }
 
             const feedTitle = channel.title || new URL(feedUrl).hostname;
 
@@ -187,17 +198,23 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     link = item.link.href;
                 }
 
-                const post: BlogPost = {
-                    title: item.title || 'Untitled',
-                    link: link,
-                    description: this.stripHtml(item.description || item.summary || ''),
-                    pubDate: item.pubDate || item.published || item.updated || '',
-                    category: this.categorizePost(item.title || '', item.description || ''),
-                    source: feedTitle
-                };
-                
-                if (post.title && post.link) {
-                    posts.push(post);
+                try {
+                    const description = item.description || item.summary || item.content || '';
+                    const post: BlogPost = {
+                        title: item.title || 'Untitled',
+                        link: link,
+                        description: this.stripHtml(description),
+                        pubDate: item.pubDate || item.published || item.updated || '',
+                        category: this.categorizePost(item.title || '', description),
+                        source: feedTitle
+                    };
+                    
+                    if (post.title && post.link) {
+                        posts.push(post);
+                    }
+                } catch (itemError) {
+                    console.error('Error processing feed item:', itemError, 'Item:', item);
+                    // Continue with next item instead of failing completely
                 }
             });
         } catch (error) {
@@ -211,13 +228,18 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         const content = (title + ' ' + description).toLowerCase();
         
         const categories = {
-            'JavaScript': ['javascript', 'js', 'node.js', 'nodejs', 'react', 'vue', 'angular', 'typescript'],
+            'JavaScript': ['javascript', 'js', 'node.js', 'nodejs', 'npm', 'react', 'vue', 'angular', 'typescript'],
             'Python': ['python', 'django', 'flask', 'fastapi', 'pandas', 'numpy'],
-            'DevOps': ['docker', 'kubernetes', 'ci/cd', 'deployment', 'aws', 'azure', 'gcp', 'terraform'],
-            'Web Development': ['html', 'css', 'frontend', 'backend', 'api', 'rest', 'graphql'],
-            'Mobile': ['ios', 'android', 'react native', 'flutter', 'swift', 'kotlin'],
+            'DevOps and Methodology': ['docker', 'kubernetes', 'ci/cd', 'deployment', 'terraform', 'agile', 'scrum', 'kanban', 'patterns'],
+            'Web Development': ['html', 'css', 'frontend', 'backend', 'api', 'rest', 'graphql', 'azure', 'aws', 'gcp', 'webassembly', 'wasm'],
+            'Mobile': ['ios', 'android', 'react native', 'flutter', 'swift', 'kotlin', '.net maui', 'jetpack compose'],
             'Data Science': ['machine learning', 'ai', 'data science', 'analytics', 'big data'],
             'Programming': ['algorithm', 'data structure', 'coding', 'programming', 'software'],
+            'AI': ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'openai', 'perplexity', 'bard', 'claude', 'gemini', 'gpt', 'copilot', 'foundry local', 'windows ml'],
+            '.NET': ['.net', 'c#', 'asp.net', 'blazor', 'entity framework', 'visual studio', 'f#'],
+            'Terminal': ['bash', 'zsh', 'fish', 'terminal', 'cli', 'command line', 'powershell'],
+            'Microsoft 365': ['microsoft 365', 'office 365', 'sharepoint', 'teams', 'onenote', 'outlook', 'microsoft graph', 'excel', 'onedrive'],
+            'Database': ['sql', 'database', 'mysql', 'postgresql', 'mongodb', 'redis', 'sqlite', 'nosql', 'fabric', 'couchbase', 'ravendb'],
             'Tools': ['git', 'vscode', 'ide', 'editor', 'productivity']
         };
 
@@ -296,6 +318,32 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     private stripHtml(html: string): string {
-        return html.replace(/<[^>]*>/g, '').substring(0, 200);
+        if (!html || typeof html !== 'string') {
+            return '';
+        }
+        
+        try {
+            // First decode HTML entities
+            const decoded = html
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/&nbsp;/g, ' ');
+            
+            // Remove HTML tags more robustly
+            const withoutTags = decoded
+                .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remove script tags and content
+                .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')   // Remove style tags and content
+                .replace(/<[^>]*>/g, '')                          // Remove all other HTML tags
+                .replace(/\s+/g, ' ')                             // Normalize whitespace
+                .trim();
+            
+            return withoutTags.substring(0, 200);
+        } catch (error) {
+            console.error('Error stripping HTML:', error);
+            return html.substring(0, 200);
+        }
     }
 }
