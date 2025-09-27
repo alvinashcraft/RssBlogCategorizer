@@ -27,7 +27,7 @@ This file contains the categories and keywords used to automatically categorize 
 
 ## Adding New Categories
 
-1. Open `categories.json`
+1. Open `categories.json` (in the extension root directory)
 2. Add a new category with relevant keywords:
 
    ```json

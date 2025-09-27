@@ -83,17 +83,21 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     private async loadCategoriesConfig(): Promise<void> {
         try {
-            const categoriesPath = path.join(__dirname, 'categories.json');
+            // Use extension context to get the correct path to categories.json
+            const categoriesPath = path.join(this.context.extensionPath, 'categories.json');
+            console.log(`Loading categories from: ${categoriesPath}`);
             const categoriesData = await fs.promises.readFile(categoriesPath, 'utf8');
             this.categoriesConfig = JSON.parse(categoriesData) as CategoriesConfig;
-            console.log('Categories configuration loaded successfully');
+            console.log(`✅ Categories configuration loaded successfully with ${Object.keys(this.categoriesConfig.categories).length} categories`);
         } catch (error) {
-            console.error('Error loading categories configuration:', error);
+            console.error('❌ Error loading categories configuration:', error);
+            console.error('This likely means categories.json is missing from the extension package');
             // Fallback to empty config if file can't be loaded
             this.categoriesConfig = {
                 categories: {},
                 defaultCategory: 'General'
             };
+            console.log('Using fallback configuration with empty categories');
         }
     }
 
@@ -341,17 +345,24 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         
         // Use loaded categories configuration
         if (!this.categoriesConfig) {
-            console.warn('Categories configuration not loaded, using default category');
+            console.warn('❌ Categories configuration not loaded, using default category "General"');
             return 'General';
+        }
+
+        // Check if categories are actually loaded
+        if (Object.keys(this.categoriesConfig.categories).length === 0) {
+            console.warn('⚠️ No categories found in configuration, using default category "General"');
+            return this.categoriesConfig.defaultCategory;
         }
 
         // Iterate through categories in the order they appear in the JSON file
         // The first matching category wins - no further categories are checked
         for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
-            const matchedKeyword = keywords.find(keyword => titleContent.includes(keyword));
+            // Ensure case-insensitive matching by converting both title and keywords to lowercase
+            const matchedKeyword = keywords.find(keyword => titleContent.includes(keyword.toLowerCase()));
             if (matchedKeyword) {
                 // Log the categorization for debugging
-                console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}"`);
+                console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}" (case-insensitive match)`);
                 return category; // Immediate return - no further categories checked
             }
         }
