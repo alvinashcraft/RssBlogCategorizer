@@ -141,8 +141,16 @@ export class ExportManager {
 
     private groupPostsByCategory(posts: BlogPost[]): Record<string, BlogPost[]> {
         const grouped: Record<string, BlogPost[]> = {};
+        const seenLinks = new Set<string>(); // Deduplicate by link
         
         posts.forEach(post => {
+            // Skip duplicates based on link
+            if (seenLinks.has(post.link)) {
+                console.log(`Export: Skipping duplicate post: ${post.title}`);
+                return;
+            }
+            seenLinks.add(post.link);
+            
             if (!grouped[post.category]) {
                 grouped[post.category] = [];
             }

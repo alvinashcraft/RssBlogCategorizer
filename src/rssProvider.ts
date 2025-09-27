@@ -94,6 +94,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         const feedUrl = config.get<string>('feedUrl') || 'https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft';
         const recordCount = config.get<number>('recordCount') || 100;
         
+        console.log(`Loading feeds - clearing existing ${this.posts.length} posts`);
         this.posts = [];
         this.categories.clear();
 
@@ -101,8 +102,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // Append record count parameter to URL
             const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
             const posts = await this.fetchFeed(urlWithParams);
+            console.log(`Fetched ${posts.length} posts from feed`);
             const filteredPosts = this.filterPostsByDate(posts);
+            console.log(`Filtered to ${filteredPosts.length} posts after date filtering`);
             this.posts.push(...filteredPosts);
+            console.log(`Total posts after loading: ${this.posts.length}`);
         } catch (error) {
             console.error('Error loading feed:', error);
         }
@@ -161,6 +165,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     private parseRSSFeed(rssData: any, feedUrl: string): BlogPost[] {
         const posts: BlogPost[] = [];
+        const seenLinks = new Set<string>(); // Track duplicate links
         
         try {
             // Handle both RSS and Atom feeds
@@ -181,8 +186,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             }
 
             const feedTitle = channel.title || new URL(feedUrl).hostname;
+            console.log(`Processing ${items.length} items from feed: ${feedTitle}`);
 
-            items.forEach((item: any) => {
+            items.forEach((item: any, index: number) => {
                 let link = '';
                 
                 // Handle different link formats (RSS vs Atom)
@@ -199,21 +205,49 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 }
 
                 try {
-                    const description = item.description || item.summary || item.content || '';
+                    // Handle description/content that might be objects (Atom feeds)
+                    let description = '';
+                    if (item.description) {
+                        description = typeof item.description === 'string' ? item.description : 
+                                    item.description['#text'] || item.description._ || '';
+                    } else if (item.summary) {
+                        description = typeof item.summary === 'string' ? item.summary : 
+                                    item.summary['#text'] || item.summary._ || '';
+                    } else if (item.content) {
+                        description = typeof item.content === 'string' ? item.content : 
+                                    item.content['#text'] || item.content._ || '';
+                    }
+                    
+                    // Handle title that might be an object
+                    let title = '';
+                    if (item.title) {
+                        title = typeof item.title === 'string' ? item.title : 
+                               item.title['#text'] || item.title._ || String(item.title) || 'Untitled';
+                    } else {
+                        title = 'Untitled';
+                    }
+                    
                     const post: BlogPost = {
-                        title: item.title || 'Untitled',
+                        title: title,
                         link: link,
                         description: this.stripHtml(description),
                         pubDate: item.pubDate || item.published || item.updated || '',
-                        category: this.categorizePost(item.title || '', description),
+                        category: this.categorizePost(title, description),
                         source: feedTitle
                     };
                     
                     if (post.title && post.link) {
-                        posts.push(post);
+                        // Check for duplicate links
+                        if (seenLinks.has(post.link)) {
+                            console.log(`Duplicate link found, skipping: ${post.link}`);
+                        } else {
+                            seenLinks.add(post.link);
+                            posts.push(post);
+                        }
                     }
                 } catch (itemError) {
-                    console.error('Error processing feed item:', itemError, 'Item:', item);
+                    console.error(`Error processing feed item ${index}:`, itemError);
+                    console.error('Problematic item data:', JSON.stringify(item, null, 2));
                     // Continue with next item instead of failing completely
                 }
             });
@@ -317,14 +351,30 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         });
     }
 
-    private stripHtml(html: string): string {
-        if (!html || typeof html !== 'string') {
+    private stripHtml(html: any): string {
+        // Handle non-string inputs defensively
+        if (!html) {
+            return '';
+        }
+        
+        // Convert to string if it's not already
+        let htmlStr = '';
+        if (typeof html === 'string') {
+            htmlStr = html;
+        } else if (typeof html === 'object') {
+            // Handle XML parser objects that might have text content
+            htmlStr = html['#text'] || html._ || html.toString() || '';
+        } else {
+            htmlStr = String(html);
+        }
+        
+        if (!htmlStr) {
             return '';
         }
         
         try {
             // First decode HTML entities
-            const decoded = html
+            const decoded = htmlStr
                 .replace(/&lt;/g, '<')
                 .replace(/&gt;/g, '>')
                 .replace(/&amp;/g, '&')
@@ -342,8 +392,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             
             return withoutTags.substring(0, 200);
         } catch (error) {
-            console.error('Error stripping HTML:', error);
-            return html.substring(0, 200);
+            console.error('Error stripping HTML:', error, 'Input was:', html);
+            return htmlStr.substring(0, 200);
         }
     }
 }
