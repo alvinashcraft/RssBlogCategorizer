@@ -515,6 +515,18 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return this.categoriesConfig.defaultCategory;
     }
 
+    /**
+     * Normalizes a category definition to the current object structure.
+     *
+     * Legacy format: string[] - an array of keywords (e.g., ["ai", "ml", "data"]).
+     * New format: CategoryDefinition - an object with properties such as titleKeywords.
+     *
+     * This method ensures backwards compatibility by converting legacy array definitions
+     * to the new object format. Use this whenever category definitions may be in either format.
+     *
+     * @param categoryDef The category definition, either as a legacy string array or a CategoryDefinition object.
+     * @returns A normalized CategoryDefinition object.
+     */
     private normalizeCategoryDefinition(categoryDef: string[] | CategoryDefinition): CategoryDefinition {
         // Backwards compatibility: convert array format to object format
         if (Array.isArray(categoryDef)) {
