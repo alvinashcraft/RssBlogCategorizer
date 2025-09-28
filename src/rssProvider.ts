@@ -20,8 +20,14 @@ export interface CategoryNode {
     collapsibleState: vscode.TreeItemCollapsibleState;
 }
 
+interface CategoryDefinition {
+    urlKeywords?: string[];
+    titleKeywords?: string[];
+    authorKeywords?: string[];
+}
+
 interface CategoriesConfig {
-    categories: Record<string, string[]>;
+    categories: Record<string, string[] | CategoryDefinition>;
     defaultCategory: string;
     wholeWordKeywords?: string[]; // Optional list of keywords that require whole word matching
 }
@@ -405,7 +411,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                         link: link,
                         description: this.stripHtml(description),
                         pubDate: item.pubDate || item.published || item.updated || '',
-                        category: this.categorizePost(title, description),
+                        category: this.categorizePost(title, description, link),
                         source: feedTitle,
                         author: author
                     };
@@ -432,10 +438,22 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return posts;
     }
 
-    private categorizePost(title: string, description: string): string {
-        // Only search the title for better categorization accuracy
-        // Description content can contain misleading keywords not related to the main topic
+    /**
+     * Categorizes a blog post based on keyword matching in the following priority order:
+     *   1. URL keyword matching (most reliable)
+     *   2. Title keyword matching
+     *   3. (Future) Author keyword matching
+     * 
+     * The first matching category is returned; if no match is found, the default category is used.
+     * 
+     * @param title - The title of the blog post.
+     * @param description - The description of the blog post (currently unused).
+     * @param url - The URL of the blog post (optional, defaults to empty string for backwards compatibility).
+     * @returns The matched category name, or the default category if no match is found.
+     */
+    private categorizePost(title: string, description: string, url: string = ''): string {
         const titleContent = title.toLowerCase();
+        const urlLower = url.toLowerCase();
         
         // Use loaded categories configuration
         if (!this.categoriesConfig) {
@@ -451,52 +469,96 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         // Iterate through categories in the order they appear in the JSON file
         // The first matching category wins - no further categories are checked
-        for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
-            // Find matching keyword using configurable whole word or substring matching
-            let matchedKeyword: string | undefined;
-            let matchType: string = '';
+        for (const [category, categoryDef] of Object.entries(this.categoriesConfig.categories)) {
+            // Normalize category definition (backwards compatibility)
+            const normalizedDef = this.normalizeCategoryDefinition(categoryDef);
             
-            for (const keyword of keywords) {
-                const keywordLower = keyword.toLowerCase();
-                
-                // Check if this keyword requires whole word matching
-                const cachedRegex = this.wholeWordRegexCache.get(keywordLower);
-                if (cachedRegex) {
-                    // Use cached regex for whole word matching
-                    if (cachedRegex.test(titleContent)) {
-                        matchedKeyword = keyword;
-                        matchType = 'whole word match';
-                        break;
-                    }
-                } else {
-                    // Use substring matching for regular keywords
-                    if (titleContent.includes(keywordLower)) {
-                        matchedKeyword = keyword;
-                        matchType = 'substring match';
-                        break;
+            // 1. First priority: URL keyword matching (most reliable)
+            if (normalizedDef.urlKeywords) {
+                for (const urlKeyword of normalizedDef.urlKeywords) {
+                    if (urlLower.includes(urlKeyword.toLowerCase())) {
+                        console.log(`Post "${title}" categorized as "${category}" due to URL keyword: "${urlKeyword}" (URL match)`);
+                        return category;
                     }
                 }
             }
             
-            if (matchedKeyword) {
-                // Log the categorization for debugging
-                console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}" (${matchType})`);
-                return category; // Immediate return - no further categories checked
+            // 2. Second priority: Title keyword matching (existing logic)
+            if (normalizedDef.titleKeywords) {
+                for (const keyword of normalizedDef.titleKeywords) {
+                    const keywordLower = keyword.toLowerCase();
+                    
+                    // Check if this keyword requires whole word matching
+                    const cachedRegex = this.wholeWordRegexCache.get(keywordLower);
+                    if (cachedRegex) {
+                        // Use cached regex for whole word matching
+                        if (cachedRegex.test(titleContent)) {
+                            console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${keyword}" (whole word match)`);
+                            return category;
+                        }
+                    } else {
+                        // Use substring matching for regular keywords
+                        if (titleContent.includes(keywordLower)) {
+                            console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${keyword}" (substring match)`);
+                            return category;
+                        }
+                    }
+                }
             }
+            
+            // 3. Future: Author keyword matching could be added here
+            // if (normalizedDef.authorKeywords) { ... }
         }
 
         // No category matched, use the default
-        console.log(`Post "${title}" categorized as default: "${this.categoriesConfig.defaultCategory}" (no title keywords matched)`);
+        console.log(`Post "${title}" categorized as default: "${this.categoriesConfig.defaultCategory}" (no keywords matched)`);
         return this.categoriesConfig.defaultCategory;
+    }
+
+    /**
+     * Normalizes a category definition to the current object structure.
+     *
+     * Legacy format: string[] - an array of keywords (e.g., ["ai", "ml", "data"]).
+     * New format: CategoryDefinition - an object with properties such as titleKeywords.
+     *
+     * This method ensures backwards compatibility by converting legacy array definitions
+     * to the new object format. Use this whenever category definitions may be in either format.
+     *
+     * @param categoryDef The category definition, either as a legacy string array or a CategoryDefinition object.
+     * @returns A normalized CategoryDefinition object.
+     */
+    private normalizeCategoryDefinition(categoryDef: string[] | CategoryDefinition): CategoryDefinition {
+        // Backwards compatibility: convert array format to object format
+        if (Array.isArray(categoryDef)) {
+            return {
+                titleKeywords: categoryDef
+            };
+        }
+        return categoryDef;
     }
 
     private categorizePosts(): void {
         this.categories.clear();
         
+        // Initialize all categories from configuration, even if they will be empty
+        if (this.categoriesConfig?.categories) {
+            for (const categoryName of Object.keys(this.categoriesConfig.categories)) {
+                this.categories.set(categoryName, []);
+            }
+            
+            // Also ensure the default category exists
+            if (!this.categories.has(this.categoriesConfig.defaultCategory)) {
+                this.categories.set(this.categoriesConfig.defaultCategory, []);
+            }
+        }
+        
+        // Populate categories with posts
         this.posts.forEach(post => {
             const category = post.category;
             if (!this.categories.has(category)) {
+                // This handles any unexpected categories not in the configuration
                 this.categories.set(category, []);
+                console.warn(`WARNING: Post assigned to unconfigured category: "${category}"`);
             }
             this.categories.get(category)!.push(post);
         });

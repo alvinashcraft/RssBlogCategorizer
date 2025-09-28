@@ -266,16 +266,20 @@ export class ExportManager {
         // Always put "Top Links" first
         orderedResult["Top Links"] = grouped["Top Links"];
         
-        // Add categories in the order they appear in the JSON file
+        // Add ALL categories in the order they appear in the JSON file (even if empty)
         categoryOrder.forEach(categoryName => {
-            if (grouped[categoryName] && grouped[categoryName].length > 0) {
-                orderedResult[categoryName] = grouped[categoryName];
-            }
+            // Always include the category, even if it has no posts
+            orderedResult[categoryName] = grouped[categoryName] || [];
         });
         
-        // Add any remaining categories not in the JSON (like "General" or others)
+        // Add the default category if it exists and isn't already included
+        if (categoriesConfig?.defaultCategory && !orderedResult[categoriesConfig.defaultCategory]) {
+            orderedResult[categoriesConfig.defaultCategory] = grouped[categoriesConfig.defaultCategory] || [];
+        }
+        
+        // Add any remaining categories not in the JSON (like unexpected categories)
         Object.keys(grouped).forEach(categoryName => {
-            if (categoryName !== "Top Links" && !orderedResult[categoryName] && grouped[categoryName].length > 0) {
+            if (categoryName !== "Top Links" && !orderedResult[categoryName]) {
                 orderedResult[categoryName] = grouped[categoryName];
             }
         });
