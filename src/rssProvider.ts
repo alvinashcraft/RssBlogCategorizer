@@ -392,11 +392,25 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         // Iterate through categories in the order they appear in the JSON file
         // The first matching category wins - no further categories are checked
         for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
-            // Ensure case-insensitive matching by converting both title and keywords to lowercase
-            const matchedKeyword = keywords.find(keyword => titleContent.includes(keyword.toLowerCase()));
+            // Find matching keyword with special handling for "ai"
+            const matchedKeyword = keywords.find(keyword => {
+                const keywordLower = keyword.toLowerCase();
+                
+                // Special case: "ai" requires whole word matching to avoid false matches
+                if (keywordLower === 'ai') {
+                    // Use word boundaries to match "ai" only as a complete word
+                    const regex = new RegExp(`\\b${keywordLower}\\b`, 'i');
+                    return regex.test(titleContent);
+                } else {
+                    // For all other keywords, use the existing substring matching
+                    return titleContent.includes(keywordLower);
+                }
+            });
+            
             if (matchedKeyword) {
                 // Log the categorization for debugging
-                console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}" (case-insensitive match)`);
+                const matchType = matchedKeyword.toLowerCase() === 'ai' ? 'whole word match' : 'case-insensitive match';
+                console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}" (${matchType})`);
                 return category; // Immediate return - no further categories checked
             }
         }
