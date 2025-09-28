@@ -62,7 +62,7 @@ describe('ExportManager', () => {
       // Mock the Dew Drop RSS response
       const mockResponse = {
         statusCode: 200,
-        on: sinon.stub().callsFake((event: string, callback: any) => {
+        on: sinon.stub().callsFake((event: string, callback: (data?: string) => void) => {
           if (event === 'data') callback(mockDewDropRss);
           if (event === 'end') callback();
         })
