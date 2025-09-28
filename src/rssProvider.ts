@@ -159,7 +159,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private escapeRegexCharacters(text: string): string {
         // Comprehensive regex escaping to prevent injection attacks
         // This escapes all characters that have special meaning in regex
-        return text.replace(/[\\^$.*+?()[\]{}|`-]/g, '\\$&');
+        return text.replace(/[\\^$.*+?()[\]{}|`/-]/g, '\\$&');
     }
 
     async refresh(): Promise<void> {
