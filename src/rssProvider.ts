@@ -438,6 +438,19 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return posts;
     }
 
+    /**
+     * Categorizes a blog post based on keyword matching in the following priority order:
+     *   1. URL keyword matching (most reliable)
+     *   2. Title keyword matching
+     *   3. (Future) Author keyword matching
+     * 
+     * The first matching category is returned; if no match is found, the default category is used.
+     * 
+     * @param title - The title of the blog post.
+     * @param description - The description of the blog post (currently unused).
+     * @param url - The URL of the blog post.
+     * @returns The matched category name, or the default category if no match is found.
+     */
     private categorizePost(title: string, description: string, url: string): string {
         const titleContent = title.toLowerCase();
         const urlLower = url.toLowerCase();
