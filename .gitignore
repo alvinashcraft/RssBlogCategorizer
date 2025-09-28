@@ -1,5 +1,6 @@
 # Compiled output
 out/
+dist/
 *.vsix
 
 # Node.js dependencies
