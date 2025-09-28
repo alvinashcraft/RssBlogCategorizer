@@ -114,14 +114,51 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         
         // Create regex patterns for whole word keywords
         if (this.categoriesConfig?.wholeWordKeywords) {
-            for (const keyword of this.categoriesConfig.wholeWordKeywords) {
-                const keywordLower = keyword.toLowerCase();
-                // Create regex with word boundaries for whole word matching
-                const regex = new RegExp(`\\b${keywordLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                this.wholeWordRegexCache.set(keywordLower, regex);
+            const validKeywords = this.categoriesConfig.wholeWordKeywords
+                .filter(this.isValidKeyword)
+                .map(keyword => keyword.toLowerCase().trim());
+                
+            for (const keywordLower of validKeywords) {
+                try {
+                    // Use comprehensive regex escaping to prevent injection
+                    const escapedKeyword = this.escapeRegexCharacters(keywordLower);
+                    const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
+                    this.wholeWordRegexCache.set(keywordLower, regex);
+                } catch (error) {
+                    console.warn(`⚠️ Failed to create regex for keyword "${keywordLower}":`, error);
+                    // Continue with other keywords instead of failing completely
+                }
             }
             console.log(`✅ Initialized ${this.wholeWordRegexCache.size} whole word regex patterns`);
         }
+    }
+
+    private isValidKeyword(keyword: string): boolean {
+        // Validate that keyword is a non-empty string with meaningful content
+        if (typeof keyword !== 'string') {
+            console.warn(`⚠️ Invalid keyword type: ${typeof keyword}, expected string`);
+            return false;
+        }
+        
+        const trimmed = keyword.trim();
+        if (trimmed.length === 0) {
+            console.warn(`⚠️ Empty or whitespace-only keyword ignored`);
+            return false;
+        }
+        
+        // Additional validation: keywords should be reasonable length
+        if (trimmed.length > 100) {
+            console.warn(`⚠️ Keyword too long (${trimmed.length} chars): "${trimmed.substring(0, 20)}..."`);
+            return false;
+        }
+        
+        return true;
+    }
+
+    private escapeRegexCharacters(text: string): string {
+        // Comprehensive regex escaping to prevent injection attacks
+        // This escapes all characters that have special meaning in regex
+        return text.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
     }
 
     async refresh(): Promise<void> {
