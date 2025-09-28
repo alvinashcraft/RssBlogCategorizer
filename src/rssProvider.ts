@@ -448,10 +448,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
      * 
      * @param title - The title of the blog post.
      * @param description - The description of the blog post (currently unused).
-     * @param url - The URL of the blog post.
+     * @param url - The URL of the blog post (optional, defaults to empty string for backwards compatibility).
      * @returns The matched category name, or the default category if no match is found.
      */
-    private categorizePost(title: string, description: string, url: string): string {
+    private categorizePost(title: string, description: string, url: string = ''): string {
         const titleContent = title.toLowerCase();
         const urlLower = url.toLowerCase();
         
