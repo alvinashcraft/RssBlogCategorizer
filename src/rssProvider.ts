@@ -122,7 +122,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 try {
                     // Use comprehensive regex escaping to prevent injection
                     const escapedKeyword = this.escapeRegexCharacters(keywordLower);
-                    const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
+                    // No 'i' flag needed since both keyword and titleContent are already lowercase
+                    const regex = new RegExp(`\\b${escapedKeyword}\\b`);
                     this.wholeWordRegexCache.set(keywordLower, regex);
                 } catch (error) {
                     console.warn(`⚠️ Failed to create regex for keyword "${keywordLower}":`, error);
@@ -158,7 +159,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private escapeRegexCharacters(text: string): string {
         // Comprehensive regex escaping to prevent injection attacks
         // This escapes all characters that have special meaning in regex
-        return text.replace(/[\\^$.*+?()[\]{}|-]/g, '\\$&');
+        return text.replace(/[\\^$.*+?()[\]{}|`-]/g, '\\$&');
     }
 
     async refresh(): Promise<void> {
