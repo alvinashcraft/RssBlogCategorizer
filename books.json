@@ -1,0 +1,74 @@
+{
+  "books": [
+    {
+      "title": "Learn WinUI 3, Second Edition",
+      "author": "Alvin Ashcraft",
+      "imageUrl": "https://m.media-amazon.com/images/I/41N4UX+uKDL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1805120069/?tag=amavin-20",
+      "description": "Leverage WinUI and the Windows App SDK to create modern Windows applications with C# and XAML."
+    },
+    {
+      "title": "Parallel Programming and Concurrency with C# and .NET",
+      "author": "Alvin Ashcraft",
+      "imageUrl": "https://m.media-amazon.com/images/I/41P9Ibggu7L._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/Parallel-Programming-Concurrency-NET6-asynchronous-dp-1803243678/dp/1803243678/?tag=amavin-20",
+      "description": "A modern approach to building faster, more responsive, and asynchronous .NET applications using C#."
+    },
+    {
+      "title": "Microsoft Copilot for Power Apps",
+      "author": "Rezwanur Rahman",
+      "imageUrl": "https://m.media-amazon.com/images/I/41JA1ZGtI0L._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/B0D6LCB348/?tag=amavin-20",
+      "description": "Transforming App Development with AI Assistance (Inside Copilot)."
+    },
+    {
+      "title": "Blazor Web Development Cookbook",
+      "author": "Pawel Bazyluk",
+      "imageUrl": "https://m.media-amazon.com/images/I/41T-v0E03TL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/183546078X/?tag=amavin-20",
+      "description": "Tested recipes for advanced single-page application scenarios in .NET 9."
+    },
+    {
+      "title": ".NET MAUI Cookbook",
+      "author": "Alexander Russkov",
+      "imageUrl": "https://m.media-amazon.com/images/I/51im4psup7L._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1835461123/?tag=amavin-20",
+      "description": "Build a full-featured app swiftly with MVVM, CRUD, AI, authentication, real-time updates, and more."
+    },
+    {
+      "title": "Real-World Web Development with .NET 9",
+      "author": "Mark J. Price",
+      "imageUrl": "hhttps://m.media-amazon.com/images/I/41U0fZzCtXL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/B0DK1KGH8R/?tag=amavin-20",
+      "description": "Build websites and services using mature and proven ASP.NET Core MVC, Web API, and Umbraco CMS."
+    },
+    {
+      "title": "'Looks Good To Me'",
+      "author": "Adrienne Braganza",
+      "imageUrl": "https://m.media-amazon.com/images/I/41GJYy3aYgL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1633438120/?tag=amavin-20",
+      "description": "Constructive code reviews."
+    },
+    {
+      "title": "Programming APIs with C# and .NET",
+      "author": "Jesse Liberty & Joseph Dluzen",
+      "imageUrl": "https://m.media-amazon.com/images/I/41EQbec1QWL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1835468853/?tag=amavin-20",
+      "description": "Develop high-performance APIs that ensure seamless application communication and enhanced security."
+    },
+    {
+      "title": "C# 13 and .NET 9 - Modern Cross-Platform Development Fundamentals",
+      "author": "Mark J. Price",
+      "imageUrl": "https://m.media-amazon.com/images/I/415b9BRgXzL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/B0DHRLPX47/?tag=amavin-20",
+      "description": "Start building websites and services with ASP.NET Core 9, Blazor, and EF Core 9."
+    },
+    {
+      "title": "Unity 2022 by Example",
+      "author": "Scott H. Cameron",
+      "imageUrl": "https://m.media-amazon.com/images/I/41XzhyzQJUL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1803234598/?tag=amavin-20",
+      "description": "A project-based guide to building 2D and 3D games, enhanced for AR, VR, and MR experiences."
+    }
+  ]
+}

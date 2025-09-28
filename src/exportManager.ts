@@ -181,6 +181,10 @@ export class ExportManager {
             }
         });
 
+        // Add Geek Shelf section
+        const geekShelfMarkdown = await this.generateGeekShelfMarkdown();
+        content += geekShelfMarkdown;
+
         return content;
     }
 
@@ -202,7 +206,7 @@ export class ExportManager {
 
         let categoriesHtml = '';
         Object.entries(groupedPosts).forEach(([category, categoryPosts]: [string, BlogPost[]]) => {
-            categoriesHtml += `    <div>\n        <h3>${category}</h3>\n`;
+            categoriesHtml += `\n    <div>\n        <h3>${category}</h3>\n`;
             
             if (category === "Top Links") {
                 // Add empty div for manual editing
@@ -218,9 +222,12 @@ export class ExportManager {
             categoriesHtml += `    </div>\n`;
         });
 
+        // Add Geek Shelf section
+        const geekShelfHtml = await this.generateGeekShelfHtml();
+        
         const htmlEnd = `</body>\n</html>`;
         
-        return htmlStart + categoriesHtml + htmlEnd;
+        return htmlStart + categoriesHtml + geekShelfHtml + htmlEnd;
     }
 
     private async groupPostsByCategory(posts: BlogPost[]): Promise<Record<string, BlogPost[]>> {
@@ -322,6 +329,80 @@ export class ExportManager {
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to export blog posts: ${error}`);
             }
+        }
+    }
+
+    private async generateGeekShelfHtml(): Promise<string> {
+        const book = await this.getBookOfTheDay();
+        if (!book) {
+            return '';
+        }
+
+        return `
+    <div>
+        <h3>Geek Shelf</h3>
+        <div style="display: flex; align-items: flex-start; gap: 15px;">
+            <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
+            <div>
+                <a href="${book.productUrl}" target="_blank">${this.escapeHtml(book.title)}</a> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
+                <p>${this.escapeHtml(book.description)}</p>
+            </div>
+        </div>
+    </div>`;
+    }
+
+    private async generateGeekShelfMarkdown(): Promise<string> {
+        const book = await this.getBookOfTheDay();
+        if (!book) {
+            return '';
+        }
+
+        return `### Geek Shelf
+
+[![${book.title}](${book.imageUrl})](${book.productUrl})
+
+[${book.title}](${book.productUrl}) (${book.author}) *- Referral Link*
+
+${book.description}
+
+`;
+    }
+
+    private async getBookOfTheDay(): Promise<any> {
+        try {
+            const books = await this.loadBooksConfig();
+            if (!books || !books.books || books.books.length === 0) {
+                return null;
+            }
+
+            // Use current date to select a book (rotates daily)
+            const today = new Date();
+            const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+            const bookIndex = dayOfYear % books.books.length;
+            
+            return books.books[bookIndex];
+        } catch (error) {
+            console.error('Error getting book of the day:', error);
+            return null;
+        }
+    }
+
+    private async loadBooksConfig(): Promise<any> {
+        try {
+            // Try to load from extension context first (packaged extension)
+            let booksPath;
+            try {
+                booksPath = vscode.Uri.joinPath(vscode.extensions.getExtension('publisher.rss-blog-categorizer')!.extensionUri, 'books.json').fsPath;
+            } catch {
+                // Fallback for development/testing
+                booksPath = path.join(__dirname, '..', 'books.json');
+            }
+            
+            const booksData = fs.readFileSync(booksPath, 'utf8');
+            return JSON.parse(booksData);
+        } catch (error) {
+            console.error('Failed to load books config:', error);
+            return null;
         }
     }
 
