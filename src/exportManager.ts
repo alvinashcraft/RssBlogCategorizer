@@ -340,7 +340,7 @@ export class ExportManager {
 
         return `
     <div>
-        <h3>Geek Shelf</h3>
+        <h3>The Geek Shelf</h3>
         <div style="display: flex; align-items: flex-start; gap: 15px;">
             <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
             <div>
@@ -357,7 +357,7 @@ export class ExportManager {
             return '';
         }
 
-        return `### Geek Shelf
+        return `### The Geek Shelf
 
 [![${book.title}](${book.imageUrl})](${book.productUrl})
 
