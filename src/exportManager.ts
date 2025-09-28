@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as https from 'https';
+import * as fs from 'fs';
+import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
 import { BlogPost } from './rssProvider';
 
@@ -160,26 +162,30 @@ export class ExportManager {
     }
 
     private async generateMarkdownContent(posts: BlogPost[]): Promise<string> {
-        const groupedPosts = this.groupPostsByCategory(posts);
+        const groupedPosts = await this.groupPostsByCategory(posts);
         const dewDropTitle = await this.generateDewDropTitle();
         
         let content = `# ${dewDropTitle}\n\n`;
 
-        Object.entries(groupedPosts).forEach(([category, categoryPosts]) => {
+        Object.entries(groupedPosts).forEach(([category, categoryPosts]: [string, BlogPost[]]) => {
             content += `### ${category}\n\n`;
             
-            categoryPosts.forEach(post => {
-                content += `- [${post.title}](${post.link}) (${post.author})\n`;
-            });
-            
-            content += `\n`;
+            if (category === "Top Links") {
+                // Add placeholder comment for manual editing
+                content += `<!-- Add top links here manually -->\n\n`;
+            } else {
+                categoryPosts.forEach(post => {
+                    content += `- [${post.title}](${post.link}) (${post.author})\n`;
+                });
+                content += `\n`;
+            }
         });
 
         return content;
     }
 
     private async generateHtmlContent(posts: BlogPost[]): Promise<string> {
-        const groupedPosts = this.groupPostsByCategory(posts);
+        const groupedPosts = await this.groupPostsByCategory(posts);
         const dewDropTitle = await this.generateDewDropTitle();
         
         const htmlStart = `<!DOCTYPE html>
@@ -195,14 +201,21 @@ export class ExportManager {
     </div>`;
 
         let categoriesHtml = '';
-        Object.entries(groupedPosts).forEach(([category, categoryPosts]) => {
-            categoriesHtml += `    <div>\n        <h3>${category}</h3>\n        <ul>\n`;
+        Object.entries(groupedPosts).forEach(([category, categoryPosts]: [string, BlogPost[]]) => {
+            categoriesHtml += `    <div>\n        <h3>${category}</h3>\n`;
             
-            categoryPosts.forEach(post => {
-                categoriesHtml += `            <li><a href="${post.link}" target="_blank">${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
-            });
+            if (category === "Top Links") {
+                // Add empty div for manual editing
+                categoriesHtml += `        <!-- Add top links here manually -->\n        <div></div>\n`;
+            } else {
+                categoriesHtml += `        <ul>\n`;
+                categoryPosts.forEach(post => {
+                    categoriesHtml += `            <li><a href="${post.link}" target="_blank">${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
+                });
+                categoriesHtml += `        </ul>\n`;
+            }
             
-            categoriesHtml += `        </ul>\n    </div>\n`;
+            categoriesHtml += `    </div>\n`;
         });
 
         const htmlEnd = `</body>\n</html>`;
@@ -210,9 +223,16 @@ export class ExportManager {
         return htmlStart + categoriesHtml + htmlEnd;
     }
 
-    private groupPostsByCategory(posts: BlogPost[]): Record<string, BlogPost[]> {
+    private async groupPostsByCategory(posts: BlogPost[]): Promise<Record<string, BlogPost[]>> {
+        // Load categories config to get the correct order
+        const categoriesConfig = await this.loadCategoriesConfig();
+        const categoryOrder = categoriesConfig ? Object.keys(categoriesConfig.categories) : [];
+        
         const grouped: Record<string, BlogPost[]> = {};
         const seenLinks = new Set<string>(); // Deduplicate by link
+        
+        // Always add "Top Links" as the first category (empty)
+        grouped["Top Links"] = [];
         
         posts.forEach(post => {
             // Skip duplicates based on link
@@ -233,7 +253,46 @@ export class ExportManager {
             categoryPosts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
         });
 
-        return grouped;
+        // Create ordered result with "Top Links" first, then categories in JSON order
+        const orderedResult: Record<string, BlogPost[]> = {};
+        
+        // Always put "Top Links" first
+        orderedResult["Top Links"] = grouped["Top Links"];
+        
+        // Add categories in the order they appear in the JSON file
+        categoryOrder.forEach(categoryName => {
+            if (grouped[categoryName] && grouped[categoryName].length > 0) {
+                orderedResult[categoryName] = grouped[categoryName];
+            }
+        });
+        
+        // Add any remaining categories not in the JSON (like "General" or others)
+        Object.keys(grouped).forEach(categoryName => {
+            if (categoryName !== "Top Links" && !orderedResult[categoryName] && grouped[categoryName].length > 0) {
+                orderedResult[categoryName] = grouped[categoryName];
+            }
+        });
+
+        return orderedResult;
+    }
+
+    private async loadCategoriesConfig(): Promise<any> {
+        try {
+            // Try to load from extension context first (packaged extension)
+            let categoriesPath;
+            try {
+                categoriesPath = vscode.Uri.joinPath(vscode.extensions.getExtension('publisher.rss-blog-categorizer')!.extensionUri, 'categories.json').fsPath;
+            } catch {
+                // Fallback for development/testing
+                categoriesPath = path.join(__dirname, '..', 'categories.json');
+            }
+            
+            const categoriesData = fs.readFileSync(categoriesPath, 'utf8');
+            return JSON.parse(categoriesData);
+        } catch (error) {
+            console.error('Failed to load categories config for ordering:', error);
+            return null;
+        }
     }
 
     private async saveExport(content: string, format: string, extension: string): Promise<void> {
