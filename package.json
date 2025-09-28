@@ -7,9 +7,9 @@
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alvinashcraft/DevFeedCategorizer.git"
+    "url": "https://github.com/alvinashcraft/RssBlogCategorizer.git"
   },
-  "homepage": "https://github.com/alvinashcraft/DevFeedCategorizer#readme",
+  "homepage": "https://github.com/alvinashcraft/RssBlogCategorizer#readme",
   "readme": "README.md",
   "license": "MIT",
   "engines": {
@@ -114,15 +114,35 @@
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out"
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile",
+    "test": "node ./out/test/runTest.js",
+    "test:basic": "mocha --require ts-node/register src/test/basic/**/*.test.ts",
+    "test:unit": "mocha --require ts-node/register src/test/unit/**/*.test.ts",
+    "test:unit:compiled": "mocha out/test/unit/**/*.test.js"
   },
   "devDependencies": {
+    "@types/chai": "^4.3.11",
+    "@types/chai-as-promised": "^7.1.8",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
     "@types/node": "16.x",
+    "@types/sinon": "^17.0.2",
+    "@types/sinon-chai": "^3.2.12",
     "@types/vscode": "^1.74.0",
+    "@vscode/test-electron": "^2.3.8",
+    "chai": "^4.3.10",
+    "chai-as-promised": "^7.1.1",
+    "glob": "^10.3.10",
+    "minimatch": "^5.1.6",
+    "mocha": "^10.2.0",
+    "sinon": "^17.0.1",
+    "sinon-chai": "^3.7.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.1",
     "typescript": "^4.9.4",
     "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4",
-    "ts-loader": "^9.5.1"
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "fast-xml-parser": "^4.3.2"

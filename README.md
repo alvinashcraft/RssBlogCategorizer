@@ -14,55 +14,75 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 
 ## Installation
 
+### From VS Code Marketplace
+
+1. Open VS Code
+2. Go to Extensions view (`Ctrl+Shift+X`)
+3. Search for "RSS Blog Categorizer"
+4. Click Install
+
 ### From VSIX Package
 
-1. Download the `.vsix` file from the releases
+1. Download the `.vsix` file from the [releases](https://github.com/alvinashcraft/RssBlogCategorizer/releases)
 2. Open VS Code
 3. Go to Extensions view (`Ctrl+Shift+X`)
 4. Click the three dots menu and select "Install from VSIX..."
 5. Select the downloaded `.vsix` file
 
-### From Source
-
-1. Clone this repository
-2. Run `npm install` to install dependencies
-3. Run `npm run compile` to build the extension
-4. Press `F5` to launch a new Extension Development Host window
-
 ## Usage
 
 ### Getting Started
 
-1. After installation, the "Dev Blog Posts" view will appear in the Explorer panel
-2. The extension comes pre-configured with a default RSS feed
-3. Click the refresh button to load the latest posts
-4. Posts are automatically categorized and displayed in a tree structure
+1. After installation, the "Dev Blog Posts" view will appear in the Explorer panel sidebar
+2. If you don't see the view, try opening the Command Palette (`Ctrl+Shift+P`) and running "RSS Blog Categorizer: Refresh" to activate the extension
+3. The extension comes pre-configured with a default RSS feed
+4. Click the refresh button in the view header to load the latest posts
+5. Posts are automatically categorized and displayed in a tree structure
 
 ### Setting Up Your RSS Feed
 
+**Via Explorer Panel:**
+
 1. Click the edit icon (pencil) in the "Dev Blog Posts" view header
 2. Enter your RSS feed URL when prompted
-3. The feed will automatically refresh with new content
+
+**Via Command Palette:**
+
+1. Open Command Palette (`Ctrl+Shift+P`)
+2. Run "RSS Blog Categorizer: Set RSS Feed"
+3. Enter your RSS feed URL when prompted
+
+The feed will automatically refresh with new content after updating.
 
 ### Exporting Posts
 
-1. Click "Export as Markdown" or "Export as HTML" from the view menu
-2. Choose your save location
-3. The exported file will include:
+**Via Explorer Panel:**
+
+1. Click "Export as Markdown" or "Export as HTML" from the "Dev Blog Posts" view menu
+
+**Via Command Palette:**
+
+1. Open Command Palette (`Ctrl+Shift+P`)
+2. Run "RSS Blog Categorizer: Export as Markdown" or "RSS Blog Categorizer: Export as HTML"
+
+**Export Process:**
+
+1. Choose your save location
+2. The exported file will include:
    - Auto-generated "Dew Drop" title with incremental numbering
    - Categorized posts with author attribution
    - "The Geek Shelf" section with book recommendations
 
-### Configuration Options
+## Configuration
 
 Access settings via `File > Preferences > Settings` and search for "RSS Blog Categorizer":
 
 - **Feed URL**: Single RSS feed URL to monitor
-- **Record Count**: Number of records to retrieve (1-200)
+- **Record Count**: Number of records to retrieve (10-500)
 - **Minimum DateTime**: Filter posts by publication date (UTC format)
 - **Refresh Interval**: Auto-refresh interval in minutes
 
-## Smart Date Filtering
+### Smart Date Filtering
 
 The extension uses intelligent date filtering:
 
@@ -75,130 +95,26 @@ Example UTC formats:
 - `2025-01-01T00:00:00Z` (midnight UTC)
 - `2025-09-27T12:00:00.000Z` (with milliseconds)
 
-## Customizing Categories
+## Category Customization
 
-Edit the `categories.json` file to customize post categorization:
-
-```json
-{
-  "categories": {
-    "Web Development": [
-      "javascript", "react", "vue", "angular", "typescript"
-    ],
-    "AI": [
-      "ai", "machine learning", "openai", "copilot"
-    ]
-  },
-  "defaultCategory": "General"
-}
-```
-
-**How it works:**
-
-- Categories are checked in JSON order (first match wins)
-- Only post titles are searched (case-insensitive)
-- Unmatched posts go to the default category
+You can customize how posts are categorized by editing the `categories.json` file in your extension directory. Posts are automatically sorted into categories based on keywords in their titles.
 
 See [CATEGORIES.md](CATEGORIES.md) for detailed configuration instructions.
 
-## Commands
+## Available Commands
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| `RSS Blog Categorizer: Refresh` | Refresh the RSS feed | - |
-| `RSS Blog Categorizer: Export as Markdown` | Export posts to Markdown | - |
-| `RSS Blog Categorizer: Export as HTML` | Export posts to HTML | - |
-| `RSS Blog Categorizer: Set RSS Feed` | Configure RSS feed URL | - |
+| Command | Description |
+|---------|-------------|
+| `RSS Blog Categorizer: Refresh` | Refresh the RSS feed |
+| `RSS Blog Categorizer: Export as Markdown` | Export posts to Markdown |
+| `RSS Blog Categorizer: Export as HTML` | Export posts to HTML |
+| `RSS Blog Categorizer: Set RSS Feed` | Configure RSS feed URL |
 
-## File Structure
-
-```text
-src/
-├── extension.ts        # Main extension entry point
-├── rssProvider.ts     # RSS parsing and tree data provider
-└── exportManager.ts   # HTML/Markdown export functionality
-categories.json        # Category configuration
-books.json            # Book recommendations for exports
-package.json          # Extension manifest
-```
+All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.
 
 ## Development
 
-### Prerequisites
-
-- Node.js (16.x or later)
-- Visual Studio Code
-- TypeScript
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/alvinashcraft/DevFeedCategorizer.git
-cd DevFeedCategorizer
-
-# Install dependencies
-npm install
-
-# Compile TypeScript
-npm run compile
-
-# Watch for changes during development
-npm run watch
-```
-
-### Testing
-
-1. Press `F5` to launch Extension Development Host
-2. Test the extension functionality
-3. Check the Debug Console for logs
-
-### Building VSIX Package
-
-```bash
-# Install vsce globally if not already installed
-npm install -g vsce
-
-# Package the extension
-vsce package
-```
-
-## Configuration Schema
-
-```json
-{
-  "rssBlogCategorizer.feedUrl": {
-    "type": "string",
-    "default": "https://dev.to/feed",
-    "description": "Single RSS feed URL to monitor"
-  },
-  "rssBlogCategorizer.recordCount": {
-    "type": "number", 
-    "default": 20,
-    "minimum": 1,
-    "maximum": 200,
-    "description": "Number of records to retrieve from RSS feed"
-  },
-  "rssBlogCategorizer.minimumDateTime": {
-    "type": "string",
-    "default": "",
-    "description": "Minimum datetime for blog posts in UTC (ISO format)"
-  },
-  "rssBlogCategorizer.refreshInterval": {
-    "type": "number",
-    "default": 30,
-    "description": "Refresh interval in minutes"
-  }
-}
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Interested in contributing or building from source? See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.
 
 ## License
 
@@ -211,8 +127,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Website: [alvinashcraft.com](https://www.alvinashcraft.com)
 - GitHub: [@alvinashcraft](https://github.com/alvinashcraft)
 
-## Acknowledgments
+---
 
-- Built for the developer community to streamline blog content curation
-- Designed to work seamlessly with the "Dew Drop" series workflow
-- Special thanks to the VS Code extension API team for excellent documentation
+*Built for the developer community to streamline blog content curation and designed to work seamlessly with the "Dew Drop" series workflow.*
