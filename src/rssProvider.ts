@@ -23,6 +23,7 @@ export interface CategoryNode {
 interface CategoriesConfig {
     categories: Record<string, string[]>;
     defaultCategory: string;
+    wholeWordKeywords?: string[]; // Optional list of keywords that require whole word matching
 }
 
 export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
@@ -32,6 +33,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private posts: BlogPost[] = [];
     private categories: Map<string, BlogPost[]> = new Map();
     private categoriesConfig: CategoriesConfig | null = null;
+    private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -90,15 +92,35 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const categoriesData = await fs.promises.readFile(categoriesPath, 'utf8');
             this.categoriesConfig = JSON.parse(categoriesData) as CategoriesConfig;
             console.log(`✅ Categories configuration loaded successfully with ${Object.keys(this.categoriesConfig.categories).length} categories`);
+            
+            // Initialize regex cache for whole word keywords
+            this.initializeWholeWordRegexCache();
         } catch (error) {
             console.error('❌ Error loading categories configuration:', error);
             console.error('This likely means categories.json is missing from the extension package');
             // Fallback to empty config if file can't be loaded
             this.categoriesConfig = {
                 categories: {},
-                defaultCategory: 'General'
+                defaultCategory: 'General',
+                wholeWordKeywords: []
             };
             console.log('Using fallback configuration with empty categories');
+        }
+    }
+
+    private initializeWholeWordRegexCache(): void {
+        // Clear existing cache
+        this.wholeWordRegexCache.clear();
+        
+        // Create regex patterns for whole word keywords
+        if (this.categoriesConfig?.wholeWordKeywords) {
+            for (const keyword of this.categoriesConfig.wholeWordKeywords) {
+                const keywordLower = keyword.toLowerCase();
+                // Create regex with word boundaries for whole word matching
+                const regex = new RegExp(`\\b${keywordLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                this.wholeWordRegexCache.set(keywordLower, regex);
+            }
+            console.log(`✅ Initialized ${this.wholeWordRegexCache.size} whole word regex patterns`);
         }
     }
 
@@ -392,24 +414,24 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         // Iterate through categories in the order they appear in the JSON file
         // The first matching category wins - no further categories are checked
         for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
-            // Find matching keyword with special handling for "ai"
+            // Find matching keyword using configurable whole word or substring matching
             const matchedKeyword = keywords.find(keyword => {
                 const keywordLower = keyword.toLowerCase();
                 
-                // Special case: "ai" requires whole word matching to avoid false matches
-                if (keywordLower === 'ai') {
-                    // Use word boundaries to match "ai" only as a complete word
-                    const regex = new RegExp(`\\b${keywordLower}\\b`, 'i');
-                    return regex.test(titleContent);
+                // Check if this keyword requires whole word matching
+                const cachedRegex = this.wholeWordRegexCache.get(keywordLower);
+                if (cachedRegex) {
+                    // Use cached regex for whole word matching
+                    return cachedRegex.test(titleContent);
                 } else {
-                    // For all other keywords, use the existing substring matching
+                    // Use substring matching for regular keywords
                     return titleContent.includes(keywordLower);
                 }
             });
             
             if (matchedKeyword) {
                 // Log the categorization for debugging
-                const matchType = matchedKeyword.toLowerCase() === 'ai' ? 'whole word match' : 'case-insensitive match';
+                const matchType = this.wholeWordRegexCache.has(matchedKeyword.toLowerCase()) ? 'whole word match' : 'substring match';
                 console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}" (${matchType})`);
                 return category; // Immediate return - no further categories checked
             }
