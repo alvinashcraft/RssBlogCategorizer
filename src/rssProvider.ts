@@ -11,6 +11,7 @@ export interface BlogPost {
     pubDate: string;
     category: string;
     source: string;
+    author: string;
 }
 
 export interface CategoryNode {
@@ -307,13 +308,46 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                         title = 'Untitled';
                     }
                     
+                    // Handle author that might be in different formats
+                    let author = '';
+                    try {
+                        if (item.author) {
+                            if (typeof item.author === 'string') {
+                                author = item.author;
+                            } else if (item.author.name) {
+                                author = typeof item.author.name === 'string' ? item.author.name : '';
+                            } else if (item.author['#text']) {
+                                author = typeof item.author['#text'] === 'string' ? item.author['#text'] : '';
+                            }
+                        } else if (item['dc:creator']) {
+                            author = typeof item['dc:creator'] === 'string' ? item['dc:creator'] : '';
+                        }
+                    } catch (error) {
+                        console.log(`Error parsing author for post "${title}":`, error);
+                        author = '';
+                    }
+                    
+                    // Clean up and validate author
+                    author = author ? author.trim() : '';
+                    
+                    // Check for problematic values and default to "unknown"
+                    if (!author || 
+                        author === '' || 
+                        author.toLowerCase().includes('blurblog') ||
+                        author.includes('[object Object]') ||
+                        author === feedTitle ||
+                        author.length > 100) { // Sanity check for overly long author names
+                        author = 'unknown';
+                    }
+                    
                     const post: BlogPost = {
                         title: title,
                         link: link,
                         description: this.stripHtml(description),
                         pubDate: item.pubDate || item.published || item.updated || '',
                         category: this.categorizePost(title, description),
-                        source: feedTitle
+                        source: feedTitle,
+                        author: author
                     };
                     
                     if (post.title && post.link) {

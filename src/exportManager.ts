@@ -164,22 +164,15 @@ export class ExportManager {
         const dewDropTitle = await this.generateDewDropTitle();
         
         let content = `# ${dewDropTitle}\n\n`;
-        content += `*Generated on ${new Date().toLocaleDateString()}*\n\n`;
 
         Object.entries(groupedPosts).forEach(([category, categoryPosts]) => {
-            content += `## ${category}\n\n`;
+            content += `### ${category}\n\n`;
             
             categoryPosts.forEach(post => {
-                content += `### [${post.title}](${post.link})\n\n`;
-                if (post.description) {
-                    content += `${post.description}\n\n`;
-                }
-                content += `*Source: ${post.source}*\n`;
-                if (post.pubDate) {
-                    content += `*Published: ${new Date(post.pubDate).toLocaleDateString()}*\n`;
-                }
-                content += `\n---\n\n`;
+                content += `- [${post.title}](${post.link}) (${post.author})\n`;
             });
+            
+            content += `\n`;
         });
 
         return content;
@@ -195,85 +188,21 @@ export class ExportManager {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${this.escapeHtml(dewDropTitle)}</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-        }
-        .header {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .category {
-            margin-bottom: 40px;
-        }
-        .category h2 {
-            color: #2c3e50;
-            border-left: 4px solid #3498db;
-            padding-left: 15px;
-        }
-        .post {
-            background: #f9f9f9;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
-        }
-        .post h3 {
-            margin-top: 0;
-        }
-        .post a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        .post a:hover {
-            text-decoration: underline;
-        }
-        .meta {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 10px;
-        }
-        .description {
-            margin: 10px 0;
-            color: #555;
-        }
-    </style>
 </head>
 <body>
-    <div class="header">
+    <div>
         <h1>${this.escapeHtml(dewDropTitle)}</h1>
-        <p><em>Generated on ${new Date().toLocaleDateString()}</em></p>
     </div>`;
 
         let categoriesHtml = '';
         Object.entries(groupedPosts).forEach(([category, categoryPosts]) => {
-            categoriesHtml += `    <div class="category">\n        <h2>${category}</h2>\n`;
+            categoriesHtml += `    <div>\n        <h3>${category}</h3>\n        <ul>\n`;
             
             categoryPosts.forEach(post => {
-                categoriesHtml += `        <div class="post">\n`;
-                categoriesHtml += `            <h3><a href="${post.link}" target="_blank">${this.escapeHtml(post.title)}</a></h3>\n`;
-                
-                if (post.description) {
-                    categoriesHtml += `            <div class="description">${this.escapeHtml(post.description)}</div>\n`;
-                }
-                
-                categoriesHtml += `            <div class="meta">\n`;
-                categoriesHtml += `                <strong>Source:</strong> ${this.escapeHtml(post.source)}`;
-                
-                if (post.pubDate) {
-                    categoriesHtml += ` | <strong>Published:</strong> ${new Date(post.pubDate).toLocaleDateString()}`;
-                }
-                
-                categoriesHtml += `\n            </div>\n        </div>\n`;
+                categoriesHtml += `            <li><a href="${post.link}" target="_blank">${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
             });
             
-            categoriesHtml += `    </div>\n`;
+            categoriesHtml += `        </ul>\n    </div>\n`;
         });
 
         const htmlEnd = `</body>\n</html>`;

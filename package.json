@@ -3,6 +3,11 @@
   "displayName": "RSS Blog Categorizer",
   "description": "Fetches RSS feeds from developer blogs and categorizes them with HTML/Markdown export functionality",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alvinashcraft/DevFeedCategorizer.git"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.74.0"
   },
