@@ -116,7 +116,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         if (this.categoriesConfig?.wholeWordKeywords) {
             const validKeywords = this.categoriesConfig.wholeWordKeywords
                 .filter((keyword) => this.isValidKeyword(keyword))
-                .map(keyword => keyword.toLowerCase().trim());
+                .map(keyword => keyword.toLowerCase());
                 
             for (const keywordLower of validKeywords) {
                 try {
