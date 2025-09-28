@@ -89,6 +89,7 @@
       "gemini",
       "gpt",
       "copilot",
+      "ollama",
       "foundry local",
       "windows ml"
     ],
@@ -112,6 +113,7 @@
       "unit test",
       "playwright",
       "msix",
+      "obfuscation",
       "advanced installer",
       "cicd",
       "continuous integration",
@@ -125,51 +127,106 @@
       "kanban",
       "patterns"
     ],
-    "Mobile and Game Development": [
-      "ios",
-      "android",
-      "react native",
-      "flutter",
-      "swift",
-      "kotlin",
-      ".net maui",
-      "jetpack compose",
-      "unity",
-      "unreal",
-      "xbox",
-      "alexa",
-      "uno platform",
-      "playstation",
-      "ps5",
-      "cordova",
-      "ionic",
-      "phonegap",
-      "xamarin",
-      "xcode",
-      "nintendo",
-      "game development",
-      "windows phone",
-      "directx",
-      "iot",
-      "raspberry pi",
-      "arduino"
-    ],
-    "Podcasts": [
-      "podcast",
-      "podcasts",
-      "hanselminutes",
-      "grammar girl",
-      ".net rocks"
-    ],
+    "Mobile and Game Development": {
+      "urlKeywords": [
+        "android-developers"
+      ],
+      "titleKeywords": [
+        "ios",
+        "android",
+        "react native",
+        "flutter",
+        "swift",
+        "kotlin",
+        ".net maui",
+        "jetpack compose",
+        "unity",
+        "unreal",
+        "xbox",
+        "alexa",
+        "uno platform",
+        "playstation",
+        "ps5",
+        "cordova",
+        "ionic",
+        "phonegap",
+        "xamarin",
+        "xcode",
+        "nintendo",
+        "game development",
+        "windows phone",
+        "directx",
+        "iot",
+        "raspberry pi",
+        "arduino"
+      ]
+  },
+    "Screencasts and Videos": {
+      "urlKeywords": [
+        "youtube.com",
+        "youtu.be",
+        "channel9.msdn.com",
+        "franksworld.com",
+        "vimeo.com",
+        "davidgiard.com"
+      ],
+      "titleKeywords": [
+        "data exposed",
+        "random.code",
+        "maeda",
+        "video",
+        "screencast",
+        "recording"
+      ]
+    },
+    "Podcasts": {
+      "urlKeywords": [
+        "hanselminutes.com",
+        "podcast",
+        "episodes",
+        "dotnetcore.show",
+        "podcasters.spotify.com",
+        "changelog.com",
+        "meta-cast.com",
+        "mergeconflict.fm",
+        "ageekleader.com",
+        "podcasts.apple.com",
+        "theaifix.show",
+        "azuredevops.show",
+        "audioboom.com",
+        "pythonbytes.fm",
+        "talkpython.fm",
+        "lennysnewsletter.com/p",
+        "syntax.fm",
+        "softwaredefinedtalk.com",
+        "netrocksshow.com",
+        "dotnetrocks.com",
+        "spreaker.com",
+        "libsyn.com"
+      ],
+      "titleKeywords": [
+        "podcast",
+        "podcasts",
+        "hanselminutes",
+        "grammar girl",
+        ".net rocks"
+      ]
+    },
     "Community": [
       "community",
       "events",
       "meetup",
       "conference",
       "techbash",
+      "my mvp journey",
       "codemash",
       "meetup",
       "dotnet foundation",
+      "mvp award",
+      "mvp summit",
+      "mvp program",
+      "mvp global summit",
+      "speaking",
       "ndc",
       "microsoft build",
       "ms build",
@@ -227,7 +284,22 @@
       "editor",
       "productivity",
       "powertoys"
-    ]
+    ],
+    "More Link Collections": {
+      "urlKeywords": [
+        "sergeytihon.com",
+        "azureweekly.info",
+        "blog.cwa.me.uk"
+      ],
+      "titleKeywords": [
+        "daily reading list",
+        ".net news daily",
+        "interesting links",
+        "reading notes",
+        "weekly roundup",
+        "my attention last week"
+      ]
+    }
   },
   "defaultCategory": "General",
   "wholeWordKeywords": [
