@@ -558,7 +558,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             if (!this.categories.has(category)) {
                 // This handles any unexpected categories not in the configuration
                 this.categories.set(category, []);
-                console.warn(`⚠️ Post assigned to unconfigured category: "${category}"`);
+                console.warn(`WARNING: Post assigned to unconfigured category: "${category}"`);
             }
             this.categories.get(category)!.push(post);
         });
