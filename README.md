@@ -15,6 +15,7 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 ## Installation
 
 ### From VSIX Package
+
 1. Download the `.vsix` file from the releases
 2. Open VS Code
 3. Go to Extensions view (`Ctrl+Shift+X`)
@@ -22,6 +23,7 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 5. Select the downloaded `.vsix` file
 
 ### From Source
+
 1. Clone this repository
 2. Run `npm install` to install dependencies
 3. Run `npm run compile` to build the extension
@@ -30,17 +32,20 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 ## Usage
 
 ### Getting Started
+
 1. After installation, the "Dev Blog Posts" view will appear in the Explorer panel
 2. The extension comes pre-configured with a default RSS feed
 3. Click the refresh button to load the latest posts
 4. Posts are automatically categorized and displayed in a tree structure
 
 ### Setting Up Your RSS Feed
+
 1. Click the edit icon (pencil) in the "Dev Blog Posts" view header
 2. Enter your RSS feed URL when prompted
 3. The feed will automatically refresh with new content
 
 ### Exporting Posts
+
 1. Click "Export as Markdown" or "Export as HTML" from the view menu
 2. Choose your save location
 3. The exported file will include:
@@ -66,6 +71,7 @@ The extension uses intelligent date filtering:
 3. **Manual Override**: Set a custom UTC datetime in settings
 
 Example UTC formats:
+
 - `2025-01-01T00:00:00Z` (midnight UTC)
 - `2025-09-27T12:00:00.000Z` (with milliseconds)
 
@@ -88,6 +94,7 @@ Edit the `categories.json` file to customize post categorization:
 ```
 
 **How it works:**
+
 - Categories are checked in JSON order (first match wins)
 - Only post titles are searched (case-insensitive)
 - Unmatched posts go to the default category
@@ -105,7 +112,7 @@ See [CATEGORIES.md](CATEGORIES.md) for detailed configuration instructions.
 
 ## File Structure
 
-```
+```text
 src/
 ├── extension.ts        # Main extension entry point
 ├── rssProvider.ts     # RSS parsing and tree data provider
@@ -118,11 +125,13 @@ package.json          # Extension manifest
 ## Development
 
 ### Prerequisites
+
 - Node.js (16.x or later)
 - Visual Studio Code
 - TypeScript
 
 ### Setup
+
 ```bash
 # Clone the repository
 git clone https://github.com/alvinashcraft/DevFeedCategorizer.git
@@ -139,11 +148,13 @@ npm run watch
 ```
 
 ### Testing
+
 1. Press `F5` to launch Extension Development Host
 2. Test the extension functionality
 3. Check the Debug Console for logs
 
 ### Building VSIX Package
+
 ```bash
 # Install vsce globally if not already installed
 npm install -g vsce
@@ -195,7 +206,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Author
 
-**Alvin Ashcraft**
+### Alvin Ashcraft
+
 - Website: [alvinashcraft.com](https://www.alvinashcraft.com)
 - GitHub: [@alvinashcraft](https://github.com/alvinashcraft)
 
