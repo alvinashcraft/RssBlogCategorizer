@@ -5,7 +5,9 @@ src/**
 .replit
 replit.md
 tsconfig.json
+webpack.config.js
 node_modules/**
 *.vsix
+out/**
 **/*.map
 test-*.js
