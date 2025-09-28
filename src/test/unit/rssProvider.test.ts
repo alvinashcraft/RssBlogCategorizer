@@ -324,7 +324,7 @@ describe('RSSBlogProvider', () => {
       });
 
       // Should not throw an error despite invalid date
-      return expect(provider.refresh()).to.be.fulfilled;
+      await expect(provider.refresh()).to.be.fulfilled;
       const posts = await provider.getAllPosts();
       expect(posts).to.be.an('array');
     });
@@ -449,7 +449,7 @@ describe('RSSBlogProvider', () => {
       fsReadFileStub.rejects(new Error('File not found'));
 
       // Should not throw error when categories file is missing
-      return expect(provider.refresh()).to.be.fulfilled;
+      await expect(provider.refresh()).to.be.fulfilled;
       
       const posts = await provider.getAllPosts();
       expect(posts).to.be.an('array');

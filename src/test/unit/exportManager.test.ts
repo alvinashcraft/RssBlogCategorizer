@@ -20,8 +20,10 @@ describe('ExportManager', () => {
   let showInformationMessageStub: sinon.SinonStub;
   let openTextDocumentStub: sinon.SinonStub;
   let showTextDocumentStub: sinon.SinonStub;
+  let originalDate: DateConstructor;
 
   beforeEach(() => {
+    originalDate = global.Date;
     exportManager = new ExportManager();
     
     // Stub external dependencies
@@ -49,6 +51,10 @@ describe('ExportManager', () => {
 
   afterEach(() => {
     sinon.restore();
+    // Restore original Date if it was mocked
+    if (originalDate) {
+      global.Date = originalDate;
+    }
   });
 
   describe('Dew Drop Title Generation', () => {
@@ -279,7 +285,6 @@ describe('ExportManager', () => {
   describe('Book Integration', () => {
     it('should rotate books based on day of year', async () => {
       // Mock current date to a specific day
-      const originalDate = Date;
       const mockDate = new Date('2025-01-02'); // Day 2 of year
       
       // @ts-ignore
@@ -322,9 +327,6 @@ describe('ExportManager', () => {
       
       // Day 2 % 2 books = index 0, should be first book
       expect(capturedContent).to.include('Clean Code');
-      
-      // Restore original Date
-      global.Date = originalDate;
     });
 
     it('should handle missing books.json gracefully', async () => {
