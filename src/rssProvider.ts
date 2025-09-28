@@ -158,7 +158,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private escapeRegexCharacters(text: string): string {
         // Comprehensive regex escaping to prevent injection attacks
         // This escapes all characters that have special meaning in regex
-        return text.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+        return text.replace(/[\\^$.*+?()[\]{}|-]/g, '\\$&');
     }
 
     async refresh(): Promise<void> {
@@ -452,23 +452,33 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         // The first matching category wins - no further categories are checked
         for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
             // Find matching keyword using configurable whole word or substring matching
-            const matchedKeyword = keywords.find(keyword => {
+            let matchedKeyword: string | undefined;
+            let matchType: string = '';
+            
+            for (const keyword of keywords) {
                 const keywordLower = keyword.toLowerCase();
                 
                 // Check if this keyword requires whole word matching
                 const cachedRegex = this.wholeWordRegexCache.get(keywordLower);
                 if (cachedRegex) {
                     // Use cached regex for whole word matching
-                    return cachedRegex.test(titleContent);
+                    if (cachedRegex.test(titleContent)) {
+                        matchedKeyword = keyword;
+                        matchType = 'whole word match';
+                        break;
+                    }
                 } else {
                     // Use substring matching for regular keywords
-                    return titleContent.includes(keywordLower);
+                    if (titleContent.includes(keywordLower)) {
+                        matchedKeyword = keyword;
+                        matchType = 'substring match';
+                        break;
+                    }
                 }
-            });
+            }
             
             if (matchedKeyword) {
                 // Log the categorization for debugging
-                const matchType = this.wholeWordRegexCache.has(matchedKeyword.toLowerCase()) ? 'whole word match' : 'substring match';
                 console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}" (${matchType})`);
                 return category; // Immediate return - no further categories checked
             }
