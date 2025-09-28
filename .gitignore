@@ -20,6 +20,7 @@ yarn.lock
 .vscode/tasks.json
 .vscode/extensions.json
 *.code-workspace
+.vscode-test/
 
 # OS generated files
 .DS_Store

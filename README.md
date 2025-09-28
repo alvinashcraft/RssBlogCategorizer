@@ -114,7 +114,7 @@ All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the 
 
 ## Development
 
-Interested in contributing or building from source? See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed development setup, building instructions, and contribution guidelines.
+Interested in contributing or building from source? See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.
 
 ## License
 

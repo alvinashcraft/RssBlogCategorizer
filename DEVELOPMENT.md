@@ -54,6 +54,32 @@ package.json          # Extension manifest
 
 ## Testing
 
+The extension includes comprehensive unit and integration tests.
+
+### Running Tests
+
+```bash
+# Run unit tests (recommended for development)
+npm run test:unit
+
+# Run all tests including integration tests
+npm test
+
+# Compile and run unit tests
+npm run compile-tests
+npm run test:unit:compiled
+```
+
+### Test Structure
+
+- `src/test/unit/` - Unit tests for individual components
+- `src/test/suite/` - Integration tests in VS Code environment  
+- `src/test/mocks/` - Mock data and VS Code API implementations
+
+See [src/test/README.md](src/test/README.md) for detailed testing documentation.
+
+### Manual Testing
+
 1. Press `F5` to launch Extension Development Host
 2. Test the extension functionality
 3. Check the Debug Console for logs
