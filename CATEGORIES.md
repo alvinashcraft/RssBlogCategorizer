@@ -13,7 +13,12 @@ This file contains the categories and keywords used to automatically categorize 
       "phrase with spaces"
     ]
   },
-  "defaultCategory": "General"
+  "defaultCategory": "General",
+  "wholeWordKeywords": [
+    "ai",
+    "ios",
+    "api"
+  ]
 }
 ```
 
@@ -24,6 +29,14 @@ This file contains the categories and keywords used to automatically categorize 
 - The first matching category is assigned to the post (based on JSON order priority)
 - If no keywords match, the post gets assigned to the `defaultCategory`
 - **Note**: Only titles are searched to avoid false matches from keywords in post descriptions
+
+### Keyword Matching Types
+
+- **Substring matching (default)**: Keywords can appear anywhere within words (e.g., "script" matches "JavaScript")
+- **Whole word matching**: Keywords listed in `wholeWordKeywords` only match as complete words
+  - Example: "ai" in `wholeWordKeywords` matches "AI Revolution" but not "Available Now"
+  - Useful for short keywords that commonly appear within other words
+  - Uses word boundaries to ensure precise matching
 
 ## Adding New Categories
 
@@ -60,11 +73,28 @@ The extension filters posts by publication date using **UTC timezone**:
   - `2025-09-27T12:00:00.000Z` (noon UTC on Sep 27, 2025)
 - **Important**: All date comparisons use UTC to ensure consistency across timezones
 
+## Whole Word Keywords
+
+The optional `wholeWordKeywords` array contains keywords that should only match as complete words:
+
+- **Performance**: Regex patterns are cached for efficiency during categorization
+- **Use cases**: Short keywords like "ai", "js", "go", "c" that often appear within other words
+- **Example configuration**:
+  ```json
+  "wholeWordKeywords": [
+    "ai",
+    "api", 
+    "js",
+    "go"
+  ]
+  ```
+
 ## Tips
 
 - **Focus on title keywords**: Since only titles are searched, choose keywords that commonly appear in post titles
-- Use specific keywords to avoid false matches
-- Include common variations of terms (e.g., "javascript", "js")
-- Consider abbreviations and alternative names that appear in titles
-- Avoid overly generic terms that might appear in many different types of posts
-- Test your changes by refreshing the feed and checking categorization results
+- **Use specific keywords** to avoid false matches
+- **Include common variations** of terms (e.g., "javascript", "js")  
+- **Consider abbreviations** and alternative names that appear in titles
+- **Avoid overly generic terms** that might appear in many different types of posts
+- **Use whole word matching** for short keywords that commonly appear within other words
+- **Test your changes** by refreshing the feed and checking categorization results

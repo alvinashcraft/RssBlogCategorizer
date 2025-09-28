@@ -23,6 +23,7 @@ export interface CategoryNode {
 interface CategoriesConfig {
     categories: Record<string, string[]>;
     defaultCategory: string;
+    wholeWordKeywords?: string[]; // Optional list of keywords that require whole word matching
 }
 
 export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
@@ -32,6 +33,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private posts: BlogPost[] = [];
     private categories: Map<string, BlogPost[]> = new Map();
     private categoriesConfig: CategoriesConfig | null = null;
+    private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -90,16 +92,74 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const categoriesData = await fs.promises.readFile(categoriesPath, 'utf8');
             this.categoriesConfig = JSON.parse(categoriesData) as CategoriesConfig;
             console.log(`✅ Categories configuration loaded successfully with ${Object.keys(this.categoriesConfig.categories).length} categories`);
+            
+            // Initialize regex cache for whole word keywords
+            this.initializeWholeWordRegexCache();
         } catch (error) {
             console.error('❌ Error loading categories configuration:', error);
             console.error('This likely means categories.json is missing from the extension package');
             // Fallback to empty config if file can't be loaded
             this.categoriesConfig = {
                 categories: {},
-                defaultCategory: 'General'
+                defaultCategory: 'General',
+                wholeWordKeywords: []
             };
             console.log('Using fallback configuration with empty categories');
         }
+    }
+
+    private initializeWholeWordRegexCache(): void {
+        // Clear existing cache
+        this.wholeWordRegexCache.clear();
+        
+        // Create regex patterns for whole word keywords
+        if (this.categoriesConfig?.wholeWordKeywords) {
+            const validKeywords = this.categoriesConfig.wholeWordKeywords
+                .filter((keyword) => this.isValidKeyword(keyword))
+                .map(keyword => keyword.toLowerCase());
+                
+            for (const keywordLower of validKeywords) {
+                try {
+                    // Use comprehensive regex escaping to prevent injection
+                    const escapedKeyword = this.escapeRegexCharacters(keywordLower);
+                    // No 'i' flag needed since both keyword and titleContent are already lowercase
+                    const regex = new RegExp(`\\b${escapedKeyword}\\b`);
+                    this.wholeWordRegexCache.set(keywordLower, regex);
+                } catch (error) {
+                    console.warn(`⚠️ Failed to create regex for keyword "${keywordLower}":`, error);
+                    // Continue with other keywords instead of failing completely
+                }
+            }
+            console.log(`✅ Initialized ${this.wholeWordRegexCache.size} whole word regex patterns`);
+        }
+    }
+
+    private isValidKeyword(keyword: string): boolean {
+        // Validate that keyword is a non-empty string with meaningful content
+        if (typeof keyword !== 'string') {
+            console.warn(`⚠️ Invalid keyword type: ${typeof keyword}, expected string`);
+            return false;
+        }
+        
+        const trimmed = keyword.trim();
+        if (trimmed.length === 0) {
+            console.warn(`⚠️ Empty or whitespace-only keyword ignored`);
+            return false;
+        }
+        
+        // Additional validation: keywords should be reasonable length
+        if (trimmed.length > 100) {
+            console.warn(`⚠️ Keyword too long (${trimmed.length} chars): "${trimmed.substring(0, 20)}..."`);
+            return false;
+        }
+        
+        return true;
+    }
+
+    private escapeRegexCharacters(text: string): string {
+        // Comprehensive regex escaping to prevent injection attacks
+        // This escapes all characters that have special meaning in regex
+        return text.replace(/[\\^$.*+?()[\]{}|`/-]/g, '\\$&');
     }
 
     async refresh(): Promise<void> {
@@ -392,11 +452,35 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         // Iterate through categories in the order they appear in the JSON file
         // The first matching category wins - no further categories are checked
         for (const [category, keywords] of Object.entries(this.categoriesConfig.categories)) {
-            // Ensure case-insensitive matching by converting both title and keywords to lowercase
-            const matchedKeyword = keywords.find(keyword => titleContent.includes(keyword.toLowerCase()));
+            // Find matching keyword using configurable whole word or substring matching
+            let matchedKeyword: string | undefined;
+            let matchType: string = '';
+            
+            for (const keyword of keywords) {
+                const keywordLower = keyword.toLowerCase();
+                
+                // Check if this keyword requires whole word matching
+                const cachedRegex = this.wholeWordRegexCache.get(keywordLower);
+                if (cachedRegex) {
+                    // Use cached regex for whole word matching
+                    if (cachedRegex.test(titleContent)) {
+                        matchedKeyword = keyword;
+                        matchType = 'whole word match';
+                        break;
+                    }
+                } else {
+                    // Use substring matching for regular keywords
+                    if (titleContent.includes(keywordLower)) {
+                        matchedKeyword = keyword;
+                        matchType = 'substring match';
+                        break;
+                    }
+                }
+            }
+            
             if (matchedKeyword) {
                 // Log the categorization for debugging
-                console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}" (case-insensitive match)`);
+                console.log(`Post "${title}" categorized as "${category}" due to title keyword: "${matchedKeyword}" (${matchType})`);
                 return category; // Immediate return - no further categories checked
             }
         }
