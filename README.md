@@ -99,7 +99,7 @@ Example UTC formats:
 
 You can customize how posts are categorized by editing the `categories.json` file in your extension directory. Posts are automatically sorted into categories based on keywords in their titles.
 
-See [CATEGORIES.md](CATEGORIES.md) for detailed configuration instructions.
+See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 
 ## Available Commands
 
@@ -114,7 +114,7 @@ All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the 
 
 ## Development
 
-Interested in contributing or building from source? See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.
+Interested in contributing or building from source? See [DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.
 
 ## License
 
