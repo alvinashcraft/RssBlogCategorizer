@@ -31,6 +31,7 @@
         "ruby on rails",
         "webstorm",
         "nodejs",
+        "fhir",
         "npm",
         "react",
         "vue",
@@ -84,6 +85,22 @@
       ]
     },
     "AI": {
+      "urlKeywords": [
+        "openai.com",
+        "chat.openai.com",
+        "perplexity.ai",
+        "bard.google.com",
+        "claude.ai",
+        "gemini.google.com",
+        "ollama.com",
+        "huggingface.co",
+        "ai.google",
+        "microsoft.com/ai",
+        "microsoft.com/en-us/ai",
+        "microsoft.com/en-us/ai/azure-openai",
+        "microsoft.com/en-us/ai/azure-cognitive-services",
+        "microsoft.com/en-us/ai/azure-machine-learning"
+      ],
       "titleKeywords": [
         "ai",
         "artificial intelligence",
@@ -94,8 +111,15 @@
         "bard",
         "claude",
         "gemini",
+        "gemma",
+        "llm",
         "gpt",
+        "rag",
         "copilot",
+        "mcp",
+        "model context protocol",
+        "langchain",
+        "foundation models",
         "ollama",
         "foundry local",
         "windows ml"
@@ -129,6 +153,7 @@
         "cicd",
         "continuous integration",
         "jenkins",
+        "codeql",
         "gitlab",
         "teamcity",
         "octopus",
@@ -327,6 +352,7 @@
   "wholeWordKeywords": [
     "ai",
     "ios",
-    "api"
+    "api",
+    "rag"
   ]
 }
