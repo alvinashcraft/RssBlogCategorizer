@@ -55,6 +55,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private categoriesConfig: CategoriesConfig | null = null;
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
     private static readonly NEWSBLUR_PASSWORD_KEY = 'newsblurPassword';
+    private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -447,7 +448,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // From: https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft
             // To: /social/stories/109116/alvinashcraft
             // Use regex to extract the /social/rss/<user_id>/<username> part from any NewsBlur subdomain
-            const match = feedUrl.match(/^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/);
+            const match = feedUrl.match(RSSBlogProvider.NEWSBLUR_RSS_PATTERN);
             let apiPath: string;
             if (match) {
                 apiPath = `/social/stories/${match[1]}/${match[2]}`;
@@ -475,8 +476,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     console.log(`Redirect ${redirectCount + 1}/${MAX_REDIRECTS}: ${apiUrl} -> ${response.headers.location}`);
                     // Only follow redirect if it matches NewsBlur RSS feed URL pattern
                     const redirectUrl = response.headers.location;
-                    const newsBlurRssPattern = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
-                    if (redirectUrl.match(newsBlurRssPattern)) {
+                    if (redirectUrl.match(RSSBlogProvider.NEWSBLUR_RSS_PATTERN)) {
                         return this.fetchNewsBlurApi(redirectUrl, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
                     } else {
                         console.error(`Redirected to non-NewsBlur RSS feed URL: ${redirectUrl}`);
