@@ -569,15 +569,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     author: author
                 };
                 
-                if (post.title && post.link) {
-                    // Check for duplicate links
-                    if (seenLinks.has(post.link)) {
-                        console.log(`Duplicate link found, skipping: ${post.link}`);
-                    } else {
-                        seenLinks.add(post.link);
-                        posts.push(post);
-                    }
-                }
+                this.addPostIfNotDuplicate(post, posts, seenLinks);
             } catch (itemError) {
                 console.error(`Error processing NewsBlur story ${index}:`, itemError);
                 // Continue with next story instead of failing completely
@@ -693,15 +685,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                         author: author
                     };
                     
-                    if (post.title && post.link) {
-                        // Check for duplicate links
-                        if (seenLinks.has(post.link)) {
-                            console.log(`Duplicate link found, skipping: ${post.link}`);
-                        } else {
-                            seenLinks.add(post.link);
-                            posts.push(post);
-                        }
-                    }
+                    this.addPostIfNotDuplicate(post, posts, seenLinks);
                 } catch (itemError) {
                     console.error(`Error processing feed item ${index}:`, itemError);
                     console.error('Problematic item data:', JSON.stringify(item, null, 2));
@@ -969,5 +953,27 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             console.error('Error stripping HTML:', error, 'Input was:', html);
             return htmlStr.substring(0, 200);
         }
+    }
+
+    /**
+     * Adds a post to the posts array if it's valid and not a duplicate.
+     * @param post The blog post to potentially add
+     * @param posts The array to add the post to
+     * @param seenLinks Set of already seen links for duplicate detection
+     * @returns true if the post was added, false if it was skipped
+     */
+    private addPostIfNotDuplicate(post: BlogPost, posts: BlogPost[], seenLinks: Set<string>): boolean {
+        if (post.title && post.link) {
+            // Check for duplicate links
+            if (seenLinks.has(post.link)) {
+                console.log(`Duplicate link found, skipping: ${post.link}`);
+                return false;
+            } else {
+                seenLinks.add(post.link);
+                posts.push(post);
+                return true;
+            }
+        }
+        return false;
     }
 }
