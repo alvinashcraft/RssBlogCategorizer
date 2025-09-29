@@ -33,7 +33,7 @@ export class MockExtensionContext implements vscode.ExtensionContext {
     this.globalState = new MockGlobalMemento();
     
     // Mock other properties
-    this.secrets = {} as vscode.SecretStorage;
+    this.secrets = new MockSecretStorage();
     this.environmentVariableCollection = new MockEnvironmentVariableCollection();
     this.extension = {} as vscode.Extension<any>;
     this.languageModelAccessInformation = {} as vscode.LanguageModelAccessInformation;
@@ -124,4 +124,22 @@ export class MockConfiguration implements vscode.WorkspaceConfiguration {
   }
 
   readonly [key: string]: any;
+}
+
+class MockSecretStorage implements vscode.SecretStorage {
+  private storage = new Map<string, string>();
+
+  async get(key: string): Promise<string | undefined> {
+    return this.storage.get(key);
+  }
+
+  async store(key: string, value: string): Promise<void> {
+    this.storage.set(key, value);
+  }
+
+  async delete(key: string): Promise<void> {
+    this.storage.delete(key);
+  }
+
+  onDidChange: vscode.Event<vscode.SecretStorageChangeEvent> = new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event;
 }

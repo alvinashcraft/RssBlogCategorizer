@@ -57,6 +57,51 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    const setNewsblurCredentialsCommand = vscode.commands.registerCommand('rssBlogCategorizer.setNewsblurCredentials', async () => {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const currentUsername = config.get<string>('newsblurUsername') || '';
+        
+        // Get username
+        const username = await vscode.window.showInputBox({
+            prompt: 'Enter NewsBlur username',
+            placeHolder: 'username',
+            value: currentUsername
+        });
+        
+        if (!username) {
+            return; // User cancelled
+        }
+        
+        // Get password securely
+        const password = await vscode.window.showInputBox({
+            prompt: `Enter NewsBlur password for user: ${username}`,
+            password: true,
+            placeHolder: 'Enter your NewsBlur password'
+        });
+        
+        if (!password) {
+            return; // User cancelled
+        }
+        
+        try {
+            // Save username in configuration
+            await config.update('newsblurUsername', username, vscode.ConfigurationTarget.Global);
+            
+            // Save password securely
+            await context.secrets.store('newsblurPassword', password);
+            
+            // Enable API usage
+            await config.update('useNewsblurApi', true, vscode.ConfigurationTarget.Global);
+            
+            vscode.window.showInformationMessage('NewsBlur credentials saved successfully! API mode enabled.');
+            
+            // Refresh to use new credentials
+            await provider.refresh();
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to save NewsBlur credentials: ${error}`);
+        }
+    });
+
     // Auto-refresh based on configuration
     const getRefreshInterval = () => {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
@@ -90,6 +135,7 @@ export function activate(context: vscode.ExtensionContext) {
         exportHtmlCommand,
         openPostCommand,
         setFeedCommand,
+        setNewsblurCredentialsCommand,
         treeView,
         configChangeHandler,
         { dispose: () => clearInterval(refreshInterval) }

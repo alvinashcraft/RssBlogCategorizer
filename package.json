@@ -56,6 +56,11 @@
         "command": "rssBlogCategorizer.addFeed",
         "title": "Set RSS Feed",
         "icon": "$(edit)"
+      },
+      {
+        "command": "rssBlogCategorizer.setNewsblurCredentials",
+        "title": "Set NewsBlur Credentials",
+        "icon": "$(key)"
       }
     ],
     "menus": {
@@ -76,6 +81,10 @@
         },
         {
           "command": "rssBlogCategorizer.exportHtml",
+          "when": "view == rssBlogCategorizerView"
+        },
+        {
+          "command": "rssBlogCategorizer.setNewsblurCredentials",
           "when": "view == rssBlogCategorizerView"
         }
       ]
@@ -108,12 +117,7 @@
         "rssBlogCategorizer.newsblurUsername": {
           "type": "string",
           "default": "",
-          "description": "NewsBlur username for API access (enables fetching more than 25 items)"
-        },
-        "rssBlogCategorizer.newsblurPassword": {
-          "type": "string",
-          "default": "",
-          "description": "NewsBlur password for API access (stored securely in VS Code settings)"
+          "description": "NewsBlur username for API access (enables fetching more than 25 items). Password is stored securely and will be prompted when needed."
         },
         "rssBlogCategorizer.useNewsblurApi": {
           "type": "boolean",

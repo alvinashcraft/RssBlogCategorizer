@@ -32,7 +32,9 @@ describe('RSSBlogProvider', () => {
       feedUrl: 'https://example.com/feed.xml',
       recordCount: 100,
       minimumDateTime: '',
-      refreshInterval: 30
+      refreshInterval: 30,
+      useNewsblurApi: false,
+      newsblurUsername: ''
     });
     workspaceGetConfigStub.returns(mockConfig);
     

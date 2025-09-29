@@ -54,6 +54,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private categories: Map<string, BlogPost[]> = new Map();
     private categoriesConfig: CategoriesConfig | null = null;
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
+    private static readonly NEWSBLUR_PASSWORD_KEY = 'newsblurPassword';
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -245,6 +246,29 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         // Refresh will be called by the command handler
     }
 
+    private async getNewsblurPassword(): Promise<string | undefined> {
+        return await this.context.secrets.get(RSSBlogProvider.NEWSBLUR_PASSWORD_KEY);
+    }
+
+    private async setNewsblurPassword(password: string): Promise<void> {
+        await this.context.secrets.store(RSSBlogProvider.NEWSBLUR_PASSWORD_KEY, password);
+    }
+
+    private async promptForNewsblurPassword(username: string): Promise<string | undefined> {
+        const password = await vscode.window.showInputBox({
+            prompt: `Enter NewsBlur password for user: ${username}`,
+            password: true,
+            placeHolder: 'Enter your NewsBlur password'
+        });
+
+        if (password) {
+            await this.setNewsblurPassword(password);
+            return password;
+        }
+
+        return undefined;
+    }
+
     private async loadFeeds(): Promise<void> {
         // Load categories configuration if not already loaded
         if (!this.categoriesConfig) {
@@ -256,7 +280,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         const recordCount = config.get<number>('recordCount') || 100;
         const useNewsblurApi = config.get<boolean>('useNewsblurApi') || false;
         const newsblurUsername = config.get<string>('newsblurUsername') || '';
-        const newsblurPassword = config.get<string>('newsblurPassword') || '';
+        
+        // Get password securely from SecretStorage
+        let newsblurPassword = await this.getNewsblurPassword();
         
         console.log(`Loading feeds - clearing existing ${this.posts.length} posts`);
         this.posts = [];
@@ -266,21 +292,38 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         try {
             // Determine which method to use
-            if (useNewsblurApi && newsblurUsername && newsblurPassword && feedUrl.includes('newsblur.com')) {
-                console.log('Using NewsBlur API for enhanced access');
-                posts = await this.fetchNewsBlurApi(feedUrl, recordCount, newsblurUsername, newsblurPassword);
-                
-                // Fallback to RSS if API fails
-                if (posts.length === 0) {
-                    console.log('NewsBlur API returned no results, falling back to RSS feed');
+            if (useNewsblurApi && newsblurUsername && feedUrl.includes('newsblur.com')) {
+                // Prompt for password if not stored securely
+                if (!newsblurPassword) {
+                    newsblurPassword = await this.promptForNewsblurPassword(newsblurUsername);
+                }
+
+                if (newsblurPassword) {
+                    console.log('Using NewsBlur API for enhanced access');
+                    posts = await this.fetchNewsBlurApi(feedUrl, recordCount, newsblurUsername, newsblurPassword);
+                    
+                    // If API fails with authentication error, clear stored password and try again
+                    if (posts.length === 0) {
+                        console.log('NewsBlur API returned no results, this might be an authentication issue');
+                        await this.context.secrets.delete(RSSBlogProvider.NEWSBLUR_PASSWORD_KEY);
+                        vscode.window.showWarningMessage('NewsBlur API authentication failed. Password cleared. Try refreshing again to re-enter credentials.');
+                        
+                        console.log('Falling back to RSS feed');
+                        const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
+                        posts = await this.fetchFeed(urlWithParams);
+                    }
+                } else {
+                    console.log('NewsBlur API enabled but no password provided, using RSS feed');
+                    vscode.window.showInformationMessage('NewsBlur API cancelled. Using RSS feed (limited to ~25 items).');
+                    
                     const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
                     posts = await this.fetchFeed(urlWithParams);
                 }
             } else {
                 // Use traditional RSS approach
-                if (useNewsblurApi && (!newsblurUsername || !newsblurPassword)) {
-                    console.warn('NewsBlur API enabled but credentials not configured, using RSS feed');
-                    vscode.window.showWarningMessage('NewsBlur API is enabled but username/password not configured. Using RSS feed (limited to ~25 items).');
+                if (useNewsblurApi && !newsblurUsername) {
+                    console.warn('NewsBlur API enabled but username not configured, using RSS feed');
+                    vscode.window.showWarningMessage('NewsBlur API is enabled but username not configured. Using RSS feed (limited to ~25 items).');
                 }
                 
                 const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
