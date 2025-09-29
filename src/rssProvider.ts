@@ -952,6 +952,16 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 return true;
             }
         }
+        
+        // Log when posts are skipped due to missing title or link
+        if (!post.title && !post.link) {
+            console.warn(`Skipping post with missing title and link from source: ${post.source || 'unknown'}`);
+        } else if (!post.title) {
+            console.warn(`Skipping post with missing title: ${post.link} from source: ${post.source || 'unknown'}`);
+        } else if (!post.link) {
+            console.warn(`Skipping post with missing link: "${post.title}" from source: ${post.source || 'unknown'}`);
+        }
+        
         return false;
     }
 }
