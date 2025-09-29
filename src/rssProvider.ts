@@ -317,16 +317,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     posts = await this.fetchNewsBlurApi(feedUrl, recordCount, newsblurUsername, newsblurPassword);
                     usedNewsBlurApi = true;
                     
-                    // If API fails with authentication error, clear stored password and try again
+                    // Note: Empty results (posts.length === 0) are not necessarily authentication failures.
+                    // The API could legitimately return zero results if there are no new posts or if 
+                    // date filtering excludes all posts. Only clear credentials on actual HTTP auth errors.
+                    console.log(`NewsBlur API returned ${posts.length} posts`);
                     if (posts.length === 0) {
-                        console.log('NewsBlur API returned no results, this might be an authentication issue');
-                        await this.context.secrets.delete(RSSBlogProvider.NEWSBLUR_PASSWORD_KEY);
-                        vscode.window.showWarningMessage('NewsBlur API authentication failed. Password cleared. Try refreshing again to re-enter credentials.');
-                        
-                        console.log('Falling back to RSS feed');
-                        const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
-                        posts = await this.fetchFeed(urlWithParams);
-                        usedNewsBlurApi = false;
+                        console.log('NewsBlur API returned no posts - this could be due to no new content, date filtering, or other factors');
                     }
                 } else {
                     console.log('NewsBlur API enabled but no password provided, using RSS feed');
