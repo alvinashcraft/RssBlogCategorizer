@@ -620,12 +620,14 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     /**
-     * Categorizes a blog post based on keyword matching in the following priority order:
-     *   1. URL keyword matching (most reliable)
-     *   2. Title keyword matching
-     *   3. (Future) Author keyword matching
+     * Categorizes a blog post based on keyword matching in the following global priority order:
+     *   1. URL keyword matching (most reliable) - checked across ALL categories first
+     *   2. Title keyword matching - checked across ALL categories second  
+     *   3. (Future) Author keyword matching - would be checked across ALL categories third
      * 
-     * The first matching category is returned; if no match is found, the default category is used.
+     * This ensures URL matches always take precedence over title matches, regardless of category order.
+     * For example, a YouTube link will always be categorized as "Videos" even if the title matches 
+     * "Web Development" keywords and "Web Development" appears first in the configuration.
      * 
      * @param title - The title of the blog post.
      * @param description - The description of the blog post (currently unused).
@@ -648,13 +650,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             return this.categoriesConfig.defaultCategory;
         }
 
-        // Iterate through categories in the order they appear in the JSON file
-        // The first matching category wins - no further categories are checked
+        // Two-pass approach to ensure URL keywords always take precedence over title keywords
+        // Pass 1: Check URL keywords across ALL categories first (highest priority)
         for (const [category, categoryDef] of Object.entries(this.categoriesConfig.categories)) {
-            // Normalize category definition (backwards compatibility)
             const normalizedDef = this.normalizeCategoryDefinition(categoryDef);
             
-            // 1. First priority: URL keyword matching (most reliable)
             if (normalizedDef.urlKeywords) {
                 for (const urlKeyword of normalizedDef.urlKeywords) {
                     if (urlLower.includes(urlKeyword.toLowerCase())) {
@@ -663,8 +663,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     }
                 }
             }
+        }
+        
+        // Pass 2: If no URL match found, check title keywords across ALL categories
+        for (const [category, categoryDef] of Object.entries(this.categoriesConfig.categories)) {
+            const normalizedDef = this.normalizeCategoryDefinition(categoryDef);
             
-            // 2. Second priority: Title keyword matching (existing logic)
             if (normalizedDef.titleKeywords) {
                 for (const keyword of normalizedDef.titleKeywords) {
                     const keywordLower = keyword.toLowerCase();
@@ -686,10 +690,13 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     }
                 }
             }
-            
-            // 3. Future: Author keyword matching could be added here
-            // if (normalizedDef.authorKeywords) { ... }
         }
+        
+        // Pass 3: Future - Author keyword matching could be added here
+        // for (const [category, categoryDef] of Object.entries(this.categoriesConfig.categories)) {
+        //     const normalizedDef = this.normalizeCategoryDefinition(categoryDef);
+        //     if (normalizedDef.authorKeywords) { ... }
+        // }
 
         // No category matched, use the default
         console.log(`Post "${title}" categorized as default: "${this.categoriesConfig.defaultCategory}" (no keywords matched)`);
