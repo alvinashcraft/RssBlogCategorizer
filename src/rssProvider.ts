@@ -3,6 +3,7 @@ import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
+import { NEWSBLUR_PASSWORD_KEY } from './constants';
 
 export interface BlogPost {
     title: string;
@@ -12,6 +13,20 @@ export interface BlogPost {
     category: string;
     source: string;
     author: string;
+}
+
+// NewsBlur API response interfaces
+interface NewsBlurStory {
+    story_title: string;
+    story_permalink: string;
+    story_date: string;
+    shared_date: string;
+    story_authors: string;
+    story_content?: string;
+}
+
+interface NewsBlurApiResponse {
+    stories: NewsBlurStory[];
 }
 
 export interface CategoryNode {
@@ -40,6 +55,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private categories: Map<string, BlogPost[]> = new Map();
     private categoriesConfig: CategoriesConfig | null = null;
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
+    private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
+    private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -231,6 +248,45 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         // Refresh will be called by the command handler
     }
 
+    private async getNewsblurPassword(): Promise<string | undefined> {
+        return await this.context.secrets.get(NEWSBLUR_PASSWORD_KEY);
+    }
+
+    private async setNewsblurPassword(password: string): Promise<void> {
+        await this.context.secrets.store(NEWSBLUR_PASSWORD_KEY, password);
+    }
+
+    private async promptForNewsblurPassword(username: string): Promise<string | undefined> {
+        const password = await vscode.window.showInputBox({
+            prompt: `Enter NewsBlur password for user: ${username}`,
+            password: true,
+            placeHolder: 'Enter your NewsBlur password'
+        });
+
+        if (password) {
+            await this.setNewsblurPassword(password);
+            return password;
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Checks if NewsBlur API usage is configured (username, URL, enabled).
+     * This method only checks configuration, not authentication readiness.
+     */
+    private isNewsBlurApiConfigured(useNewsblurApi: boolean, newsblurUsername: string, feedUrl: string): boolean {
+        return useNewsblurApi && !!newsblurUsername && feedUrl.includes('newsblur.com');
+    }
+
+    /**
+     * Checks if NewsBlur API can be used with the given credentials.
+     * Requires both configuration and valid authentication.
+     */
+    private canUseNewsBlurApi(useNewsblurApi: boolean, newsblurUsername: string, feedUrl: string, newsblurPassword: string): boolean {
+        return this.isNewsBlurApiConfigured(useNewsblurApi, newsblurUsername, feedUrl) && !!newsblurPassword;
+    }
+
     private async loadFeeds(): Promise<void> {
         // Load categories configuration if not already loaded
         if (!this.categoriesConfig) {
@@ -240,16 +296,61 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const feedUrl = config.get<string>('feedUrl') || 'https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft';
         const recordCount = config.get<number>('recordCount') || 100;
+        const useNewsblurApi = config.get<boolean>('useNewsblurApi') || false;
+        const newsblurUsername = config.get<string>('newsblurUsername') || '';
+        
+        // Get password securely from SecretStorage
+        let newsblurPassword = await this.getNewsblurPassword();
         
         console.log(`Loading feeds - clearing existing ${this.posts.length} posts`);
         this.posts = [];
         this.categories.clear();
 
+        let posts: BlogPost[] = [];
+        let usedNewsBlurApi = false;
+
         try {
-            // Append record count parameter to URL
-            const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
-            const posts = await this.fetchFeed(urlWithParams);
-            console.log(`Fetched ${posts.length} posts from feed`);
+            // Determine which method to use
+            if (this.isNewsBlurApiConfigured(useNewsblurApi, newsblurUsername, feedUrl)) {
+                // Prompt for password if not stored securely
+                if (!newsblurPassword) {
+                    newsblurPassword = await this.promptForNewsblurPassword(newsblurUsername);
+                }
+
+                if (newsblurPassword && this.canUseNewsBlurApi(useNewsblurApi, newsblurUsername, feedUrl, newsblurPassword)) {
+                    console.log('Using NewsBlur API for enhanced access');
+                    posts = await this.fetchNewsBlurApi(feedUrl, recordCount, newsblurUsername, newsblurPassword);
+                    usedNewsBlurApi = true;
+                    
+                    // Note: Empty results (posts.length === 0) are not necessarily authentication failures.
+                    // The API could legitimately return zero results if there are no new posts or if 
+                    // date filtering excludes all posts. Only clear credentials on actual HTTP auth errors.
+                    console.log(`NewsBlur API returned ${posts.length} posts`);
+                    if (posts.length === 0) {
+                        console.log('NewsBlur API returned no posts - this could be due to no new content, date filtering, or other factors');
+                    }
+                } else {
+                    console.log('NewsBlur API enabled but no password provided, using RSS feed');
+                    vscode.window.showInformationMessage('NewsBlur API cancelled. Using RSS feed (limited to ~25 items).');
+                    
+                    const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
+                    posts = await this.fetchFeed(urlWithParams);
+                    usedNewsBlurApi = false;
+                }
+            } else {
+                // Use traditional RSS approach
+                if (useNewsblurApi && !newsblurUsername) {
+                    console.warn('NewsBlur API enabled but username not configured, using RSS feed');
+                    vscode.window.showWarningMessage('NewsBlur API is enabled but username not configured. Using RSS feed (limited to ~25 items).');
+                }
+                
+                const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
+                posts = await this.fetchFeed(urlWithParams);
+                usedNewsBlurApi = false;
+            }
+            
+            console.log(`Fetched ${posts.length} posts from ${usedNewsBlurApi ? 'NewsBlur API' : 'RSS feed'}`);
+            
             const filteredPosts = await this.filterPostsByDate(posts);
             console.log(`Filtered to ${filteredPosts.length} posts after date filtering`);
             this.posts.push(...filteredPosts);
@@ -261,7 +362,15 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         this.categorizePosts();
     }
 
-    private async fetchFeed(feedUrl: string): Promise<BlogPost[]> {
+    private async fetchFeed(feedUrl: string, redirectCount: number = 0): Promise<BlogPost[]> {
+        const MAX_REDIRECTS = 5;
+        
+        // Prevent infinite redirect loops
+        if (redirectCount > MAX_REDIRECTS) {
+            console.error(`Error fetching RSS feed ${feedUrl}: Too many redirects (${redirectCount}). Possible redirect loop.`);
+            return [];
+        }
+        
         return new Promise((resolve, reject) => {
             const options = {
                 headers: {
@@ -272,7 +381,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             https.get(feedUrl, options, (response) => {
                 // Handle redirects
                 if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                    return this.fetchFeed(response.headers.location).then(resolve).catch(() => resolve([]));
+                    console.log(`Redirect ${redirectCount + 1}/${MAX_REDIRECTS}: ${feedUrl} -> ${response.headers.location}`);
+                    return this.fetchFeed(response.headers.location, redirectCount + 1).then(resolve).catch(() => resolve([]));
                 }
 
                 // Check for successful response
@@ -308,6 +418,148 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 resolve([]);
             });
         });
+    }
+
+    private async fetchNewsBlurApi(feedUrl: string, recordCount: number, username: string, password: string, redirectCount: number = 0): Promise<BlogPost[]> {
+        // Convert RSS URL to API URL format
+        // From: https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft
+        // To: /social/stories/109116/alvinashcraft
+        // Use regex to extract the /social/rss/<user_id>/<username> part from any NewsBlur subdomain
+        const match = feedUrl.match(RSSBlogProvider.NEWSBLUR_RSS_PATTERN);
+        let apiPath: string;
+        if (match) {
+            apiPath = `/social/stories/${match[1]}/${match[2]}`;
+        } else {
+            console.error(`Invalid NewsBlur social RSS feed URL: ${feedUrl}`);
+            return [];
+        }
+        const apiUrl = `https://www.newsblur.com${apiPath}?limit=${recordCount}`;
+        
+        return this.fetchNewsBlurApiUrl(apiUrl, feedUrl, recordCount, username, password, redirectCount);
+    }
+
+    private async fetchNewsBlurApiUrl(apiUrl: string, originalFeedUrl: string, recordCount: number, username: string, password: string, redirectCount: number = 0): Promise<BlogPost[]> {
+        const MAX_REDIRECTS = 5;
+        
+        // Prevent infinite redirect loops
+        if (redirectCount > MAX_REDIRECTS) {
+            console.error(`Error fetching NewsBlur API ${apiUrl}: Too many redirects (${redirectCount}). Possible redirect loop.`);
+            return [];
+        }
+        
+        return new Promise((resolve) => {
+            console.log(`Fetching NewsBlur API: ${apiUrl}`);
+            
+            const auth = Buffer.from(`${username}:${password}`).toString('base64');
+            const options = {
+                headers: {
+                    'Authorization': `Basic ${auth}`,
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'application/json'
+                }
+            };
+
+            https.get(apiUrl, options, (response) => {
+                // Handle redirects
+                if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                    console.log(`Redirect ${redirectCount + 1}/${MAX_REDIRECTS}: ${apiUrl} -> ${response.headers.location}`);
+                    // Only follow redirect if it matches NewsBlur API URL pattern
+                    const redirectUrl = response.headers.location;
+                    if (redirectUrl.match(RSSBlogProvider.NEWSBLUR_API_PATTERN)) {
+                        // Use the redirect URL directly without conversion round-trip
+                        return this.fetchNewsBlurApiUrl(redirectUrl, originalFeedUrl, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
+                    } else {
+                        console.error(`Redirected to non-NewsBlur API URL: ${redirectUrl}`);
+                        resolve([]);
+                        return;
+                    }
+                }
+
+                // Check for successful response
+                if (!response.statusCode || response.statusCode < 200 || response.statusCode >= 300) {
+                    console.error(`Error fetching NewsBlur API ${apiUrl}: HTTP ${response.statusCode}`);
+                    resolve([]);
+                    return;
+                }
+
+                let data = '';
+                
+                response.on('data', (chunk) => {
+                    data += chunk;
+                });
+
+                response.on('end', () => {
+                    try {
+                        const apiResponse: NewsBlurApiResponse = JSON.parse(data);
+                        const posts = this.parseNewsBlurApiResponse(apiResponse, originalFeedUrl);
+                        console.log(`NewsBlur API returned ${posts.length} stories`);
+                        resolve(posts);
+                    } catch (error) {
+                        console.error(`Error parsing NewsBlur API response:`, error);
+                        resolve([]);
+                    }
+                });
+            }).on('error', (error) => {
+                console.error(`Error fetching NewsBlur API ${apiUrl}:`, error);
+                resolve([]);
+            });
+        });
+    }
+
+    private parseNewsBlurApiResponse(apiResponse: NewsBlurApiResponse, feedUrl: string): BlogPost[] {
+        const posts: BlogPost[] = [];
+        const seenLinks = new Set<string>(); // Track duplicate links
+        
+        if (!apiResponse.stories || !Array.isArray(apiResponse.stories)) {
+            console.warn('No stories found in NewsBlur API response');
+            return posts;
+        }
+
+        const feedTitle = 'NewsBlur Shared Stories';
+        console.log(`Processing ${apiResponse.stories.length} stories from NewsBlur API`);
+
+        apiResponse.stories.forEach((story: NewsBlurStory, index: number) => {
+            try {
+                const title = story.story_title || 'Untitled';
+                const link = story.story_permalink || '';
+                const description = story.story_content ? this.stripHtml(story.story_content) : '';
+                const pubDate = story.story_date || story.shared_date || '';
+                let author = story.story_authors || 'unknown';
+                
+                // Clean up author - NewsBlur sometimes returns comma-separated authors
+                if (author.includes(',')) {
+                    author = author.split(',')[0].trim();
+                }
+                
+                // Clean up and validate author
+                author = author ? author.trim() : '';
+                if (!author || 
+                    author === '' || 
+                    author.toLowerCase().includes('blurblog') ||
+                    author.includes('[object Object]') ||
+                    author === feedTitle ||
+                    author.length > 100) {
+                    author = 'unknown';
+                }
+
+                const post: BlogPost = {
+                    title: title,
+                    link: link,
+                    description: description,
+                    pubDate: pubDate,
+                    category: this.categorizePost(title, description, link),
+                    source: feedTitle,
+                    author: author
+                };
+                
+                this.addPostIfNotDuplicate(post, posts, seenLinks);
+            } catch (itemError) {
+                console.error(`Error processing NewsBlur story ${index}:`, itemError);
+                // Continue with next story instead of failing completely
+            }
+        });
+
+        return posts;
     }
 
     private parseRSSFeed(rssData: any, feedUrl: string): BlogPost[] {
@@ -416,15 +668,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                         author: author
                     };
                     
-                    if (post.title && post.link) {
-                        // Check for duplicate links
-                        if (seenLinks.has(post.link)) {
-                            console.log(`Duplicate link found, skipping: ${post.link}`);
-                        } else {
-                            seenLinks.add(post.link);
-                            posts.push(post);
-                        }
-                    }
+                    this.addPostIfNotDuplicate(post, posts, seenLinks);
                 } catch (itemError) {
                     console.error(`Error processing feed item ${index}:`, itemError);
                     console.error('Problematic item data:', JSON.stringify(item, null, 2));
@@ -439,12 +683,14 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     /**
-     * Categorizes a blog post based on keyword matching in the following priority order:
-     *   1. URL keyword matching (most reliable)
-     *   2. Title keyword matching
-     *   3. (Future) Author keyword matching
+     * Categorizes a blog post based on keyword matching in the following global priority order:
+     *   1. URL keyword matching (most reliable) - checked across ALL categories first
+     *   2. Title keyword matching - checked across ALL categories second  
+     *   3. (Future) Author keyword matching - would be checked across ALL categories third
      * 
-     * The first matching category is returned; if no match is found, the default category is used.
+     * This ensures URL matches always take precedence over title matches, regardless of category order.
+     * For example, a YouTube link will always be categorized as "Videos" even if the title matches 
+     * "Web Development" keywords and "Web Development" appears first in the configuration.
      * 
      * @param title - The title of the blog post.
      * @param description - The description of the blog post (currently unused).
@@ -467,13 +713,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             return this.categoriesConfig.defaultCategory;
         }
 
-        // Iterate through categories in the order they appear in the JSON file
-        // The first matching category wins - no further categories are checked
+        // Two-pass approach to ensure URL keywords always take precedence over title keywords
+        // Pass 1: Check URL keywords across ALL categories first (highest priority)
         for (const [category, categoryDef] of Object.entries(this.categoriesConfig.categories)) {
-            // Normalize category definition (backwards compatibility)
             const normalizedDef = this.normalizeCategoryDefinition(categoryDef);
             
-            // 1. First priority: URL keyword matching (most reliable)
             if (normalizedDef.urlKeywords) {
                 for (const urlKeyword of normalizedDef.urlKeywords) {
                     if (urlLower.includes(urlKeyword.toLowerCase())) {
@@ -482,8 +726,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     }
                 }
             }
+        }
+        
+        // Pass 2: If no URL match found, check title keywords across ALL categories
+        for (const [category, categoryDef] of Object.entries(this.categoriesConfig.categories)) {
+            const normalizedDef = this.normalizeCategoryDefinition(categoryDef);
             
-            // 2. Second priority: Title keyword matching (existing logic)
             if (normalizedDef.titleKeywords) {
                 for (const keyword of normalizedDef.titleKeywords) {
                     const keywordLower = keyword.toLowerCase();
@@ -505,10 +753,13 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     }
                 }
             }
-            
-            // 3. Future: Author keyword matching could be added here
-            // if (normalizedDef.authorKeywords) { ... }
         }
+        
+        // Pass 3: Future - Author keyword matching could be added here
+        // for (const [category, categoryDef] of Object.entries(this.categoriesConfig.categories)) {
+        //     const normalizedDef = this.normalizeCategoryDefinition(categoryDef);
+        //     if (normalizedDef.authorKeywords) { ... }
+        // }
 
         // No category matched, use the default
         console.log(`Post "${title}" categorized as default: "${this.categoriesConfig.defaultCategory}" (no keywords matched)`);
@@ -684,6 +935,34 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         } catch (error) {
             console.error('Error stripping HTML:', error, 'Input was:', html);
             return htmlStr.substring(0, 200);
+        }
+    }
+
+    /**
+     * Adds a post to the posts array if it's valid and not a duplicate.
+     * @param post The blog post to potentially add
+     * @param posts The array to add the post to
+     * @param seenLinks Set of already seen links for duplicate detection
+     */
+    private addPostIfNotDuplicate(post: BlogPost, posts: BlogPost[], seenLinks: Set<string>): void {
+        if (post.title && post.link) {
+            // Check for duplicate links
+            if (seenLinks.has(post.link)) {
+                console.log(`Duplicate link found, skipping: ${post.link}`);
+                return;
+            }
+            
+            seenLinks.add(post.link);
+            posts.push(post);
+        }
+        
+        // Log when posts are skipped due to missing title or link
+        if (!post.title && !post.link) {
+            console.warn(`Skipping post with missing title and link from source: ${post.source || 'unknown'}`);
+        } else if (!post.title) {
+            console.warn(`Skipping post with missing title: ${post.link} from source: ${post.source || 'unknown'}`);
+        } else if (!post.link) {
+            console.warn(`Skipping post with missing link: "${post.title}" from source: ${post.source || 'unknown'}`);
         }
     }
 }

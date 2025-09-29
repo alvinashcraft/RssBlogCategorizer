@@ -1,9 +1,10 @@
 import { expect, use } from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import 'chai-as-promised';
+import * as chaiAsPromised from 'chai-as-promised';
 
 use(sinonChai);
+use(chaiAsPromised);
 import * as vscode from 'vscode';
 import { RSSBlogProvider, BlogPost } from '../../rssProvider';
 import { MockExtensionContext, MockConfiguration } from '../mocks/mockVscode';
@@ -32,7 +33,9 @@ describe('RSSBlogProvider', () => {
       feedUrl: 'https://example.com/feed.xml',
       recordCount: 100,
       minimumDateTime: '',
-      refreshInterval: 30
+      refreshInterval: 30,
+      useNewsblurApi: false,
+      newsblurUsername: ''
     });
     workspaceGetConfigStub.returns(mockConfig);
     
@@ -167,7 +170,7 @@ describe('RSSBlogProvider', () => {
               <title>Random Blog Post About Nothing</title>
               <link>https://example.com/random</link>
               <description>This post has no matching keywords</description>
-              <pubDate>Mon, 25 Sep 2025 10:00:00 GMT</pubDate>
+              <pubDate>Mon, 30 Sep 2025 10:00:00 GMT</pubDate>
               <author>Unknown Author</author>
             </item>
           </channel>
@@ -200,14 +203,14 @@ describe('RSSBlogProvider', () => {
               <title>AI Revolution in Technology</title>
               <link>https://example.com/ai-tech</link>
               <description>About AI</description>
-              <pubDate>Mon, 25 Sep 2025 10:00:00 GMT</pubDate>
+              <pubDate>Mon, 30 Sep 2025 10:00:00 GMT</pubDate>
               <author>Tech Writer</author>
             </item>
             <item>
               <title>Maintaining Your Application</title>
-              <link>https://example.com/maintaining</link>
+              <link>https://example.com/app-support</link>
               <description>About maintenance</description>
-              <pubDate>Mon, 25 Sep 2025 10:00:00 GMT</pubDate>
+              <pubDate>Mon, 30 Sep 2025 10:00:00 GMT</pubDate>
               <author>Developer</author>
             </item>
           </channel>
@@ -324,9 +327,10 @@ describe('RSSBlogProvider', () => {
       });
 
       // Should not throw an error despite invalid date
-      await expect(provider.refresh()).to.be.fulfilled;
-      const posts = await provider.getAllPosts();
-      expect(posts).to.be.an('array');
+      return expect(provider.refresh()).to.be.fulfilled.then(async () => {
+        const posts = await provider.getAllPosts();
+        expect(posts).to.be.an('array');
+      });
     });
   });
 
@@ -449,10 +453,10 @@ describe('RSSBlogProvider', () => {
       fsReadFileStub.rejects(new Error('File not found'));
 
       // Should not throw error when categories file is missing
-      await expect(provider.refresh()).to.be.fulfilled;
-      
-      const posts = await provider.getAllPosts();
-      expect(posts).to.be.an('array');
+      return expect(provider.refresh()).to.be.fulfilled.then(async () => {
+        const posts = await provider.getAllPosts();
+        expect(posts).to.be.an('array');
+      });
     });
 
     it('should handle malformed XML gracefully', async () => {
