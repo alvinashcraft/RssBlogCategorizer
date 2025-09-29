@@ -272,12 +272,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private shouldUseNewsBlurApi(useNewsblurApi: boolean, newsblurUsername: string, feedUrl: string, newsblurPassword?: string): boolean {
         const baseCondition = useNewsblurApi && !!newsblurUsername && feedUrl.includes('newsblur.com');
         
-        // If password is provided as parameter, include it in the condition
+        // When password parameter is explicitly provided, require it to be truthy for API usage
         if (newsblurPassword !== undefined) {
             return baseCondition && !!newsblurPassword;
         }
         
-        // Otherwise, just check the base condition
+        // When no password provided, only check if API usage is configured and possible
         return baseCondition;
     }
 
@@ -428,7 +428,15 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         });
     }
 
-    private async fetchNewsBlurApi(feedUrl: string, recordCount: number, username: string, password: string): Promise<BlogPost[]> {
+    private async fetchNewsBlurApi(feedUrl: string, recordCount: number, username: string, password: string, redirectCount: number = 0): Promise<BlogPost[]> {
+        const MAX_REDIRECTS = 5;
+        
+        // Prevent infinite redirect loops
+        if (redirectCount > MAX_REDIRECTS) {
+            console.error(`Error fetching NewsBlur API ${feedUrl}: Too many redirects (${redirectCount}). Possible redirect loop.`);
+            return [];
+        }
+        
         return new Promise((resolve) => {
             // Convert RSS URL to API URL format
             // From: https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft
@@ -459,7 +467,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             https.get(apiUrl, options, (response) => {
                 // Handle redirects
                 if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                    return this.fetchNewsBlurApi(response.headers.location, recordCount, username, password).then(resolve).catch(() => resolve([]));
+                    console.log(`Redirect ${redirectCount + 1}/${MAX_REDIRECTS}: ${apiUrl} -> ${response.headers.location}`);
+                    return this.fetchNewsBlurApi(response.headers.location, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
                 }
 
                 // Check for successful response
