@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { RSSBlogProvider } from './rssProvider';
 import { ExportManager } from './exportManager';
+import { NEWSBLUR_PASSWORD_KEY } from './constants';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('RSS Blog Categorizer extension is now active!');
@@ -88,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
             await config.update('newsblurUsername', username, vscode.ConfigurationTarget.Global);
             
             // Save password securely
-            await context.secrets.store('newsblurPassword', password);
+            await context.secrets.store(NEWSBLUR_PASSWORD_KEY, password);
             
             // Enable API usage
             await config.update('useNewsblurApi', true, vscode.ConfigurationTarget.Global);

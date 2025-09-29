@@ -3,6 +3,7 @@ import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
+import { NEWSBLUR_PASSWORD_KEY } from './constants';
 
 export interface BlogPost {
     title: string;
@@ -54,7 +55,6 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private categories: Map<string, BlogPost[]> = new Map();
     private categoriesConfig: CategoriesConfig | null = null;
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
-    private static readonly NEWSBLUR_PASSWORD_KEY = 'newsblurPassword';
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
     private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
 
@@ -249,11 +249,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     private async getNewsblurPassword(): Promise<string | undefined> {
-        return await this.context.secrets.get(RSSBlogProvider.NEWSBLUR_PASSWORD_KEY);
+        return await this.context.secrets.get(NEWSBLUR_PASSWORD_KEY);
     }
 
     private async setNewsblurPassword(password: string): Promise<void> {
-        await this.context.secrets.store(RSSBlogProvider.NEWSBLUR_PASSWORD_KEY, password);
+        await this.context.secrets.store(NEWSBLUR_PASSWORD_KEY, password);
     }
 
     private async promptForNewsblurPassword(username: string): Promise<string | undefined> {
