@@ -350,21 +350,6 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             
             console.log(`Fetched ${posts.length} posts from ${usedNewsBlurApi ? 'NewsBlur API' : 'RSS feed'}`);
             
-            // Debug: Check for duplicates in the raw data before filtering
-            const seenLinks = new Set<string>();
-            const duplicateCount = posts.filter(post => {
-                if (seenLinks.has(post.link)) {
-                    console.log(`🔍 Duplicate found in raw data: "${post.title}" - ${post.link}`);
-                    return true;
-                }
-                seenLinks.add(post.link);
-                return false;
-            }).length;
-            
-            if (duplicateCount > 0) {
-                console.log(`⚠️ Found ${duplicateCount} duplicates in raw feed data before date filtering`);
-            }
-            
             const filteredPosts = await this.filterPostsByDate(posts);
             console.log(`Filtered to ${filteredPosts.length} posts after date filtering`);
             this.posts.push(...filteredPosts);
@@ -527,13 +512,6 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         const feedTitle = 'NewsBlur Shared Stories';
         console.log(`Processing ${apiResponse.stories.length} stories from NewsBlur API`);
-
-        // Debug: Check for duplicates in the raw NewsBlur API response
-        const rawLinks = apiResponse.stories.map(story => story.story_permalink);
-        const uniqueRawLinks = new Set(rawLinks);
-        if (rawLinks.length !== uniqueRawLinks.size) {
-            console.log(`🔍 NewsBlur API returned ${rawLinks.length - uniqueRawLinks.size} duplicate stories in the raw response`);
-        }
 
         apiResponse.stories.forEach((story: NewsBlurStory, index: number) => {
             try {
