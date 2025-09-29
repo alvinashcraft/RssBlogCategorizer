@@ -7,21 +7,21 @@ export const mockRssXml = `<?xml version="1.0" encoding="UTF-8"?>
       <title>Building React Apps with TypeScript</title>
       <link>https://example.com/react-typescript</link>
       <description>Learn how to build modern React applications using TypeScript for better type safety.</description>
-      <pubDate>Mon, 25 Sep 2025 10:00:00 GMT</pubDate>
+      <pubDate>Mon, 30 Sep 2025 10:00:00 GMT</pubDate>
       <author>John Doe</author>
     </item>
     <item>
       <title>Python Data Science Tutorial</title>
       <link>https://example.com/python-data-science</link>
       <description>A comprehensive guide to data science with Python and pandas.</description>
-      <pubDate>Sun, 24 Sep 2025 15:30:00 GMT</pubDate>
+      <pubDate>Sun, 29 Sep 2025 15:30:00 GMT</pubDate>
       <author>Jane Smith</author>
     </item>
     <item>
       <title>DevOps with Docker and Kubernetes</title>
       <link>https://example.com/devops-k8s</link>
       <description>Setting up CI/CD pipelines with Docker containers and Kubernetes orchestration.</description>
-      <pubDate>Sat, 23 Sep 2025 09:15:00 GMT</pubDate>
+      <pubDate>Sat, 30 Sep 2025 09:15:00 GMT</pubDate>
       <author>Bob Wilson</author>
     </item>
     <item>
@@ -40,7 +40,7 @@ export const mockAtomXml = `<?xml version="1.0" encoding="UTF-8"?>
   <entry>
     <title>Machine Learning with AI</title>
     <link href="https://example.com/ml-ai" />
-    <published>2025-09-26T14:00:00Z</published>
+    <published>2025-09-30T14:00:00Z</published>
     <summary>Exploring machine learning algorithms and AI applications.</summary>
     <author>
       <name>AI Expert</name>
@@ -60,7 +60,7 @@ export const mockDewDropRss = `<?xml version="1.0" encoding="UTF-8"?>
     <item>
       <title>Some Other Post</title>
       <link>https://www.alvinashcraft.com/2025/09/25/other-post</link>
-      <pubDate>Wed, 25 Sep 2025 10:00:00 GMT</pubDate>
+      <pubDate>Wed, 29 Sep 2025 10:00:00 GMT</pubDate>
     </item>
   </channel>
 </rss>`;
@@ -122,7 +122,7 @@ export const mockBlogPosts: TestBlogPost[] = [
     title: "Building React Apps with TypeScript",
     link: "https://example.com/react-typescript", 
     description: "Learn how to build modern React applications using TypeScript for better type safety.",
-    pubDate: "Mon, 25 Sep 2025 10:00:00 GMT",
+    pubDate: "Mon, 30 Sep 2025 10:00:00 GMT",
     category: "Web Development",
     source: "Test Developer Blog",
     author: "John Doe"
@@ -131,7 +131,7 @@ export const mockBlogPosts: TestBlogPost[] = [
     title: "Python Data Science Tutorial",
     link: "https://example.com/python-data-science",
     description: "A comprehensive guide to data science with Python and pandas.",
-    pubDate: "Sun, 24 Sep 2025 15:30:00 GMT", 
+    pubDate: "Sun, 29 Sep 2025 15:30:00 GMT", 
     category: "Data Science",
     source: "Test Developer Blog",
     author: "Jane Smith"
@@ -140,7 +140,7 @@ export const mockBlogPosts: TestBlogPost[] = [
     title: "DevOps with Docker and Kubernetes",
     link: "https://example.com/devops-k8s",
     description: "Setting up CI/CD pipelines with Docker containers and Kubernetes orchestration.",
-    pubDate: "Sat, 23 Sep 2025 09:15:00 GMT",
+    pubDate: "Sat, 30 Sep 2025 09:15:00 GMT",
     category: "DevOps", 
     source: "Test Developer Blog",
     author: "Bob Wilson"
