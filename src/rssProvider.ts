@@ -270,16 +270,20 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return undefined;
     }
 
-    private shouldUseNewsBlurApi(useNewsblurApi: boolean, newsblurUsername: string, feedUrl: string, newsblurPassword?: string): boolean {
-        const baseCondition = useNewsblurApi && !!newsblurUsername && feedUrl.includes('newsblur.com');
-        
-        // When password parameter is explicitly provided, require it to be truthy for API usage
-        if (newsblurPassword !== undefined) {
-            return baseCondition && !!newsblurPassword;
-        }
-        
-        // When no password provided, only check if API usage is configured and possible
-        return baseCondition;
+    /**
+     * Checks if NewsBlur API usage is configured (username, URL, enabled).
+     * This method only checks configuration, not authentication readiness.
+     */
+    private isNewsBlurApiConfigured(useNewsblurApi: boolean, newsblurUsername: string, feedUrl: string): boolean {
+        return useNewsblurApi && !!newsblurUsername && feedUrl.includes('newsblur.com');
+    }
+
+    /**
+     * Checks if NewsBlur API can be used with the given credentials.
+     * Requires both configuration and valid authentication.
+     */
+    private canUseNewsBlurApi(useNewsblurApi: boolean, newsblurUsername: string, feedUrl: string, newsblurPassword: string): boolean {
+        return this.isNewsBlurApiConfigured(useNewsblurApi, newsblurUsername, feedUrl) && !!newsblurPassword;
     }
 
     private async loadFeeds(): Promise<void> {
@@ -306,13 +310,13 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         try {
             // Determine which method to use
-            if (this.shouldUseNewsBlurApi(useNewsblurApi, newsblurUsername, feedUrl)) {
+            if (this.isNewsBlurApiConfigured(useNewsblurApi, newsblurUsername, feedUrl)) {
                 // Prompt for password if not stored securely
                 if (!newsblurPassword) {
                     newsblurPassword = await this.promptForNewsblurPassword(newsblurUsername);
                 }
 
-                if (newsblurPassword) {
+                if (newsblurPassword && this.canUseNewsBlurApi(useNewsblurApi, newsblurUsername, feedUrl, newsblurPassword)) {
                     console.log('Using NewsBlur API for enhanced access');
                     posts = await this.fetchNewsBlurApi(feedUrl, recordCount, newsblurUsername, newsblurPassword);
                     usedNewsBlurApi = true;
