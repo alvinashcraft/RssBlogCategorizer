@@ -370,7 +370,15 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         this.categorizePosts();
     }
 
-    private async fetchFeed(feedUrl: string): Promise<BlogPost[]> {
+    private async fetchFeed(feedUrl: string, redirectCount: number = 0): Promise<BlogPost[]> {
+        const MAX_REDIRECTS = 5;
+        
+        // Prevent infinite redirect loops
+        if (redirectCount > MAX_REDIRECTS) {
+            console.error(`Error fetching RSS feed ${feedUrl}: Too many redirects (${redirectCount}). Possible redirect loop.`);
+            return [];
+        }
+        
         return new Promise((resolve, reject) => {
             const options = {
                 headers: {
@@ -381,7 +389,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             https.get(feedUrl, options, (response) => {
                 // Handle redirects
                 if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                    return this.fetchFeed(response.headers.location).then(resolve).catch(() => resolve([]));
+                    console.log(`Redirect ${redirectCount + 1}/${MAX_REDIRECTS}: ${feedUrl} -> ${response.headers.location}`);
+                    return this.fetchFeed(response.headers.location, redirectCount + 1).then(resolve).catch(() => resolve([]));
                 }
 
                 // Check for successful response
