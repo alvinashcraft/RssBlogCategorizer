@@ -950,11 +950,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             if (seenLinks.has(post.link)) {
                 console.log(`Duplicate link found, skipping: ${post.link}`);
                 return;
-            } else {
-                seenLinks.add(post.link);
-                posts.push(post);
-                return;
             }
+            
+            seenLinks.add(post.link);
+            posts.push(post);
         }
         
         // Log when posts are skipped due to missing title or link
