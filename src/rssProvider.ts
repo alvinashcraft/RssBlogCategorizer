@@ -945,18 +945,17 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
      * @param post The blog post to potentially add
      * @param posts The array to add the post to
      * @param seenLinks Set of already seen links for duplicate detection
-     * @returns true if the post was added, false if it was skipped
      */
-    private addPostIfNotDuplicate(post: BlogPost, posts: BlogPost[], seenLinks: Set<string>): boolean {
+    private addPostIfNotDuplicate(post: BlogPost, posts: BlogPost[], seenLinks: Set<string>): void {
         if (post.title && post.link) {
             // Check for duplicate links
             if (seenLinks.has(post.link)) {
                 console.log(`Duplicate link found, skipping: ${post.link}`);
-                return false;
+                return;
             } else {
                 seenLinks.add(post.link);
                 posts.push(post);
-                return true;
+                return;
             }
         }
         
@@ -968,7 +967,5 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         } else if (!post.link) {
             console.warn(`Skipping post with missing link: "${post.title}" from source: ${post.source || 'unknown'}`);
         }
-        
-        return false;
     }
 }
