@@ -421,30 +421,33 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     private async fetchNewsBlurApi(feedUrl: string, recordCount: number, username: string, password: string, redirectCount: number = 0): Promise<BlogPost[]> {
+        // Convert RSS URL to API URL format
+        // From: https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft
+        // To: /social/stories/109116/alvinashcraft
+        // Use regex to extract the /social/rss/<user_id>/<username> part from any NewsBlur subdomain
+        const match = feedUrl.match(RSSBlogProvider.NEWSBLUR_RSS_PATTERN);
+        let apiPath: string;
+        if (match) {
+            apiPath = `/social/stories/${match[1]}/${match[2]}`;
+        } else {
+            console.error(`Invalid NewsBlur social RSS feed URL: ${feedUrl}`);
+            return [];
+        }
+        const apiUrl = `https://www.newsblur.com${apiPath}?limit=${recordCount}`;
+        
+        return this.fetchNewsBlurApiUrl(apiUrl, feedUrl, recordCount, username, password, redirectCount);
+    }
+
+    private async fetchNewsBlurApiUrl(apiUrl: string, originalFeedUrl: string, recordCount: number, username: string, password: string, redirectCount: number = 0): Promise<BlogPost[]> {
         const MAX_REDIRECTS = 5;
         
         // Prevent infinite redirect loops
         if (redirectCount > MAX_REDIRECTS) {
-            console.error(`Error fetching NewsBlur API ${feedUrl}: Too many redirects (${redirectCount}). Possible redirect loop.`);
+            console.error(`Error fetching NewsBlur API ${apiUrl}: Too many redirects (${redirectCount}). Possible redirect loop.`);
             return [];
         }
         
         return new Promise((resolve) => {
-            // Convert RSS URL to API URL format
-            // From: https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft
-            // To: /social/stories/109116/alvinashcraft
-            // Use regex to extract the /social/rss/<user_id>/<username> part from any NewsBlur subdomain
-            const match = feedUrl.match(RSSBlogProvider.NEWSBLUR_RSS_PATTERN);
-            let apiPath: string;
-            if (match) {
-                apiPath = `/social/stories/${match[1]}/${match[2]}`;
-            } else {
-                console.error(`Invalid NewsBlur social RSS feed URL: ${feedUrl}`);
-                resolve([]);
-                return;
-            }
-            const apiUrl = `https://www.newsblur.com${apiPath}?limit=${recordCount}`;
-            
             console.log(`Fetching NewsBlur API: ${apiUrl}`);
             
             const auth = Buffer.from(`${username}:${password}`).toString('base64');
@@ -463,13 +466,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     // Only follow redirect if it matches NewsBlur API URL pattern
                     const redirectUrl = response.headers.location;
                     if (redirectUrl.match(RSSBlogProvider.NEWSBLUR_API_PATTERN)) {
-                        // Extract user_id and username from redirect URL and convert back to RSS URL format
-                        // since fetchNewsBlurApi expects RSS URLs to convert to API paths
-                        const match = redirectUrl.match(RSSBlogProvider.NEWSBLUR_API_PATTERN);
-                        if (match) {
-                            const rssUrl = `https://www.newsblur.com/social/rss/${match[1]}/${match[2]}`;
-                            return this.fetchNewsBlurApi(rssUrl, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
-                        }
+                        // Use the redirect URL directly without conversion round-trip
+                        return this.fetchNewsBlurApiUrl(redirectUrl, originalFeedUrl, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
                     } else {
                         console.error(`Redirected to non-NewsBlur API URL: ${redirectUrl}`);
                         resolve([]);
@@ -493,7 +491,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 response.on('end', () => {
                     try {
                         const apiResponse: NewsBlurApiResponse = JSON.parse(data);
-                        const posts = this.parseNewsBlurApiResponse(apiResponse, feedUrl);
+                        const posts = this.parseNewsBlurApiResponse(apiResponse, originalFeedUrl);
                         console.log(`NewsBlur API returned ${posts.length} stories`);
                         resolve(posts);
                     } catch (error) {
