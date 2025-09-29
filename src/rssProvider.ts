@@ -269,6 +269,18 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return undefined;
     }
 
+    private shouldUseNewsBlurApi(useNewsblurApi: boolean, newsblurUsername: string, feedUrl: string, newsblurPassword?: string): boolean {
+        const baseCondition = useNewsblurApi && !!newsblurUsername && feedUrl.includes('newsblur.com');
+        
+        // If password is provided as parameter, include it in the condition
+        if (newsblurPassword !== undefined) {
+            return baseCondition && !!newsblurPassword;
+        }
+        
+        // Otherwise, just check the base condition
+        return baseCondition;
+    }
+
     private async loadFeeds(): Promise<void> {
         // Load categories configuration if not already loaded
         if (!this.categoriesConfig) {
@@ -292,7 +304,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         try {
             // Determine which method to use
-            if (useNewsblurApi && newsblurUsername && feedUrl.includes('newsblur.com')) {
+            if (this.shouldUseNewsBlurApi(useNewsblurApi, newsblurUsername, feedUrl)) {
                 // Prompt for password if not stored securely
                 if (!newsblurPassword) {
                     newsblurPassword = await this.promptForNewsblurPassword(newsblurUsername);
@@ -330,7 +342,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 posts = await this.fetchFeed(urlWithParams);
             }
             
-            console.log(`Fetched ${posts.length} posts from ${useNewsblurApi && newsblurUsername && newsblurPassword && feedUrl.includes('newsblur.com') ? 'NewsBlur API' : 'RSS feed'}`);
+            console.log(`Fetched ${posts.length} posts from ${this.shouldUseNewsBlurApi(useNewsblurApi, newsblurUsername, feedUrl, newsblurPassword) ? 'NewsBlur API' : 'RSS feed'}`);
             
             // Debug: Check for duplicates in the raw data before filtering
             const seenLinks = new Set<string>();
