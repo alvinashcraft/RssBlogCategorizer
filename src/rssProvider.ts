@@ -301,6 +301,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         this.categories.clear();
 
         let posts: BlogPost[] = [];
+        let usedNewsBlurApi = false;
 
         try {
             // Determine which method to use
@@ -313,6 +314,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 if (newsblurPassword) {
                     console.log('Using NewsBlur API for enhanced access');
                     posts = await this.fetchNewsBlurApi(feedUrl, recordCount, newsblurUsername, newsblurPassword);
+                    usedNewsBlurApi = true;
                     
                     // If API fails with authentication error, clear stored password and try again
                     if (posts.length === 0) {
@@ -323,6 +325,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                         console.log('Falling back to RSS feed');
                         const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
                         posts = await this.fetchFeed(urlWithParams);
+                        usedNewsBlurApi = false;
                     }
                 } else {
                     console.log('NewsBlur API enabled but no password provided, using RSS feed');
@@ -330,6 +333,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     
                     const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
                     posts = await this.fetchFeed(urlWithParams);
+                    usedNewsBlurApi = false;
                 }
             } else {
                 // Use traditional RSS approach
@@ -340,9 +344,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 
                 const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
                 posts = await this.fetchFeed(urlWithParams);
+                usedNewsBlurApi = false;
             }
             
-            console.log(`Fetched ${posts.length} posts from ${this.shouldUseNewsBlurApi(useNewsblurApi, newsblurUsername, feedUrl, newsblurPassword) ? 'NewsBlur API' : 'RSS feed'}`);
+            console.log(`Fetched ${posts.length} posts from ${usedNewsBlurApi ? 'NewsBlur API' : 'RSS feed'}`);
             
             // Debug: Check for duplicates in the raw data before filtering
             const seenLinks = new Set<string>();
