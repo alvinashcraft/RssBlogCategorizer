@@ -56,6 +56,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
     private static readonly NEWSBLUR_PASSWORD_KEY = 'newsblurPassword';
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
+    private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -459,12 +460,18 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 // Handle redirects
                 if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
                     console.log(`Redirect ${redirectCount + 1}/${MAX_REDIRECTS}: ${apiUrl} -> ${response.headers.location}`);
-                    // Only follow redirect if it matches NewsBlur RSS feed URL pattern
+                    // Only follow redirect if it matches NewsBlur API URL pattern
                     const redirectUrl = response.headers.location;
-                    if (redirectUrl.match(RSSBlogProvider.NEWSBLUR_RSS_PATTERN)) {
-                        return this.fetchNewsBlurApi(redirectUrl, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
+                    if (redirectUrl.match(RSSBlogProvider.NEWSBLUR_API_PATTERN)) {
+                        // Extract user_id and username from redirect URL and convert back to RSS URL format
+                        // since fetchNewsBlurApi expects RSS URLs to convert to API paths
+                        const match = redirectUrl.match(RSSBlogProvider.NEWSBLUR_API_PATTERN);
+                        if (match) {
+                            const rssUrl = `https://www.newsblur.com/social/rss/${match[1]}/${match[2]}`;
+                            return this.fetchNewsBlurApi(rssUrl, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
+                        }
                     } else {
-                        console.error(`Redirected to non-NewsBlur RSS feed URL: ${redirectUrl}`);
+                        console.error(`Redirected to non-NewsBlur API URL: ${redirectUrl}`);
                         resolve([]);
                         return;
                     }
