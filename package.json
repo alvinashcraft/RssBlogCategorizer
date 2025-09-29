@@ -104,6 +104,21 @@
           "type": "number",
           "default": 30,
           "description": "Refresh interval in minutes"
+        },
+        "rssBlogCategorizer.newsblurUsername": {
+          "type": "string",
+          "default": "",
+          "description": "NewsBlur username for API access (enables fetching more than 25 items)"
+        },
+        "rssBlogCategorizer.newsblurPassword": {
+          "type": "string",
+          "default": "",
+          "description": "NewsBlur password for API access (stored securely in VS Code settings)"
+        },
+        "rssBlogCategorizer.useNewsblurApi": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use NewsBlur API instead of RSS feed (allows more than 25 items with authentication)"
         }
       }
     }

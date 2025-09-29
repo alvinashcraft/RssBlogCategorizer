@@ -14,6 +14,20 @@ export interface BlogPost {
     author: string;
 }
 
+// NewsBlur API response interfaces
+interface NewsBlurStory {
+    story_title: string;
+    story_permalink: string;
+    story_date: string;
+    shared_date: string;
+    story_authors: string;
+    story_content?: string;
+}
+
+interface NewsBlurApiResponse {
+    stories: NewsBlurStory[];
+}
+
 export interface CategoryNode {
     label: string;
     posts: BlogPost[];
@@ -240,16 +254,56 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const feedUrl = config.get<string>('feedUrl') || 'https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft';
         const recordCount = config.get<number>('recordCount') || 100;
+        const useNewsblurApi = config.get<boolean>('useNewsblurApi') || false;
+        const newsblurUsername = config.get<string>('newsblurUsername') || '';
+        const newsblurPassword = config.get<string>('newsblurPassword') || '';
         
         console.log(`Loading feeds - clearing existing ${this.posts.length} posts`);
         this.posts = [];
         this.categories.clear();
 
+        let posts: BlogPost[] = [];
+
         try {
-            // Append record count parameter to URL
-            const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
-            const posts = await this.fetchFeed(urlWithParams);
-            console.log(`Fetched ${posts.length} posts from feed`);
+            // Determine which method to use
+            if (useNewsblurApi && newsblurUsername && newsblurPassword && feedUrl.includes('newsblur.com')) {
+                console.log('Using NewsBlur API for enhanced access');
+                posts = await this.fetchNewsBlurApi(feedUrl, recordCount, newsblurUsername, newsblurPassword);
+                
+                // Fallback to RSS if API fails
+                if (posts.length === 0) {
+                    console.log('NewsBlur API returned no results, falling back to RSS feed');
+                    const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
+                    posts = await this.fetchFeed(urlWithParams);
+                }
+            } else {
+                // Use traditional RSS approach
+                if (useNewsblurApi && (!newsblurUsername || !newsblurPassword)) {
+                    console.warn('NewsBlur API enabled but credentials not configured, using RSS feed');
+                    vscode.window.showWarningMessage('NewsBlur API is enabled but username/password not configured. Using RSS feed (limited to ~25 items).');
+                }
+                
+                const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
+                posts = await this.fetchFeed(urlWithParams);
+            }
+            
+            console.log(`Fetched ${posts.length} posts from ${useNewsblurApi && newsblurUsername && newsblurPassword && feedUrl.includes('newsblur.com') ? 'NewsBlur API' : 'RSS feed'}`);
+            
+            // Debug: Check for duplicates in the raw data before filtering
+            const seenLinks = new Set<string>();
+            const duplicateCount = posts.filter(post => {
+                if (seenLinks.has(post.link)) {
+                    console.log(`🔍 Duplicate found in raw data: "${post.title}" - ${post.link}`);
+                    return true;
+                }
+                seenLinks.add(post.link);
+                return false;
+            }).length;
+            
+            if (duplicateCount > 0) {
+                console.log(`⚠️ Found ${duplicateCount} duplicates in raw feed data before date filtering`);
+            }
+            
             const filteredPosts = await this.filterPostsByDate(posts);
             console.log(`Filtered to ${filteredPosts.length} posts after date filtering`);
             this.posts.push(...filteredPosts);
@@ -308,6 +362,133 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 resolve([]);
             });
         });
+    }
+
+    private async fetchNewsBlurApi(feedUrl: string, recordCount: number, username: string, password: string): Promise<BlogPost[]> {
+        return new Promise((resolve) => {
+            // Convert RSS URL to API URL format
+            // From: https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft
+            // To: /social/stories/109116/alvinashcraft
+            const apiPath = feedUrl.replace('https://alvinashcraft.newsblur.com/social/rss/', '/social/stories/');
+            const apiUrl = `https://www.newsblur.com${apiPath}?limit=${recordCount}`;
+            
+            console.log(`Fetching NewsBlur API: ${apiUrl}`);
+            
+            const auth = Buffer.from(`${username}:${password}`).toString('base64');
+            const options = {
+                headers: {
+                    'Authorization': `Basic ${auth}`,
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'application/json'
+                }
+            };
+
+            https.get(apiUrl, options, (response) => {
+                // Handle redirects
+                if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                    return this.fetchNewsBlurApi(response.headers.location, recordCount, username, password).then(resolve).catch(() => resolve([]));
+                }
+
+                // Check for successful response
+                if (!response.statusCode || response.statusCode < 200 || response.statusCode >= 300) {
+                    console.error(`Error fetching NewsBlur API ${apiUrl}: HTTP ${response.statusCode}`);
+                    resolve([]);
+                    return;
+                }
+
+                let data = '';
+                
+                response.on('data', (chunk) => {
+                    data += chunk;
+                });
+
+                response.on('end', () => {
+                    try {
+                        const apiResponse: NewsBlurApiResponse = JSON.parse(data);
+                        const posts = this.parseNewsBlurApiResponse(apiResponse, feedUrl);
+                        console.log(`NewsBlur API returned ${posts.length} stories`);
+                        resolve(posts);
+                    } catch (error) {
+                        console.error(`Error parsing NewsBlur API response:`, error);
+                        resolve([]);
+                    }
+                });
+            }).on('error', (error) => {
+                console.error(`Error fetching NewsBlur API ${apiUrl}:`, error);
+                resolve([]);
+            });
+        });
+    }
+
+    private parseNewsBlurApiResponse(apiResponse: NewsBlurApiResponse, feedUrl: string): BlogPost[] {
+        const posts: BlogPost[] = [];
+        const seenLinks = new Set<string>(); // Track duplicate links
+        
+        if (!apiResponse.stories || !Array.isArray(apiResponse.stories)) {
+            console.warn('No stories found in NewsBlur API response');
+            return posts;
+        }
+
+        const feedTitle = 'NewsBlur Shared Stories';
+        console.log(`Processing ${apiResponse.stories.length} stories from NewsBlur API`);
+
+        // Debug: Check for duplicates in the raw NewsBlur API response
+        const rawLinks = apiResponse.stories.map(story => story.story_permalink);
+        const uniqueRawLinks = new Set(rawLinks);
+        if (rawLinks.length !== uniqueRawLinks.size) {
+            console.log(`🔍 NewsBlur API returned ${rawLinks.length - uniqueRawLinks.size} duplicate stories in the raw response`);
+        }
+
+        apiResponse.stories.forEach((story: NewsBlurStory, index: number) => {
+            try {
+                const title = story.story_title || 'Untitled';
+                const link = story.story_permalink || '';
+                const description = story.story_content ? this.stripHtml(story.story_content) : '';
+                const pubDate = story.story_date || story.shared_date || '';
+                let author = story.story_authors || 'unknown';
+                
+                // Clean up author - NewsBlur sometimes returns comma-separated authors
+                if (author.includes(',')) {
+                    author = author.split(',')[0].trim();
+                }
+                
+                // Clean up and validate author
+                author = author ? author.trim() : '';
+                if (!author || 
+                    author === '' || 
+                    author.toLowerCase().includes('blurblog') ||
+                    author.includes('[object Object]') ||
+                    author === feedTitle ||
+                    author.length > 100) {
+                    author = 'unknown';
+                }
+
+                const post: BlogPost = {
+                    title: title,
+                    link: link,
+                    description: description,
+                    pubDate: pubDate,
+                    category: this.categorizePost(title, description, link),
+                    source: feedTitle,
+                    author: author
+                };
+                
+                if (post.title && post.link) {
+                    // Check for duplicate links
+                    if (seenLinks.has(post.link)) {
+                        console.log(`Duplicate link found, skipping: ${post.link}`);
+                    } else {
+                        seenLinks.add(post.link);
+                        posts.push(post);
+                    }
+                }
+            } catch (itemError) {
+                console.error(`Error processing NewsBlur story ${index}:`, itemError);
+                // Continue with next story instead of failing completely
+            }
+        });
+
+        return posts;
     }
 
     private parseRSSFeed(rssData: any, feedUrl: string): BlogPost[] {
