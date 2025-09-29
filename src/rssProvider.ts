@@ -433,7 +433,16 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // Convert RSS URL to API URL format
             // From: https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft
             // To: /social/stories/109116/alvinashcraft
-            const apiPath = feedUrl.replace('https://alvinashcraft.newsblur.com/social/rss/', '/social/stories/');
+            // Use regex to extract the /social/rss/<user_id>/<username> part from any NewsBlur subdomain
+            const match = feedUrl.match(/^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/);
+            let apiPath: string;
+            if (match) {
+                apiPath = `/social/stories/${match[1]}/${match[2]}`;
+            } else {
+                console.error(`Invalid NewsBlur social RSS feed URL: ${feedUrl}`);
+                resolve([]);
+                return;
+            }
             const apiUrl = `https://www.newsblur.com${apiPath}?limit=${recordCount}`;
             
             console.log(`Fetching NewsBlur API: ${apiUrl}`);
