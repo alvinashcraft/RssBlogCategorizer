@@ -473,7 +473,16 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 // Handle redirects
                 if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
                     console.log(`Redirect ${redirectCount + 1}/${MAX_REDIRECTS}: ${apiUrl} -> ${response.headers.location}`);
-                    return this.fetchNewsBlurApi(response.headers.location, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
+                    // Only follow redirect if it matches NewsBlur RSS feed URL pattern
+                    const redirectUrl = response.headers.location;
+                    const newsBlurRssPattern = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
+                    if (redirectUrl.match(newsBlurRssPattern)) {
+                        return this.fetchNewsBlurApi(redirectUrl, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
+                    } else {
+                        console.error(`Redirected to non-NewsBlur RSS feed URL: ${redirectUrl}`);
+                        resolve([]);
+                        return;
+                    }
                 }
 
                 // Check for successful response
