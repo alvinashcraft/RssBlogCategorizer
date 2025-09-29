@@ -5,6 +5,7 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 ## Features
 
 - 📡 **RSS Feed Parsing** - Fetches and parses RSS/Atom feeds with robust error handling
+- 🔐 **NewsBlur API Integration** - Optionally use NewsBlur API for authenticated access to get more than 25 items
 - 🏷️ **Smart Categorization** - Automatically categorizes posts by technology (JavaScript, Python, DevOps, etc.)
 - 🌳 **Tree View Integration** - Displays categorized posts in VS Code sidebar with expandable categories
 - 📄 **Export Functionality** - Generates HTML and Markdown files with professional templates
@@ -54,6 +55,20 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 
 The feed will automatically refresh with new content after updating.
 
+### NewsBlur API Integration (Optional)
+
+For enhanced functionality, you can configure NewsBlur API access to retrieve more than 25 items:
+
+1. **Enable NewsBlur API**: Set `rssBlogCategorizer.useNewsblurApi` to `true` in settings
+2. **Set Username**: Configure your NewsBlur username in `rssBlogCategorizer.newsblurUsername`
+3. **Set Credentials**: Use Command Palette → "RSS Blog Categorizer: Set NewsBlur Credentials" to securely store your password
+
+**Benefits of NewsBlur API:**
+
+- Access more than 25 feed items (RSS feeds are typically limited to 25)
+- More reliable access to popular feeds
+- Better handling of feed redirects and updates
+
 ### Exporting Posts
 
 **Via Explorer Panel:**
@@ -81,6 +96,8 @@ Access settings via `File > Preferences > Settings` and search for "RSS Blog Cat
 - **Record Count**: Number of records to retrieve (10-500)
 - **Minimum DateTime**: Filter posts by publication date (UTC format)
 - **Refresh Interval**: Auto-refresh interval in minutes
+- **Use NewsBlur API**: Enable NewsBlur API integration for enhanced functionality
+- **NewsBlur Username**: Your NewsBlur account username (password stored securely)
 
 ### Smart Date Filtering
 
@@ -109,6 +126,7 @@ See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 | `RSS Blog Categorizer: Export as Markdown` | Export posts to Markdown |
 | `RSS Blog Categorizer: Export as HTML` | Export posts to HTML |
 | `RSS Blog Categorizer: Set RSS Feed` | Configure RSS feed URL |
+| `RSS Blog Categorizer: Set NewsBlur Credentials` | Securely configure NewsBlur API credentials |
 
 All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.
 
