@@ -29,12 +29,95 @@ export class WordPressManager {
     }
 
     /**
+     * Show Application Password creation instructions
+     */
+    async showApplicationPasswordInstructions(): Promise<void> {
+        const instructions = `
+# WordPress Application Password Setup
+
+For secure authentication with the WordPress REST API, you should create an Application Password:
+
+## Steps:
+1. **Log into your WordPress admin panel**
+2. **Go to Users → Profile** (or Users → All Users → [Your User])
+3. **Scroll down to "Application Passwords" section**
+4. **Enter application name**: "VS Code RSS Extension" (or any name)
+5. **Click "Add New Application Password"**
+6. **Copy the generated password** (it will look like: xxxx xxxx xxxx xxxx xxxx xxxx)
+7. **Use this Application Password** when setting up credentials in VS Code
+
+## Important Notes:
+- Application Passwords are more secure than regular passwords
+- They can be revoked individually without changing your main password
+- Your username remains the same, only the password is different
+- The Application Password will have spaces - this is normal
+
+## Alternative:
+If Application Passwords are not available on your WordPress site, you may need to:
+- Update WordPress to version 5.6 or higher
+- Enable Application Passwords via a plugin
+- Or use your regular WordPress password (less secure)
+
+Would you like to open your WordPress admin panel now?
+        `;
+
+        const choice = await vscode.window.showInformationMessage(
+            'Application Password setup instructions are ready.',
+            'View Instructions',
+            'Open WordPress Admin',
+            'Continue with Setup'
+        );
+
+        if (choice === 'View Instructions') {
+            // Create a new untitled document with the instructions
+            const doc = await vscode.workspace.openTextDocument({
+                content: instructions,
+                language: 'markdown'
+            });
+            await vscode.window.showTextDocument(doc);
+        } else if (choice === 'Open WordPress Admin') {
+            const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+            const blogUrl = config.get<string>('wordpressBlogUrl');
+            if (blogUrl) {
+                const adminUrl = `${blogUrl.replace(/\/$/, '')}/wp-admin/profile.php`;
+                vscode.env.openExternal(vscode.Uri.parse(adminUrl));
+            } else {
+                vscode.window.showErrorMessage('Please set your blog URL first');
+            }
+        }
+    }
+
+    /**
      * Prompt user for WordPress credentials and store them securely
      */
     async setWordpressCredentials(): Promise<boolean> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const currentBlogUrl = config.get<string>('wordpressBlogUrl') || '';
         const currentUsername = config.get<string>('wordpressUsername') || '';
+        
+        // Show instructions first
+        const showInstructions = await vscode.window.showInformationMessage(
+            'WordPress REST API requires an Application Password for secure authentication. Would you like to see setup instructions first?',
+            'Show Instructions',
+            'I have my credentials ready',
+            'Cancel'
+        );
+
+        if (showInstructions === 'Show Instructions') {
+            await this.showApplicationPasswordInstructions();
+            
+            const continueSetup = await vscode.window.showInformationMessage(
+                'Ready to enter your credentials?',
+                'Yes, continue',
+                'Cancel'
+            );
+            
+            if (continueSetup !== 'Yes, continue') {
+                return false;
+            }
+        } else if (showInstructions === 'Cancel') {
+            return false;
+        }
         
         // Get blog URL
         const blogUrl = await vscode.window.showInputBox({
@@ -57,7 +140,7 @@ export class WordPressManager {
         
         // Get username
         const username = await vscode.window.showInputBox({
-            prompt: 'Enter WordPress username',
+            prompt: 'Enter WordPress username (same as your login username)',
             placeHolder: 'username',
             value: currentUsername
         });
@@ -66,14 +149,14 @@ export class WordPressManager {
             return false; // User cancelled
         }
         
-        // Get password securely
-        const password = await vscode.window.showInputBox({
-            prompt: `Enter WordPress password for user: ${username}`,
+        // Get application password
+        const appPassword = await vscode.window.showInputBox({
+            prompt: `Enter WordPress Application Password for user: ${username}`,
             password: true,
-            placeHolder: 'Enter your WordPress password or application password'
+            placeHolder: 'xxxx xxxx xxxx xxxx xxxx xxxx (Application Password with spaces)'
         });
         
-        if (!password) {
+        if (!appPassword) {
             return false; // User cancelled
         }
 
@@ -81,9 +164,9 @@ export class WordPressManager {
             // Save settings
             await config.update('wordpressBlogUrl', blogUrl, vscode.ConfigurationTarget.Global);
             await config.update('wordpressUsername', username, vscode.ConfigurationTarget.Global);
-            await this.setWordpressPassword(password);
+            await this.setWordpressPassword(appPassword);
             
-            vscode.window.showInformationMessage('WordPress credentials saved successfully!');
+            vscode.window.showInformationMessage('WordPress credentials saved successfully! Use "Test WordPress Connection" to verify.');
             return true;
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to save WordPress credentials: ${error}`);
@@ -92,88 +175,77 @@ export class WordPressManager {
     }
 
     /**
-     * Create XML-RPC request body for WordPress
+     * Create Basic Auth header for WordPress REST API
      */
-    private createXmlRpcRequest(methodName: string, params: any[]): string {
-        const paramsXml = params.map(param => this.encodeValue(param)).join('');
-        
-        return `<?xml version="1.0" encoding="UTF-8"?>
-<methodCall>
-    <methodName>${methodName}</methodName>
-    <params>${paramsXml}</params>
-</methodCall>`;
+    private createAuthHeader(username: string, password: string): string {
+        const credentials = Buffer.from(`${username}:${password}`).toString('base64');
+        console.log(`Creating auth header for user: ${username} (password length: ${password.length})`);
+        return `Basic ${credentials}`;
     }
 
     /**
-     * Encode values for XML-RPC
+     * Make REST API request to WordPress
      */
-    private encodeValue(value: any): string {
-        if (typeof value === 'string') {
-            return `<param><value><string>${this.escapeXml(value)}</string></value></param>`;
-        } else if (typeof value === 'number') {
-            return `<param><value><int>${value}</int></value></param>`;
-        } else if (typeof value === 'boolean') {
-            return `<param><value><boolean>${value ? '1' : '0'}</boolean></value></param>`;
-        } else if (value instanceof Date) {
-            return `<param><value><dateTime.iso8601>${value.toISOString()}</dateTime.iso8601></value></param>`;
-        } else if (typeof value === 'object' && value !== null) {
-            const members = Object.entries(value)
-                .map(([key, val]) => `<member><name>${key}</name>${this.encodeValue(val).replace(/<param><value>|<\/value><\/param>/g, '')}</member>`)
-                .join('');
-            return `<param><value><struct>${members}</struct></value></param>`;
-        }
-        return '';
-    }
-
-    /**
-     * Escape XML special characters
-     */
-    private escapeXml(text: string): string {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
-
-    /**
-     * Make XML-RPC request to WordPress
-     */
-    private async makeXmlRpcRequest(blogUrl: string, requestBody: string): Promise<any> {
+    private async makeRestApiRequest(blogUrl: string, endpoint: string, method: string = 'GET', data?: any, username?: string, password?: string): Promise<any> {
         return new Promise((resolve, reject) => {
-            const url = new URL('/xmlrpc.php', blogUrl);
+            const url = new URL(`/wp-json/wp/v2/${endpoint}`, blogUrl);
             
-            console.log(`Making XML-RPC request to: ${url.toString()}`);
-            console.log(`Host: ${url.hostname}, Port: ${url.port || (url.protocol === 'https:' ? 443 : 80)}, Path: ${url.pathname}`);
+            console.log(`Making REST API request to: ${url.toString()}`);
+            console.log(`Method: ${method}, Host: ${url.hostname}, Port: ${url.port || (url.protocol === 'https:' ? 443 : 80)}, Path: ${url.pathname}`);
+            
+            const requestBody = data ? JSON.stringify(data) : '';
             
             const options = {
                 hostname: url.hostname,
                 port: url.port || (url.protocol === 'https:' ? 443 : 80),
-                path: url.pathname,
-                method: 'POST',
+                path: url.pathname + url.search,
+                method: method,
                 headers: {
-                    'Content-Type': 'text/xml',
-                    'Content-Length': Buffer.byteLength(requestBody),
-                    'User-Agent': 'VS Code RSS Blog Categorizer Extension'
-                }
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'VS Code RSS Blog Categorizer Extension',
+                    'Accept': 'application/json'
+                } as any
             };
+
+            // Add authentication header if credentials provided
+            if (username && password) {
+                options.headers['Authorization'] = this.createAuthHeader(username, password);
+            }
+
+            // Set content length for POST/PUT requests
+            if (requestBody) {
+                options.headers['Content-Length'] = Buffer.byteLength(requestBody);
+            }
 
             const protocol = url.protocol === 'https:' ? https : require('http');
             const req = protocol.request(options, (res: any) => {
-                let data = '';
-                res.on('data', (chunk: any) => { data += chunk; });
+                let responseData = '';
+                res.on('data', (chunk: any) => { responseData += chunk; });
                 res.on('end', () => {
-                    if (res.statusCode === 200) {
+                    console.log(`REST API response: HTTP ${res.statusCode}`);
+                    
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
                         try {
-                            // Parse XML-RPC response (simplified parser)
-                            const result = this.parseXmlRpcResponse(data);
+                            const result = responseData ? JSON.parse(responseData) : {};
                             resolve(result);
                         } catch (error) {
-                            reject(new Error(`Failed to parse XML-RPC response: ${error}`));
+                            reject(new Error(`Failed to parse JSON response: ${error}`));
                         }
                     } else {
-                        reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                        // Try to parse error response
+                        let errorMessage = `HTTP ${res.statusCode}: ${res.statusMessage}`;
+                        try {
+                            const errorData = JSON.parse(responseData);
+                            if (errorData.message) {
+                                errorMessage = `${errorMessage} - ${errorData.message}`;
+                            }
+                        } catch {
+                            // Use raw response if JSON parsing fails
+                            if (responseData) {
+                                errorMessage = `${errorMessage} - ${responseData}`;
+                            }
+                        }
+                        reject(new Error(errorMessage));
                     }
                 });
             });
@@ -182,49 +254,14 @@ export class WordPressManager {
                 reject(error);
             });
 
-            req.write(requestBody);
+            if (requestBody) {
+                req.write(requestBody);
+            }
             req.end();
         });
     }
 
-    /**
-     * Simple XML-RPC response parser
-     */
-    private parseXmlRpcResponse(xml: string): any {
-        // Simple regex-based parser for XML-RPC responses
-        const faultMatch = xml.match(/<fault>[\s\S]*?<\/fault>/);
-        if (faultMatch) {
-            const codeMatch = xml.match(/<int>(\d+)<\/int>/);
-            const messageMatch = xml.match(/<string>(.*?)<\/string>/);
-            const code = codeMatch ? parseInt(codeMatch[1]) : 0;
-            const message = messageMatch ? messageMatch[1] : 'Unknown error';
-            throw new Error(`WordPress error ${code}: ${message}`);
-        }
 
-        // Extract value from successful response
-        const valueMatch = xml.match(/<value>(.*?)<\/value>/s);
-        if (valueMatch) {
-            const content = valueMatch[1];
-            
-            // Parse different types
-            const stringMatch = content.match(/<string>(.*?)<\/string>/s);
-            if (stringMatch) {
-                return stringMatch[1];
-            }
-
-            const intMatch = content.match(/<int>(\d+)<\/int>/);
-            if (intMatch) {
-                return parseInt(intMatch[1]);
-            }
-
-            const booleanMatch = content.match(/<boolean>([01])<\/boolean>/);
-            if (booleanMatch) {
-                return booleanMatch[1] === '1';
-            }
-        }
-
-        return null;
-    }
 
     /**
      * Extract technology tags from HTML content
@@ -345,43 +382,61 @@ export class WordPressManager {
     }
 
     /**
-     * Test WordPress XML-RPC endpoint accessibility
+     * Test WordPress REST API endpoint accessibility
      */
-    async testXmlRpcEndpoint(blogUrl: string): Promise<boolean> {
-        return new Promise((resolve) => {
-            const url = new URL('/xmlrpc.php', blogUrl);
-            const protocol = url.protocol === 'https:' ? https : require('http');
-            
-            console.log(`Testing XML-RPC endpoint: ${url.toString()}`);
-            
-            const options = {
-                hostname: url.hostname,
-                port: url.port || (url.protocol === 'https:' ? 443 : 80),
-                path: url.pathname,
-                method: 'HEAD', // Just check if endpoint exists
-                timeout: 5000
+    async testRestApiEndpoint(blogUrl: string): Promise<boolean> {
+        try {
+            // Test the basic REST API endpoint without authentication first
+            console.log('Testing REST API endpoint accessibility...');
+            await this.makeRestApiRequest(blogUrl, 'posts?per_page=1', 'GET');
+            console.log('REST API endpoint is accessible');
+            return true;
+        } catch (error) {
+            console.error(`REST API endpoint test failed: ${error}`);
+            return false;
+        }
+    }
+
+    /**
+     * Test different authentication methods
+     */
+    async testAuthenticationMethods(blogUrl: string, username: string, password: string): Promise<string[]> {
+        const workingMethods: string[] = [];
+        
+        // Test 1: Basic authentication with application password
+        try {
+            console.log('Testing basic authentication...');
+            await this.makeRestApiRequest(blogUrl, 'users/me', 'GET', undefined, username, password);
+            workingMethods.push('Basic Auth');
+            console.log('Basic authentication works');
+        } catch (error) {
+            console.log(`Basic authentication failed: ${error}`);
+        }
+        
+        // Test 2: Try accessing a public endpoint that requires auth (like creating a post in draft)
+        try {
+            console.log('Testing post creation capabilities...');
+            const testPost = {
+                title: 'Test Connection Post - DELETE ME',
+                content: 'This is a test post created by VS Code extension to verify connection. Please delete.',
+                status: 'draft'
             };
-
-            const req = protocol.request(options, (res: any) => {
-                console.log(`XML-RPC endpoint test: HTTP ${res.statusCode}`);
-                // WordPress XML-RPC typically returns 405 (Method Not Allowed) for HEAD requests
-                // or 200 for GET requests, both indicate the endpoint exists
-                resolve(res.statusCode === 200 || res.statusCode === 405 || res.statusCode === 501);
-            });
-
-            req.on('error', (error: any) => {
-                console.error(`XML-RPC endpoint test failed: ${error.message}`);
-                resolve(false);
-            });
-
-            req.on('timeout', () => {
-                console.error('XML-RPC endpoint test timed out');
-                req.destroy();
-                resolve(false);
-            });
-
-            req.end();
-        });
+            const result = await this.makeRestApiRequest(blogUrl, 'posts', 'POST', testPost, username, password);
+            if (result && result.id) {
+                // Try to delete the test post immediately
+                try {
+                    await this.makeRestApiRequest(blogUrl, `posts/${result.id}`, 'DELETE', undefined, username, password);
+                    console.log('Test post created and deleted successfully');
+                } catch (deleteError) {
+                    console.log(`Test post created (ID: ${result.id}) but could not delete: ${deleteError}`);
+                }
+                workingMethods.push('Post Creation');
+            }
+        } catch (error) {
+            console.log(`Post creation test failed: ${error}`);
+        }
+        
+        return workingMethods;
     }
 
     /**
@@ -398,33 +453,137 @@ export class WordPressManager {
             return false;
         }
 
-        // First test if XML-RPC endpoint is accessible
-        const endpointAccessible = await this.testXmlRpcEndpoint(blogUrl);
+        console.log(`Testing connection to: ${blogUrl}`);
+        console.log(`Username: ${username}`);
+
+        // First test if REST API endpoint is accessible
+        const endpointAccessible = await this.testRestApiEndpoint(blogUrl);
         if (!endpointAccessible) {
             vscode.window.showErrorMessage(
-                `WordPress XML-RPC endpoint not accessible at ${blogUrl}/xmlrpc.php. ` +
+                `WordPress REST API endpoint not accessible at ${blogUrl}/wp-json/wp/v2/. ` +
                 'Please check:\n' +
-                '1. XML-RPC is enabled in WordPress settings\n' +
+                '1. WordPress REST API is enabled\n' +
                 '2. Your blog URL is correct\n' +
-                '3. No security plugins are blocking XML-RPC'
+                '3. No security plugins are blocking REST API'
             );
             return false;
         }
 
-        try {
-            // Test with a simple method call to verify credentials
-            const requestBody = this.createXmlRpcRequest('wp.getProfile', [1, username, password]);
-            await this.makeXmlRpcRequest(blogUrl, requestBody);
-            vscode.window.showInformationMessage('WordPress connection successful!');
+        // Test different authentication methods
+        const workingMethods = await this.testAuthenticationMethods(blogUrl, username, password);
+        
+        if (workingMethods.length > 0) {
+            vscode.window.showInformationMessage(
+                `WordPress REST API connection successful!\nWorking authentication methods: ${workingMethods.join(', ')}`
+            );
             return true;
-        } catch (error) {
-            vscode.window.showErrorMessage(`WordPress connection failed: ${error}\n\nPossible issues:\n1. Incorrect username/password\n2. XML-RPC disabled\n3. Security plugin blocking requests`);
+        } else {
+            // Provide detailed troubleshooting information
+            const troubleshootingInfo = await this.gatherTroubleshootingInfo(blogUrl);
+            
+            vscode.window.showErrorMessage(
+                `WordPress connection failed. All authentication methods failed.\n\n` +
+                `Troubleshooting info:\n${troubleshootingInfo}\n\n` +
+                `Common solutions:\n` +
+                `1. Create an Application Password in WordPress Admin → Users → Profile\n` +
+                `2. Check if security plugins are blocking REST API\n` +
+                `3. Verify username is correct and user has 'publish_posts' capability\n` +
+                `4. Try temporarily disabling security plugins`
+            );
             return false;
         }
     }
 
     /**
-     * Publish post to WordPress
+     * Gather troubleshooting information
+     */
+    private async gatherTroubleshootingInfo(blogUrl: string): Promise<string> {
+        const info: string[] = [];
+        
+        try {
+            // Test if we can get basic site info
+            const siteInfo = await this.makeRestApiRequest(blogUrl, '', 'GET');
+            if (siteInfo && siteInfo.name) {
+                info.push(`✓ Site accessible: ${siteInfo.name}`);
+            }
+            
+            // Test authentication requirements
+            if (siteInfo && siteInfo.authentication) {
+                info.push(`Authentication info: ${JSON.stringify(siteInfo.authentication)}`);
+            }
+        } catch (error) {
+            info.push(`✗ Site info request failed: ${error}`);
+        }
+        
+        // Test specific endpoints
+        try {
+            await this.makeRestApiRequest(blogUrl, 'posts?per_page=1', 'GET');
+            info.push('✓ Posts endpoint accessible (no auth)');
+        } catch (error) {
+            info.push(`✗ Posts endpoint failed: ${error}`);
+        }
+        
+        return info.join('\n');
+    }
+
+    /**
+     * Get or create category by name
+     */
+    private async getOrCreateCategory(blogUrl: string, categoryName: string, username: string, password: string): Promise<number> {
+        try {
+            // First, try to find existing category
+            const categories = await this.makeRestApiRequest(blogUrl, `categories?search=${encodeURIComponent(categoryName)}`, 'GET', undefined, username, password);
+            
+            const existingCategory = categories.find((cat: any) => cat.name.toLowerCase() === categoryName.toLowerCase());
+            if (existingCategory) {
+                console.log(`Found existing category: ${categoryName} (ID: ${existingCategory.id})`);
+                return existingCategory.id;
+            }
+
+            // Create new category if not found
+            const newCategory = await this.makeRestApiRequest(blogUrl, 'categories', 'POST', {
+                name: categoryName,
+                slug: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+            }, username, password);
+            
+            console.log(`Created new category: ${categoryName} (ID: ${newCategory.id})`);
+            return newCategory.id;
+        } catch (error) {
+            console.error(`Failed to get/create category ${categoryName}: ${error}`);
+            return 0; // Return 0 if category creation fails
+        }
+    }
+
+    /**
+     * Get or create tag by name
+     */
+    private async getOrCreateTag(blogUrl: string, tagName: string, username: string, password: string): Promise<number> {
+        try {
+            // First, try to find existing tag
+            const tags = await this.makeRestApiRequest(blogUrl, `tags?search=${encodeURIComponent(tagName)}`, 'GET', undefined, username, password);
+            
+            const existingTag = tags.find((tag: any) => tag.name.toLowerCase() === tagName.toLowerCase());
+            if (existingTag) {
+                console.log(`Found existing tag: ${tagName} (ID: ${existingTag.id})`);
+                return existingTag.id;
+            }
+
+            // Create new tag if not found
+            const newTag = await this.makeRestApiRequest(blogUrl, 'tags', 'POST', {
+                name: tagName,
+                slug: tagName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+            }, username, password);
+            
+            console.log(`Created new tag: ${tagName} (ID: ${newTag.id})`);
+            return newTag.id;
+        } catch (error) {
+            console.error(`Failed to get/create tag ${tagName}: ${error}`);
+            return 0; // Return 0 if tag creation fails
+        }
+    }
+
+    /**
+     * Publish post to WordPress using REST API
      */
     async publishPost(post: WordPressPost): Promise<boolean> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
@@ -439,41 +598,56 @@ export class WordPressManager {
 
         try {
             const postData: any = {
-                post_title: post.title,
-                post_content: post.content,
-                post_status: post.status || 'draft',
-                post_type: 'post'
+                title: post.title,
+                content: post.content,
+                status: post.status || 'draft'
             };
 
             if (post.dateCreated) {
-                postData.post_date = post.dateCreated.toISOString();
+                postData.date = post.dateCreated.toISOString();
             }
 
-            // Add categories if provided
+            // Handle categories
             if (post.categories && post.categories.length > 0) {
-                // WordPress XML-RPC can create categories automatically when using terms_names
-                postData.terms_names = {
-                    category: post.categories
-                };
-                console.log(`Setting categories: ${post.categories.join(', ')}`);
-            }
-
-            // Add tags if provided
-            if (post.tags && post.tags.length > 0) {
-                // Add tags to terms_names (WordPress will create them if they don't exist)
-                if (!postData.terms_names) {
-                    postData.terms_names = {};
+                console.log(`Processing ${post.categories.length} categories: ${post.categories.join(', ')}`);
+                const categoryIds: number[] = [];
+                
+                for (const categoryName of post.categories) {
+                    const categoryId = await this.getOrCreateCategory(blogUrl, categoryName, username, password);
+                    if (categoryId > 0) {
+                        categoryIds.push(categoryId);
+                    }
                 }
-                postData.terms_names.post_tag = post.tags;
-                console.log(`Setting ${post.tags.length} tags: ${post.tags.join(', ')}`);
+                
+                if (categoryIds.length > 0) {
+                    postData.categories = categoryIds;
+                    console.log(`Set categories with IDs: ${categoryIds.join(', ')}`);
+                }
             }
 
-            const requestBody = this.createXmlRpcRequest('wp.newPost', [1, username, password, postData]);
-            const postId = await this.makeXmlRpcRequest(blogUrl, requestBody);
+            // Handle tags
+            if (post.tags && post.tags.length > 0) {
+                console.log(`Processing ${post.tags.length} tags: ${post.tags.join(', ')}`);
+                const tagIds: number[] = [];
+                
+                for (const tagName of post.tags) {
+                    const tagId = await this.getOrCreateTag(blogUrl, tagName, username, password);
+                    if (tagId > 0) {
+                        tagIds.push(tagId);
+                    }
+                }
+                
+                if (tagIds.length > 0) {
+                    postData.tags = tagIds;
+                    console.log(`Set tags with IDs: ${tagIds.join(', ')}`);
+                }
+            }
+
+            const result = await this.makeRestApiRequest(blogUrl, 'posts', 'POST', postData, username, password);
             
-            if (postId) {
+            if (result && result.id) {
                 const status = post.status === 'publish' ? 'published' : 'saved as draft';
-                let message = `Post ${status} successfully! Post ID: ${postId}`;
+                let message = `Post ${status} successfully! Post ID: ${result.id}`;
                 
                 if (post.categories && post.categories.length > 0) {
                     message += ` Categories: ${post.categories.join(', ')}`;
@@ -497,18 +671,32 @@ export class WordPressManager {
 
     /**
      * Extract body content from HTML (content between <body> and </body> tags)
+     * Also removes H1 tags since WordPress renders the post title as H1
      */
     private extractBodyContent(html: string): string {
+        let content: string;
+        
         // Try to extract content from <body> tags
         const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
         if (bodyMatch && bodyMatch[1]) {
-            return bodyMatch[1].trim();
+            content = bodyMatch[1].trim();
+        } else {
+            // Fallback: if no body tags found, return the full HTML
+            // This handles cases where the exported HTML might not have proper body tags
+            console.warn('No <body> tags found in HTML, using full content');
+            content = html;
         }
 
-        // Fallback: if no body tags found, return the full HTML
-        // This handles cases where the exported HTML might not have proper body tags
-        console.warn('No <body> tags found in HTML, using full content');
-        return html;
+        // Remove H1 tags since WordPress automatically renders the post title as H1
+        // This prevents duplicate H1 headings and improves HTML structure
+        content = content.replace(/<h1[^>]*>[\s\S]*?<\/h1>/gi, '');
+        
+        // Clean up any extra whitespace left after removing H1
+        content = content.replace(/^\s+|\s+$/g, '').replace(/\n\s*\n\s*\n/g, '\n\n');
+        
+        console.log('Removed H1 tags from content to avoid duplicate headings with WordPress post title');
+        
+        return content;
     }
 
     /**
