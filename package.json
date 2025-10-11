@@ -128,10 +128,15 @@
           "default": "",
           "description": "Minimum datetime for blog posts in UTC (ISO format, e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00.000Z). Leave empty to automatically use the date of the latest 'Dew Drop' post from alvinashcraft.com, or fall back to last 24 hours (UTC) if unavailable. All date comparisons use UTC timezone."
         },
+        "rssBlogCategorizer.enableAutoRefresh": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable automatic refresh of RSS feed data. When disabled, refresh is manual only."
+        },
         "rssBlogCategorizer.refreshInterval": {
           "type": "number",
           "default": 30,
-          "description": "Refresh interval in minutes"
+          "description": "Refresh interval in minutes (only applies when auto-refresh is enabled)"
         },
         "rssBlogCategorizer.newsblurUsername": {
           "type": "string",

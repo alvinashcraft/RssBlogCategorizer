@@ -12,7 +12,7 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 - 🚀 **WordPress Publishing** - Direct publishing to WordPress blogs via XML-RPC with secure credential storage
 - 🏷️ **Automatic Tag Detection** - Intelligent extraction of technology tags from blog post content
 - ⚙️ **Configurable Settings** - Customizable RSS feed URLs, refresh intervals, and date filtering
-- 🔄 **Auto-refresh** - Configurable automatic feed updates
+- 🔄 **Optional Auto-refresh** - Configurable automatic feed updates (disabled by default for on-demand usage)
 - 📚 **Book Recommendations** - Includes "The Geek Shelf" section with rotating book recommendations
 
 ## Installation
@@ -37,10 +37,10 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 ### Getting Started
 
 1. After installation, the "Dev Blog Posts" view will appear in the Explorer panel sidebar
-2. If you don't see the view, try opening the Command Palette (`Ctrl+Shift+P`) and running "RSS Blog Categorizer: Refresh" to activate the extension
-3. The extension comes pre-configured with a default RSS feed
-4. Click the refresh button in the view header to load the latest posts
-5. Posts are automatically categorized and displayed in a tree structure
+2. The extension comes pre-configured with a default RSS feed
+3. **Click the refresh button** in the view header to load posts (no automatic refresh on startup)
+4. Posts are automatically categorized and displayed in a tree structure
+5. **Optional**: Enable auto-refresh in settings if you want automatic updates
 
 ### Setting Up Your RSS Feed
 
@@ -55,7 +55,16 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 2. Run "RSS Blog Categorizer: Set RSS Feed"
 3. Enter your RSS feed URL when prompted
 
-The feed will automatically refresh with new content after updating.
+Click the refresh button to load new content after updating the feed URL.
+
+### Manual vs Automatic Refresh
+
+By default, the extension uses **manual refresh** for better performance and control:
+
+- **Manual Mode** (default): Click the refresh button when you want to check for new posts
+- **Automatic Mode** (optional): Enable "Auto Refresh" in settings for periodic updates
+
+Manual refresh is recommended for most users as it prevents unnecessary network requests and provides better control over when data is updated.
 
 ### NewsBlur API Integration (Optional)
 
@@ -144,7 +153,8 @@ Access settings via `File > Preferences > Settings` and search for "RSS Blog Cat
 - **Feed URL**: Single RSS feed URL to monitor
 - **Record Count**: Number of records to retrieve (10-500)
 - **Minimum DateTime**: Filter posts by publication date (UTC format)
-- **Refresh Interval**: Auto-refresh interval in minutes
+- **Enable Auto Refresh**: Turn on automatic feed updates (disabled by default)
+- **Refresh Interval**: Auto-refresh interval in minutes (when auto-refresh is enabled)
 - **Use NewsBlur API**: Enable NewsBlur API integration for enhanced functionality
 - **NewsBlur Username**: Your NewsBlur account username (password stored securely)
 - **WordPress Blog URL**: Your WordPress blog URL (e.g., `https://yourblog.com`)
