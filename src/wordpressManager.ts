@@ -12,7 +12,100 @@ export interface WordPressPost {
 }
 
 export class WordPressManager {
-    constructor(private context: vscode.ExtensionContext) {}
+    private readonly compiledTechKeywords: Map<string, RegExp[]>;
+
+    constructor(private context: vscode.ExtensionContext) {
+        this.compiledTechKeywords = this.initializeTechKeywords();
+    }
+
+    /**
+     * Initialize and pre-compile regex patterns for technology keywords
+     */
+    private initializeTechKeywords(): Map<string, RegExp[]> {
+        const techKeywords = {
+            // .NET & Microsoft Technologies
+            '.net': ['.net', 'dotnet', 'dot net', '.net framework', '.net core', 'asp.net', 'asp.net core'],
+            '.net 9': ['.net 9', 'dotnet 9'],
+            '.net 10': ['.net 10', 'dotnet 10'],
+            '.net maui': ['.net maui', 'dotnet maui', 'maui'],
+            'asp.net core': ['asp.net core', 'aspnet core', 'aspnetcore'],
+            'blazor': ['blazor'],
+            'c#': ['c#', 'csharp', 'c sharp'],
+            'ef core': ['ef core', 'entity framework', 'entity framework core'],
+            'visual studio': ['visual studio', 'vs 2022', 'vs 2025', 'vs 2026', 'vs2022', 'vs2025', 'vs2026'],
+            'vs code': ['vs code', 'visual studio code', 'vscode'],
+            'winrt': ['winrt', 'windows runtime'],
+            'windows 11': ['windows 11'],
+            'windows ml': ['windows ml', 'windowsml'],
+            'uno platform': ['uno platform'],
+
+            // Web Technologies
+            'javascript': ['javascript', 'js'],
+            'typescript': ['typescript', 'ts'],
+            'node.js': ['node.js', 'nodejs', 'node js'],
+            'react': ['react', 'reactjs'],
+            'css': ['css', 'css3'],
+            'html': ['html', 'html5'],
+            'vite': ['vite'],
+
+            // Cloud & DevOps
+            'azure': ['azure', 'microsoft azure'],
+            'azure ai foundry': ['azure ai foundry', 'ai foundry'],
+            'aws': ['aws', 'amazon web services'],
+            'docker': ['docker', 'containerization'],
+            'kubernetes': ['kubernetes', 'k8s'],
+            'teamcity': ['teamcity'],
+
+            // Databases
+            'sql server': ['sql server', 'mssql'],
+            'mysql': ['mysql'],
+            'postgresql': ['postgresql', 'postgres'],
+
+            // AI & ML
+            'ai': ['artificial intelligence', 'machine learning', 'ai agent', 'ai agents'],
+            'chatgpt': ['chatgpt', 'chat gpt'],
+            'copilot': ['github copilot', 'copilot'],
+            'copilot chat': ['copilot chat'],
+            'claude code': ['claude code'],
+            'google gemini': ['google gemini', 'gemini'],
+            'perplexity': ['perplexity'],
+
+            // Mobile & IoT
+            'android': ['android'],
+            'android studio': ['android studio'],
+            'kotlin': ['kotlin'],
+            'swift': ['swift'],
+            'raspberry pi': ['raspberry pi', 'raspi'],
+
+            // Programming Languages
+            'python': ['python'],
+            'golang': ['golang', 'go lang', 'go programming'],
+            'c++': ['c++', 'cpp'],
+
+            // Other Technologies
+            'playwright': ['playwright'],
+            'auth0': ['auth0'],
+            'github universe': ['github universe'],
+            'ms ignite': ['ms ignite', 'microsoft ignite'],
+            'm365': ['m365', 'microsoft 365', 'office 365'],
+            'onedrive': ['onedrive'],
+            'mcp': ['mcp', 'model context protocol'],
+            'agile': ['agile', 'scrum', 'kanban'],
+            'vibe coding': ['vibe coding']
+        };
+
+        const compiledMap = new Map<string, RegExp[]>();
+        
+        // Pre-compile all regex patterns for better performance
+        for (const [tag, keywords] of Object.entries(techKeywords)) {
+            const compiledPatterns = keywords.map(keyword => 
+                new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+            );
+            compiledMap.set(tag, compiledPatterns);
+        }
+        
+        return compiledMap;
+    }
 
     /**
      * Get WordPress password from secure storage
@@ -264,91 +357,15 @@ Would you like to open your WordPress admin panel now?
 
 
     /**
-     * Extract technology tags from HTML content
+     * Extract technology tags from HTML content using pre-compiled regex patterns
      */
     private extractTagsFromContent(html: string): string[] {
         const content = html.toLowerCase();
         const detectedTags = new Set<string>();
 
-        // Technology keywords and their normalized tag names
-        const techKeywords = {
-            // .NET & Microsoft Technologies
-            '.net': ['.net', 'dotnet', 'dot net', '.net framework', '.net core', 'asp.net', 'asp.net core'],
-            '.net 9': ['.net 9', 'dotnet 9'],
-            '.net 10': ['.net 10', 'dotnet 10'],
-            '.net maui': ['.net maui', 'dotnet maui', 'maui'],
-            'asp.net core': ['asp.net core', 'aspnet core', 'aspnetcore'],
-            'blazor': ['blazor'],
-            'c#': ['c#', 'csharp', 'c sharp'],
-            'ef core': ['ef core', 'entity framework', 'entity framework core'],
-            'visual studio': ['visual studio', 'vs 2022', 'vs 2025', 'vs 2026', 'vs2022', 'vs2025', 'vs2026'],
-            'vs code': ['vs code', 'visual studio code', 'vscode'],
-            'winrt': ['winrt', 'windows runtime'],
-            'windows 11': ['windows 11'],
-            'windows ml': ['windows ml', 'windowsml'],
-            'uno platform': ['uno platform'],
-
-            // Web Technologies
-            'javascript': ['javascript', 'js'],
-            'typescript': ['typescript', 'ts'],
-            'node.js': ['node.js', 'nodejs', 'node js'],
-            'react': ['react', 'reactjs'],
-            'css': ['css', 'css3'],
-            'html': ['html', 'html5'],
-            'vite': ['vite'],
-
-            // Cloud & DevOps
-            'azure': ['azure', 'microsoft azure'],
-            'azure ai foundry': ['azure ai foundry', 'ai foundry'],
-            'aws': ['aws', 'amazon web services'],
-            'docker': ['docker', 'containerization'],
-            'kubernetes': ['kubernetes', 'k8s'],
-            'teamcity': ['teamcity'],
-
-            // Databases
-            'sql server': ['sql server', 'mssql'],
-            'mysql': ['mysql'],
-            'postgresql': ['postgresql', 'postgres'],
-
-            // AI & ML
-            'ai': ['artificial intelligence', 'machine learning', 'ai agent', 'ai agents'],
-            'chatgpt': ['chatgpt', 'chat gpt'],
-            'copilot': ['github copilot', 'copilot'],
-            'copilot chat': ['copilot chat'],
-            'claude code': ['claude code'],
-            'google gemini': ['google gemini', 'gemini'],
-            'perplexity': ['perplexity'],
-
-            // Mobile & IoT
-            'android': ['android'],
-            'android studio': ['android studio'],
-            'kotlin': ['kotlin'],
-            'swift': ['swift'],
-            'raspberry pi': ['raspberry pi', 'raspi'],
-
-            // Programming Languages
-            'python': ['python'],
-            'golang': ['golang', 'go lang', 'go programming'],
-            'c++': ['c++', 'cpp'],
-
-            // Other Technologies
-            'playwright': ['playwright'],
-            'auth0': ['auth0'],
-            'github universe': ['github universe'],
-            'ms ignite': ['ms ignite', 'microsoft ignite'],
-            'm365': ['m365', 'microsoft 365', 'office 365'],
-            'onedrive': ['onedrive'],
-            'mcp': ['mcp', 'model context protocol'],
-            'agile': ['agile', 'scrum', 'kanban'],
-            'vibe coding': ['vibe coding']
-        };
-
-        // Check for each technology keyword
-        for (const [tag, keywords] of Object.entries(techKeywords)) {
-            const found = keywords.some(keyword => {
-                const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                return regex.test(content);
-            });
+        // Check for each technology keyword using pre-compiled regex patterns
+        for (const [tag, patterns] of this.compiledTechKeywords) {
+            const found = patterns.some(regex => regex.test(content));
             
             if (found) {
                 detectedTags.add(tag);
@@ -527,6 +544,13 @@ Would you like to open your WordPress admin panel now?
     }
 
     /**
+     * Generate URL-friendly slug from name
+     */
+    private generateSlug(name: string): string {
+        return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    }
+
+    /**
      * Get or create category by name
      */
     private async getOrCreateCategory(blogUrl: string, categoryName: string, username: string, password: string): Promise<number> {
@@ -543,7 +567,7 @@ Would you like to open your WordPress admin panel now?
             // Create new category if not found
             const newCategory = await this.makeRestApiRequest(blogUrl, 'categories', 'POST', {
                 name: categoryName,
-                slug: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+                slug: this.generateSlug(categoryName)
             }, username, password);
             
             console.log(`Created new category: ${categoryName} (ID: ${newCategory.id})`);
@@ -571,7 +595,7 @@ Would you like to open your WordPress admin panel now?
             // Create new tag if not found
             const newTag = await this.makeRestApiRequest(blogUrl, 'tags', 'POST', {
                 name: tagName,
-                slug: tagName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+                slug: this.generateSlug(tagName)
             }, username, password);
             
             console.log(`Created new tag: ${tagName} (ID: ${newTag.id})`);
