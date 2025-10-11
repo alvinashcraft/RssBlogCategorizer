@@ -144,6 +144,9 @@ export class WordPressManager {
         return new Promise((resolve, reject) => {
             const url = new URL('/xmlrpc.php', blogUrl);
             
+            console.log(`Making XML-RPC request to: ${url.toString()}`);
+            console.log(`Host: ${url.hostname}, Port: ${url.port || (url.protocol === 'https:' ? 443 : 80)}, Path: ${url.pathname}`);
+            
             const options = {
                 hostname: url.hostname,
                 port: url.port || (url.protocol === 'https:' ? 443 : 80),
@@ -342,6 +345,46 @@ export class WordPressManager {
     }
 
     /**
+     * Test WordPress XML-RPC endpoint accessibility
+     */
+    async testXmlRpcEndpoint(blogUrl: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            const url = new URL('/xmlrpc.php', blogUrl);
+            const protocol = url.protocol === 'https:' ? https : require('http');
+            
+            console.log(`Testing XML-RPC endpoint: ${url.toString()}`);
+            
+            const options = {
+                hostname: url.hostname,
+                port: url.port || (url.protocol === 'https:' ? 443 : 80),
+                path: url.pathname,
+                method: 'HEAD', // Just check if endpoint exists
+                timeout: 5000
+            };
+
+            const req = protocol.request(options, (res: any) => {
+                console.log(`XML-RPC endpoint test: HTTP ${res.statusCode}`);
+                // WordPress XML-RPC typically returns 405 (Method Not Allowed) for HEAD requests
+                // or 200 for GET requests, both indicate the endpoint exists
+                resolve(res.statusCode === 200 || res.statusCode === 405 || res.statusCode === 501);
+            });
+
+            req.on('error', (error: any) => {
+                console.error(`XML-RPC endpoint test failed: ${error.message}`);
+                resolve(false);
+            });
+
+            req.on('timeout', () => {
+                console.error('XML-RPC endpoint test timed out');
+                req.destroy();
+                resolve(false);
+            });
+
+            req.end();
+        });
+    }
+
+    /**
      * Test WordPress connection
      */
     async testConnection(): Promise<boolean> {
@@ -355,13 +398,27 @@ export class WordPressManager {
             return false;
         }
 
+        // First test if XML-RPC endpoint is accessible
+        const endpointAccessible = await this.testXmlRpcEndpoint(blogUrl);
+        if (!endpointAccessible) {
+            vscode.window.showErrorMessage(
+                `WordPress XML-RPC endpoint not accessible at ${blogUrl}/xmlrpc.php. ` +
+                'Please check:\n' +
+                '1. XML-RPC is enabled in WordPress settings\n' +
+                '2. Your blog URL is correct\n' +
+                '3. No security plugins are blocking XML-RPC'
+            );
+            return false;
+        }
+
         try {
+            // Test with a simple method call to verify credentials
             const requestBody = this.createXmlRpcRequest('wp.getProfile', [1, username, password]);
             await this.makeXmlRpcRequest(blogUrl, requestBody);
             vscode.window.showInformationMessage('WordPress connection successful!');
             return true;
         } catch (error) {
-            vscode.window.showErrorMessage(`WordPress connection failed: ${error}`);
+            vscode.window.showErrorMessage(`WordPress connection failed: ${error}\n\nPossible issues:\n1. Incorrect username/password\n2. XML-RPC disabled\n3. Security plugin blocking requests`);
             return false;
         }
     }

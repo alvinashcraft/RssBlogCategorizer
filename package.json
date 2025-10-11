@@ -66,6 +66,11 @@
         "icon": "$(key)"
       },
       {
+        "command": "rssBlogCategorizer.testWordpressConnection",
+        "title": "Test WordPress Connection",
+        "icon": "$(plug)"
+      },
+      {
         "command": "rssBlogCategorizer.publishToWordpress",
         "title": "Publish to WordPress",
         "icon": "$(cloud-upload)"
@@ -97,6 +102,10 @@
         },
         {
           "command": "rssBlogCategorizer.setWordpressCredentials",
+          "when": "view == rssBlogCategorizerView"
+        },
+        {
+          "command": "rssBlogCategorizer.testWordpressConnection",
           "when": "view == rssBlogCategorizerView"
         }
       ],

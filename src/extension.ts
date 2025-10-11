@@ -109,6 +109,10 @@ export function activate(context: vscode.ExtensionContext) {
         await wordpressManager.setWordpressCredentials();
     });
 
+    const testWordpressConnectionCommand = vscode.commands.registerCommand('rssBlogCategorizer.testWordpressConnection', async () => {
+        await wordpressManager.testConnection();
+    });
+
     const publishToWordpressCommand = vscode.commands.registerCommand('rssBlogCategorizer.publishToWordpress', async () => {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) {
@@ -198,6 +202,7 @@ export function activate(context: vscode.ExtensionContext) {
         setFeedCommand,
         setNewsblurCredentialsCommand,
         setWordpressCredentialsCommand,
+        testWordpressConnectionCommand,
         publishToWordpressCommand,
         treeView,
         configChangeHandler,
