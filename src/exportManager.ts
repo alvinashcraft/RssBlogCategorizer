@@ -308,7 +308,15 @@ export class ExportManager {
 
     private async saveExport(content: string, format: string, extension: string): Promise<void> {
         const dewDropTitle = await this.generateDewDropTitle();
-        const filename = `${dewDropTitle.replace(/[<>:"/\\|?*]/g, '-')}.${extension}`;
+        // Clean up the title for use as filename
+        const cleanTitle = dewDropTitle
+            .replace(/[<>:"/\\|?*#]/g, '')  // Remove invalid filename characters  
+            .replace(/[()]/g, '')           // Remove parentheses
+            .replace(/\s+/g, '_')           // Replace spaces with underscores
+            .replace(/_+/g, '_')            // Replace multiple underscores with single
+            .replace(/^_|_$/g, '')          // Remove leading/trailing underscores
+            .trim();
+        const filename = `${cleanTitle}.${extension}`;
         
         let defaultUri;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {

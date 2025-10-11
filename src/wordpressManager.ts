@@ -439,6 +439,22 @@ export class WordPressManager {
     }
 
     /**
+     * Extract body content from HTML (content between <body> and </body> tags)
+     */
+    private extractBodyContent(html: string): string {
+        // Try to extract content from <body> tags
+        const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        if (bodyMatch && bodyMatch[1]) {
+            return bodyMatch[1].trim();
+        }
+
+        // Fallback: if no body tags found, return the full HTML
+        // This handles cases where the exported HTML might not have proper body tags
+        console.warn('No <body> tags found in HTML, using full content');
+        return html;
+    }
+
+    /**
      * Extract title from HTML content
      */
     private extractTitleFromHtml(html: string): string {
@@ -464,6 +480,7 @@ export class WordPressManager {
     async publishHtmlFile(document: vscode.TextDocument): Promise<boolean> {
         const html = document.getText();
         const title = this.extractTitleFromHtml(html);
+        const bodyContent = this.extractBodyContent(html);
 
         // Get default categories from configuration
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
@@ -533,7 +550,7 @@ export class WordPressManager {
             return false; // User cancelled
         }
 
-        // Auto-detect tags from content
+        // Auto-detect tags from full HTML content (including title, etc.)
         const detectedTags = this.extractTagsFromContent(html);
 
         // Show detected tags to user for confirmation
@@ -588,7 +605,7 @@ export class WordPressManager {
 
         const post: WordPressPost = {
             title: title,
-            content: html,
+            content: bodyContent,
             status: status.value as 'draft' | 'publish',
             dateCreated: new Date(),
             categories: categories,

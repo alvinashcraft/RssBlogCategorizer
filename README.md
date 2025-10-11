@@ -93,11 +93,16 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
 
 **Export Process:**
 
-1. Choose your save location
+1. Choose your save location (filename is auto-generated from the blog post title)
 2. The exported file will include:
    - Auto-generated "Dew Drop" title with incremental numbering
    - Categorized posts with author attribution
    - "The Geek Shelf" section with book recommendations
+
+**Default Filename**: Files are automatically named using the blog post title, for example:
+
+- `Dew_Drop_October_11_2025_4517.html`
+- `Dew_Drop_October_11_2025_4517.md`
 
 ### Publishing to WordPress
 
@@ -114,6 +119,7 @@ After exporting to HTML, you can publish directly to your WordPress blog:
 2. **Open the HTML file** in VS Code editor
 3. **Click the WordPress publish button** in the editor toolbar (cloud upload icon)
    - Or use Command Palette → "RSS Blog Categorizer: Publish to WordPress"
+   - Only the content inside `<body>` tags is published (excludes `<html>`, `<head>`, etc.)
 4. **Choose categories**: Use default categories (configurable in settings), customize for this post, or publish without categories
 5. **Review auto-detected tags**: The extension automatically detects technology tags from content - use detected tags, customize them, or skip
 6. **Choose publish status**: Publish immediately or save as draft
