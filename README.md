@@ -9,7 +9,7 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 - 🏷️ **Smart Categorization** - Automatically categorizes posts by technology (JavaScript, Python, DevOps, etc.)
 - 🌳 **Tree View Integration** - Displays categorized posts in VS Code sidebar with expandable categories
 - 📄 **Export Functionality** - Generates HTML and Markdown files with professional templates
-- 🚀 **WordPress Publishing** - Direct publishing to WordPress blogs via XML-RPC with secure credential storage
+- 🚀 **WordPress Publishing** - Direct publishing to WordPress blogs via REST API with secure credential storage
 - 🏷️ **Automatic Tag Detection** - Intelligent extraction of technology tags from blog post content
 - ⚙️ **Configurable Settings** - Customizable RSS feed URLs, refresh intervals, and date filtering
 - 🔄 **Optional Auto-refresh** - Configurable automatic feed updates (disabled by default for on-demand usage)
@@ -127,9 +127,9 @@ After exporting to HTML, you can publish directly to your WordPress blog:
 
 **WordPress Setup Requirements:**
 
-- WordPress site with XML-RPC enabled (enabled by default in most WordPress installations)
+- WordPress site with REST API enabled (enabled by default in WordPress 4.7+)
 - WordPress user account with publishing permissions
-- For enhanced security, consider using WordPress Application Passwords instead of your main password
+- Application Password for secure authentication (recommended for WordPress 5.6+)
 
 **Automatic Tag Detection:**
 

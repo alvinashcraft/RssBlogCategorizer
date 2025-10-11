@@ -66,7 +66,7 @@ vs2026, windows 11, windows ml, winrt
 ## 🚀 Technical Implementation
 
 ### WordPress REST API Integration
-- **Modern API**: Uses WordPress REST API (`/wp-json/wp/v2/`) instead of XML-RPC
+- **Modern API**: Uses WordPress REST API (`/wp-json/wp/v2/`) for secure, reliable communication
 - **Secure Authentication**: Application Password support with Basic Auth
 - **Smart Category Management**: Searches for existing categories, creates new ones automatically
 - **Intelligent Tag Handling**: Finds existing tags, creates new ones as needed
@@ -144,9 +144,9 @@ Your extension now provides a complete workflow:
 
 **RSS Feed** → **Categorization** → **HTML Export** → **WordPress REST API Publishing with Auto-Tags**
 
-### Key Improvements in Latest Version:
+### Key Improvements in Version 1.0.0:
 
-- **WordPress REST API**: Modern, secure API replacing XML-RPC
+- **WordPress REST API**: Modern, secure API for reliable publishing
 - **Application Password Support**: Built-in setup instructions and authentication
 - **Enhanced Diagnostics**: Comprehensive connection testing and troubleshooting
 - **Smart Category/Tag Management**: Automatic creation of missing categories and tags
@@ -154,9 +154,9 @@ Your extension now provides a complete workflow:
 
 ### Package Information
 
-- **Extension Size**: 70.09 KB (compiled)
-- **Version**: 0.0.8  
-- **Status**: ✅ REST API integration complete, ready for use
+- **Extension Size**: 70.4 KB (compiled)
+- **Version**: 1.0.0  
+- **Status**: ✅ REST API integration complete, ready for production use
 - **Authentication**: Application Password setup with detailed instructions
 
 The extension is now feature-complete with modern WordPress REST API integration, providing secure and reliable publishing with intelligent technology tag detection for your Dew Drop series posts.

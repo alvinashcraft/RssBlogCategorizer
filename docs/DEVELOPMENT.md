@@ -46,7 +46,8 @@ This guide contains developer-specific instructions for building, testing, and c
 src/
 ├── extension.ts        # Main extension entry point
 ├── rssProvider.ts     # RSS parsing and tree data provider
-└── exportManager.ts   # HTML/Markdown export functionality
+├── exportManager.ts   # HTML/Markdown export functionality
+└── wordpressManager.ts # WordPress REST API publishing
 categories.json        # Category configuration
 books.json            # Book recommendations for exports
 package.json          # Extension manifest
@@ -107,9 +108,9 @@ The extension uses the following configuration schema:
   },
   "rssBlogCategorizer.recordCount": {
     "type": "number", 
-    "default": 20,
-    "minimum": 1,
-    "maximum": 200,
+    "default": 100,
+    "minimum": 10,
+    "maximum": 500,
     "description": "Number of records to retrieve from RSS feed"
   },
   "rssBlogCategorizer.minimumDateTime": {
@@ -121,6 +122,31 @@ The extension uses the following configuration schema:
     "type": "number",
     "default": 30,
     "description": "Refresh interval in minutes"
+  },
+  "rssBlogCategorizer.enableAutoRefresh": {
+    "type": "boolean",
+    "default": false,
+    "description": "Enable automatic refresh of RSS feed data"
+  },
+  "rssBlogCategorizer.useNewsblurApi": {
+    "type": "boolean",
+    "default": false,
+    "description": "Use NewsBlur API for enhanced functionality"
+  },
+  "rssBlogCategorizer.wordpressBlogUrl": {
+    "type": "string",
+    "default": "",
+    "description": "WordPress blog URL for publishing"
+  },
+  "rssBlogCategorizer.wordpressUsername": {
+    "type": "string",
+    "default": "",
+    "description": "WordPress username for publishing"
+  },
+  "rssBlogCategorizer.wordpressCategories": {
+    "type": "array",
+    "default": ["Daily Links", "Development"],
+    "description": "Default WordPress categories for published posts"
   }
 }
 ```
@@ -183,6 +209,7 @@ We welcome contributions! Here's how to get started:
 - Verify the extension works in both development and packaged modes
 - Check that configuration changes work as expected
 - Validate export functionality with different feed formats
+- Test WordPress publishing with different authentication methods
 
 ## Troubleshooting
 
@@ -216,8 +243,9 @@ The extension follows a modular architecture:
 - **extension.ts**: Entry point, registers commands and providers
 - **rssProvider.ts**: Handles RSS feed parsing and tree view data
 - **exportManager.ts**: Manages HTML and Markdown export functionality
+- **wordpressManager.ts**: Handles WordPress REST API publishing and authentication
 
-The extension uses VS Code's TreeDataProvider API to display categorized posts and integrates with the workspace file system for exports.
+The extension uses VS Code's TreeDataProvider API to display categorized posts, integrates with the workspace file system for exports, and provides secure WordPress publishing via REST API.
 
 ## License
 
