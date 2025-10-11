@@ -154,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
         return config.get<boolean>('enableAutoRefresh') || false;
     };
 
-    let refreshInterval: NodeJS.Timeout | undefined;
+    let refreshInterval: ReturnType<typeof setInterval> | undefined;
 
     const setupAutoRefresh = () => {
         // Clear existing interval
