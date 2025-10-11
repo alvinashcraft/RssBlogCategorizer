@@ -9,6 +9,8 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 - 🏷️ **Smart Categorization** - Automatically categorizes posts by technology (JavaScript, Python, DevOps, etc.)
 - 🌳 **Tree View Integration** - Displays categorized posts in VS Code sidebar with expandable categories
 - 📄 **Export Functionality** - Generates HTML and Markdown files with professional templates
+- 🚀 **WordPress Publishing** - Direct publishing to WordPress blogs via XML-RPC with secure credential storage
+- 🏷️ **Automatic Tag Detection** - Intelligent extraction of technology tags from blog post content
 - ⚙️ **Configurable Settings** - Customizable RSS feed URLs, refresh intervals, and date filtering
 - 🔄 **Auto-refresh** - Configurable automatic feed updates
 - 📚 **Book Recommendations** - Includes "The Geek Shelf" section with rotating book recommendations
@@ -88,6 +90,53 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
    - Categorized posts with author attribution
    - "The Geek Shelf" section with book recommendations
 
+### Publishing to WordPress
+
+After exporting to HTML, you can publish directly to your WordPress blog:
+
+**Prerequisites:**
+
+1. **Configure WordPress Settings**: Set your blog URL and username in settings
+2. **Set Credentials**: Use Command Palette → "RSS Blog Categorizer: Set WordPress Credentials" to securely store your login
+
+**Publishing Process:**
+
+1. **Export to HTML** first using the export functionality above
+2. **Open the HTML file** in VS Code editor
+3. **Click the WordPress publish button** in the editor toolbar (cloud upload icon)
+   - Or use Command Palette → "RSS Blog Categorizer: Publish to WordPress"
+4. **Choose categories**: Use default categories (configurable in settings), customize for this post, or publish without categories
+5. **Review auto-detected tags**: The extension automatically detects technology tags from content - use detected tags, customize them, or skip
+6. **Choose publish status**: Publish immediately or save as draft
+7. **Confirmation**: The extension will confirm successful publication with the post ID, assigned categories, and tag count
+
+**WordPress Setup Requirements:**
+
+- WordPress site with XML-RPC enabled (enabled by default in most WordPress installations)
+- WordPress user account with publishing permissions
+- For enhanced security, consider using WordPress Application Passwords instead of your main password
+
+**Automatic Tag Detection:**
+
+The extension automatically analyzes your blog post content and detects relevant technology tags including:
+
+- **Frameworks & Platforms**: .NET, ASP.NET Core, Blazor, React, Node.js, Uno Platform
+- **Programming Languages**: C#, JavaScript, TypeScript, Python, Go, Swift, Kotlin
+- **Cloud & DevOps**: Azure, AWS, Docker, Kubernetes, TeamCity
+- **AI & ML**: ChatGPT, Copilot, Claude, Gemini, Perplexity
+- **Mobile & IoT**: Android, iOS, Raspberry Pi
+- **Databases**: SQL Server, MySQL, PostgreSQL
+- **Tools**: Visual Studio, VS Code, Android Studio, Playwright
+- **And 50+ more technology keywords**
+
+The system intelligently matches content against a comprehensive technology keyword database and presents detected tags for your review before publishing.
+
+**Security Notes:**
+
+- WordPress credentials are stored securely using VS Code's built-in SecretStorage
+- Passwords are never stored in plain text or configuration files
+- Use WordPress Application Passwords for enhanced security when available
+
 ## Configuration
 
 Access settings via `File > Preferences > Settings` and search for "RSS Blog Categorizer":
@@ -98,6 +147,11 @@ Access settings via `File > Preferences > Settings` and search for "RSS Blog Cat
 - **Refresh Interval**: Auto-refresh interval in minutes
 - **Use NewsBlur API**: Enable NewsBlur API integration for enhanced functionality
 - **NewsBlur Username**: Your NewsBlur account username (password stored securely)
+- **WordPress Blog URL**: Your WordPress blog URL (e.g., `https://yourblog.com`)
+- **WordPress Username**: Your WordPress account username (password stored securely)
+- **WordPress Categories**: Default categories to assign to published posts (e.g., "Daily Links", "Development")
+
+**Note**: Tags are automatically detected from content and don't require configuration - the system analyzes your blog post and suggests relevant technology tags during publishing.
 
 ### Smart Date Filtering
 
@@ -127,6 +181,8 @@ See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 | `RSS Blog Categorizer: Export as HTML` | Export posts to HTML |
 | `RSS Blog Categorizer: Set RSS Feed` | Configure RSS feed URL |
 | `RSS Blog Categorizer: Set NewsBlur Credentials` | Securely configure NewsBlur API credentials |
+| `RSS Blog Categorizer: Set WordPress Credentials` | Securely configure WordPress publishing credentials |
+| `RSS Blog Categorizer: Publish to WordPress` | Publish HTML file to WordPress blog |
 
 All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.
 

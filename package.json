@@ -59,6 +59,16 @@
         "command": "rssBlogCategorizer.setNewsblurCredentials",
         "title": "Set NewsBlur Credentials",
         "icon": "$(key)"
+      },
+      {
+        "command": "rssBlogCategorizer.setWordpressCredentials",
+        "title": "Set WordPress Credentials",
+        "icon": "$(key)"
+      },
+      {
+        "command": "rssBlogCategorizer.publishToWordpress",
+        "title": "Publish to WordPress",
+        "icon": "$(cloud-upload)"
       }
     ],
     "menus": {
@@ -84,6 +94,17 @@
         {
           "command": "rssBlogCategorizer.setNewsblurCredentials",
           "when": "view == rssBlogCategorizerView"
+        },
+        {
+          "command": "rssBlogCategorizer.setWordpressCredentials",
+          "when": "view == rssBlogCategorizerView"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "rssBlogCategorizer.publishToWordpress",
+          "when": "resourceExtname == .html && resourcePath =~ /.*Dew Drop.*/",
+          "group": "navigation"
         }
       ]
     },
@@ -121,6 +142,24 @@
           "type": "boolean",
           "default": false,
           "description": "Use NewsBlur API instead of RSS feed (allows more than 25 items with authentication)"
+        },
+        "rssBlogCategorizer.wordpressBlogUrl": {
+          "type": "string",
+          "default": "",
+          "description": "WordPress blog URL (e.g., https://yourblog.com)"
+        },
+        "rssBlogCategorizer.wordpressUsername": {
+          "type": "string",
+          "default": "",
+          "description": "WordPress username for publishing. Password is stored securely and will be prompted when needed."
+        },
+        "rssBlogCategorizer.wordpressCategories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["Daily Links", "Development"],
+          "description": "Default WordPress categories to assign to published posts"
         }
       }
     }
