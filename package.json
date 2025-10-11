@@ -13,13 +13,10 @@
   "readme": "README.md",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
-  ],
-  "activationEvents": [
-    "onView:rssBlogCategorizerView"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -28,6 +25,7 @@
         {
           "id": "rssBlogCategorizerView",
           "name": "Dev Blog Posts",
+          "icon": "images/feedIcon.png",
           "when": "true"
         }
       ]
