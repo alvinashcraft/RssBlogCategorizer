@@ -48,6 +48,7 @@
         "winforms",
         "wct",
         "windows community toolkit",
+        "windows runtime",
         "c++",
         "winrt",
         "windows sdk",
@@ -105,9 +106,13 @@
         "ai",
         "artificial intelligence",
         "machine learning",
+        "context engineering",
+        "prompt engineering",
+        "coding agents",
         "deep learning",
         "openai",
         "perplexity",
+        "vibe coding",
         "bard",
         "claude",
         "gemini",
@@ -227,6 +232,7 @@
         "meta-cast.com",
         "mergeconflict.fm",
         "ageekleader.com",
+        "cppcast.com",
         "podcasts.apple.com",
         "theaifix.show",
         "azuredevops.show",
@@ -336,6 +342,7 @@
       "urlKeywords": [
         "sergeytihon.com",
         "azureweekly.info",
+        "dotnetnews.co",
         "blog.cwa.me.uk"
       ],
       "titleKeywords": [

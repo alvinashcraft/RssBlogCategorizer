@@ -3,7 +3,7 @@
   "displayName": "RSS Blog Categorizer and Link Blog Post Generator",
   "description": "Fetches RSS feeds from developer blogs and categorizes them with HTML/Markdown export functionality to generate link blog posts.",
   "icon": "images/feedIcon.png",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -13,13 +13,10 @@
   "readme": "README.md",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
-  ],
-  "activationEvents": [
-    "onView:rssBlogCategorizerView"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -28,6 +25,7 @@
         {
           "id": "rssBlogCategorizerView",
           "name": "Dev Blog Posts",
+          "icon": "images/feedIcon.png",
           "when": "true"
         }
       ]
@@ -61,6 +59,21 @@
         "command": "rssBlogCategorizer.setNewsblurCredentials",
         "title": "Set NewsBlur Credentials",
         "icon": "$(key)"
+      },
+      {
+        "command": "rssBlogCategorizer.setWordpressCredentials",
+        "title": "Set WordPress Credentials",
+        "icon": "$(key)"
+      },
+      {
+        "command": "rssBlogCategorizer.testWordpressConnection",
+        "title": "Test WordPress Connection",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "rssBlogCategorizer.publishToWordpress",
+        "title": "Publish to WordPress",
+        "icon": "$(cloud-upload)"
       }
     ],
     "menus": {
@@ -86,6 +99,21 @@
         {
           "command": "rssBlogCategorizer.setNewsblurCredentials",
           "when": "view == rssBlogCategorizerView"
+        },
+        {
+          "command": "rssBlogCategorizer.setWordpressCredentials",
+          "when": "view == rssBlogCategorizerView"
+        },
+        {
+          "command": "rssBlogCategorizer.testWordpressConnection",
+          "when": "view == rssBlogCategorizerView"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "rssBlogCategorizer.publishToWordpress",
+          "when": "resourceExtname == .html && resourcePath =~ /.*Dew Drop.*/",
+          "group": "navigation"
         }
       ]
     },
@@ -109,10 +137,15 @@
           "default": "",
           "description": "Minimum datetime for blog posts in UTC (ISO format, e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00.000Z). Leave empty to automatically use the date of the latest 'Dew Drop' post from alvinashcraft.com, or fall back to last 24 hours (UTC) if unavailable. All date comparisons use UTC timezone."
         },
+        "rssBlogCategorizer.enableAutoRefresh": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable automatic refresh of RSS feed data. When disabled, refresh is manual only."
+        },
         "rssBlogCategorizer.refreshInterval": {
           "type": "number",
           "default": 30,
-          "description": "Refresh interval in minutes"
+          "description": "Refresh interval in minutes (only applies when auto-refresh is enabled)"
         },
         "rssBlogCategorizer.newsblurUsername": {
           "type": "string",
@@ -123,6 +156,24 @@
           "type": "boolean",
           "default": false,
           "description": "Use NewsBlur API instead of RSS feed (allows more than 25 items with authentication)"
+        },
+        "rssBlogCategorizer.wordpressBlogUrl": {
+          "type": "string",
+          "default": "",
+          "description": "WordPress blog URL (e.g., https://yourblog.com)"
+        },
+        "rssBlogCategorizer.wordpressUsername": {
+          "type": "string",
+          "default": "",
+          "description": "WordPress username for publishing. Password is stored securely and will be prompted when needed."
+        },
+        "rssBlogCategorizer.wordpressCategories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["Daily Links", "Development"],
+          "description": "Default WordPress categories to assign to published posts"
         }
       }
     }
@@ -148,7 +199,7 @@
     "@types/node": "16.x",
     "@types/sinon": "^17.0.2",
     "@types/sinon-chai": "^3.2.12",
-    "@types/vscode": "^1.74.0",
+    "@types/vscode": "^1.75.0",
     "@vscode/test-electron": "^2.3.8",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",

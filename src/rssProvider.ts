@@ -837,8 +837,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const lastDewDropDate = await this.getLastDewDropDate();
             
             if (lastDewDropDate) {
-                minimumDateTime = lastDewDropDate;
-                console.log(`Using latest Dew Drop post date as filter: posts newer than ${minimumDateTime.toISOString()}`);
+                // Add a small buffer (5 minutes) to account for timing differences
+                // This helps avoid edge cases where posts might have similar timestamps
+                minimumDateTime = new Date(lastDewDropDate.getTime() + (5 * 60 * 1000));
+                console.log(`Using latest Dew Drop post date as filter (with 5min buffer): posts newer than ${minimumDateTime.toISOString()}`);
             } else {
                 // Fallback to last 24 hours in UTC if we can't get the Dew Drop date
                 minimumDateTime = new Date();
@@ -877,9 +879,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     return false; // Exclude posts with invalid dates
                 }
                 
-                const isIncluded = postDate >= minimumDateTime;
+                const isIncluded = postDate > minimumDateTime;
                 if (!isIncluded) {
-                    console.log(`Excluding post "${post.title}" - too old: ${postDate.toISOString()} < ${minimumDateTime.toISOString()}`);
+                    console.log(`Excluding post "${post.title}" - too old: ${postDate.toISOString()} <= ${minimumDateTime.toISOString()}`);
                 }
                 return isIncluded;
             } catch (error) {

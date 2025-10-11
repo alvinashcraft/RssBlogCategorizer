@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { RSSBlogProvider } from './rssProvider';
 import { ExportManager } from './exportManager';
+import { WordPressManager } from './wordpressManager';
 import { NEWSBLUR_PASSWORD_KEY } from './constants';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -15,6 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const exportManager = new ExportManager();
+    const wordpressManager = new WordPressManager(context);
 
     // Register commands
     const refreshCommand = vscode.commands.registerCommand('rssBlogCategorizer.refresh', async () => {
@@ -103,30 +105,92 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    const setWordpressCredentialsCommand = vscode.commands.registerCommand('rssBlogCategorizer.setWordpressCredentials', async () => {
+        await wordpressManager.setWordpressCredentials();
+    });
+
+    const testWordpressConnectionCommand = vscode.commands.registerCommand('rssBlogCategorizer.testWordpressConnection', async () => {
+        await wordpressManager.testConnection();
+    });
+
+    const publishToWordpressCommand = vscode.commands.registerCommand('rssBlogCategorizer.publishToWordpress', async () => {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (!activeEditor) {
+            vscode.window.showErrorMessage('No active editor found. Please open an HTML file to publish.');
+            return;
+        }
+
+        const document = activeEditor.document;
+        if (!document.fileName.endsWith('.html')) {
+            vscode.window.showErrorMessage('Please open an HTML file to publish to WordPress.');
+            return;
+        }
+
+        // Check if this is a Dew Drop post (contains "Dew Drop" in title or filename)
+        const isDewDrop = document.fileName.includes('Dew Drop') || 
+                         document.getText().toLowerCase().includes('dew drop');
+        
+        if (!isDewDrop) {
+            const proceed = await vscode.window.showWarningMessage(
+                'This doesn\'t appear to be a Dew Drop post. Do you want to publish it anyway?',
+                'Yes', 'No'
+            );
+            if (proceed !== 'Yes') {
+                return;
+            }
+        }
+
+        await wordpressManager.publishHtmlFile(document);
+    });
+
     // Auto-refresh based on configuration
     const getRefreshInterval = () => {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         return (config.get<number>('refreshInterval') || 30) * 60 * 1000;
     };
 
-    let refreshInterval = setInterval(async () => {
-        await provider.refresh();
-    }, getRefreshInterval());
+    const isAutoRefreshEnabled = () => {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        return config.get<boolean>('enableAutoRefresh') || false;
+    };
 
-    // Update interval when configuration changes
-    const configChangeHandler = vscode.workspace.onDidChangeConfiguration(event => {
-        if (event.affectsConfiguration('rssBlogCategorizer.refreshInterval')) {
+    let refreshInterval: ReturnType<typeof setInterval> | undefined;
+
+    const setupAutoRefresh = () => {
+        // Clear existing interval
+        if (refreshInterval) {
             clearInterval(refreshInterval);
+            refreshInterval = undefined;
+        }
+
+        // Only setup auto-refresh if enabled
+        if (isAutoRefreshEnabled()) {
             refreshInterval = setInterval(async () => {
                 await provider.refresh();
             }, getRefreshInterval());
+            console.log('Auto-refresh enabled with interval:', getRefreshInterval() / 60000, 'minutes');
+        } else {
+            console.log('Auto-refresh disabled - manual refresh only');
+        }
+    };
+
+    // Setup initial auto-refresh state
+    setupAutoRefresh();
+
+    // Update interval when configuration changes
+    const configChangeHandler = vscode.workspace.onDidChangeConfiguration(event => {
+        if (event.affectsConfiguration('rssBlogCategorizer.enableAutoRefresh') ||
+            event.affectsConfiguration('rssBlogCategorizer.refreshInterval')) {
+            setupAutoRefresh();
         }
         
-        // Auto-refresh when feed settings change
+        // Auto-refresh when feed settings change (only if auto-refresh is enabled)
         if (event.affectsConfiguration('rssBlogCategorizer.feedUrl') ||
             event.affectsConfiguration('rssBlogCategorizer.recordCount') ||
             event.affectsConfiguration('rssBlogCategorizer.minimumDateTime')) {
-            provider.refresh().catch(console.error);
+            if (isAutoRefreshEnabled()) {
+                provider.refresh().catch(console.error);
+            }
         }
     });
 
@@ -137,13 +201,16 @@ export function activate(context: vscode.ExtensionContext) {
         openPostCommand,
         setFeedCommand,
         setNewsblurCredentialsCommand,
+        setWordpressCredentialsCommand,
+        testWordpressConnectionCommand,
+        publishToWordpressCommand,
         treeView,
         configChangeHandler,
-        { dispose: () => clearInterval(refreshInterval) }
+        { dispose: () => { if (refreshInterval) clearInterval(refreshInterval); } }
     );
 
-    // Initial refresh
-    provider.refresh().catch(console.error);
+    // No initial refresh - manual only unless auto-refresh is enabled
+    console.log('RSS Blog Categorizer extension activated. Use refresh button or enable auto-refresh in settings.');
 }
 
 export function deactivate() {}

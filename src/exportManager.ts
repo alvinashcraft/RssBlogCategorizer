@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { XMLParser } from 'fast-xml-parser';
 import { BlogPost } from './rssProvider';
 
@@ -308,15 +309,29 @@ export class ExportManager {
 
     private async saveExport(content: string, format: string, extension: string): Promise<void> {
         const dewDropTitle = await this.generateDewDropTitle();
-        const filename = `${dewDropTitle.replace(/[<>:"/\\|?*]/g, '-')}.${extension}`;
+        // Clean up the title for use as filename
+        const cleanTitle = dewDropTitle
+            .replace(/[<>:"/\\|?*#]/g, '')  // Remove invalid filename characters  
+            .replace(/[()]/g, '')           // Remove parentheses
+            .replace(/\s+/g, '_')           // Replace spaces with underscores
+            .replace(/_+/g, '_')            // Replace multiple underscores with single
+            .replace(/^_|_$/g, '')          // Remove leading/trailing underscores
+            .trim();
+        const filename = `${cleanTitle}.${extension}`;
         
+        // Create default URI - use workspace folder if available, otherwise user's home directory
         let defaultUri;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             defaultUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, filename);
+        } else {
+            // Fallback: use OS home directory with the filename
+            const homedir = os.homedir();
+            defaultUri = vscode.Uri.file(path.join(homedir, 'Desktop', filename));
         }
         
         const uri = await vscode.window.showSaveDialog({
             defaultUri: defaultUri,
+            saveLabel: `Save ${format.toUpperCase()}`,
             filters: {
                 [format.toUpperCase()]: [extension]
             }
