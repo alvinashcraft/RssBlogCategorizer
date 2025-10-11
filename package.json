@@ -3,7 +3,7 @@
   "displayName": "RSS Blog Categorizer and Link Blog Post Generator",
   "description": "Fetches RSS feeds from developer blogs and categorizes them with HTML/Markdown export functionality to generate link blog posts.",
   "icon": "images/feedIcon.png",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -146,7 +146,7 @@
     "@types/node": "16.x",
     "@types/sinon": "^17.0.2",
     "@types/sinon-chai": "^3.2.12",
-    "@types/vscode": "^1.74.0",
+    "@types/vscode": "^1.75.0",
     "@vscode/test-electron": "^2.3.8",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
