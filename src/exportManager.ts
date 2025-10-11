@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { XMLParser } from 'fast-xml-parser';
 import { BlogPost } from './rssProvider';
 
@@ -318,13 +319,19 @@ export class ExportManager {
             .trim();
         const filename = `${cleanTitle}.${extension}`;
         
+        // Create default URI - use workspace folder if available, otherwise user's home directory
         let defaultUri;
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             defaultUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, filename);
+        } else {
+            // Fallback: use OS home directory with the filename
+            const homedir = os.homedir();
+            defaultUri = vscode.Uri.file(path.join(homedir, 'Desktop', filename));
         }
         
         const uri = await vscode.window.showSaveDialog({
             defaultUri: defaultUri,
+            saveLabel: `Save ${format.toUpperCase()}`,
             filters: {
                 [format.toUpperCase()]: [extension]
             }
