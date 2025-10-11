@@ -179,7 +179,7 @@ Would you like to open your WordPress admin panel now?
      */
     private createAuthHeader(username: string, password: string): string {
         const credentials = Buffer.from(`${username}:${password}`).toString('base64');
-        console.log(`Creating auth header for user: ${username} (password length: ${password.length})`);
+        console.log(`Creating auth header for user: ${username}`);
         return `Basic ${credentials}`;
     }
 
