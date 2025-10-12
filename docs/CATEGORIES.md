@@ -73,6 +73,14 @@ The extension filters posts by publication date using **UTC timezone**:
   - `2025-09-27T12:00:00.000Z` (noon UTC on Sep 27, 2025)
 - **Important**: All date comparisons use UTC to ensure consistency across timezones
 
+### NewsBlur Date Filtering
+
+When using NewsBlur API integration, the extension prioritizes the **shared date** for filtering:
+
+- **Primary**: Uses `shared_date` (when you shared the item in NewsBlur)
+- **Fallback**: Uses `story_date` (original publication date) if shared_date is unavailable
+- **Benefit**: Allows inclusion of older content based on when you curated it, not when it was originally published
+
 ## Whole Word Keywords
 
 The optional `wholeWordKeywords` array contains keywords that should only match as complete words:

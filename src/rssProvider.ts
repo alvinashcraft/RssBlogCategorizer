@@ -523,7 +523,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 const title = story.story_title || 'Untitled';
                 const link = story.story_permalink || '';
                 const description = story.story_content ? this.stripHtml(story.story_content) : '';
-                const pubDate = story.story_date || story.shared_date || '';
+                const pubDate = story.shared_date || story.story_date || '';
                 let author = story.story_authors || 'unknown';
                 
                 // Clean up author - NewsBlur sometimes returns comma-separated authors
