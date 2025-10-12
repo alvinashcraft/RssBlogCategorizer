@@ -79,6 +79,7 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
 - Access more than 25 feed items (RSS feeds are typically limited to 25)
 - More reliable access to popular feeds
 - Better handling of feed redirects and updates
+- Date filtering based on when you shared items in NewsBlur (shared_date) rather than original publication date
 
 ### Exporting Posts
 
