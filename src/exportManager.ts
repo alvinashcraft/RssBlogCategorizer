@@ -193,6 +193,11 @@ export class ExportManager {
         const groupedPosts = await this.groupPostsByCategory(posts);
         const dewDropTitle = await this.generateDewDropTitle();
         
+        // Get the setting for opening links in new tab
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const openInNewTab = config.get<boolean>('openLinksInNewTab') || false;
+        const targetAttribute = openInNewTab ? ' target="_blank"' : '';
+        
         const htmlStart = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -201,30 +206,29 @@ export class ExportManager {
     <title>${this.escapeHtml(dewDropTitle)}</title>
 </head>
 <body>
-    <div>
-        <h1>${this.escapeHtml(dewDropTitle)}</h1>
-    </div>`;
+    <h1>${this.escapeHtml(dewDropTitle)}</h1>`;
 
         let categoriesHtml = '';
         Object.entries(groupedPosts).forEach(([category, categoryPosts]: [string, BlogPost[]]) => {
-            categoriesHtml += `\n    <div>\n        <h3>${category}</h3>\n`;
+            categoriesHtml += `\n    <h3>${category}</h3>\n`;
             
             if (category === "Top Links") {
-                // Add empty div for manual editing
-                categoriesHtml += `        <!-- Add top links here manually -->\n        <div></div>\n`;
+                // Add placeholder for manual editing
+                categoriesHtml += `    <!-- Add top links here manually -->\n    <ul>\n        <li>TBD</li>\n    </ul>\n`;
+            } else if (categoryPosts.length === 0) {
+                // Empty category - add placeholder
+                categoriesHtml += `    <ul>\n        <li>TBD</li>\n    </ul>\n`;
             } else {
-                categoriesHtml += `        <ul>\n`;
+                categoriesHtml += `    <ul>\n`;
                 categoryPosts.forEach(post => {
-                    categoriesHtml += `            <li><a href="${post.link}" target="_blank">${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
+                    categoriesHtml += `        <li><a href="${post.link}"${targetAttribute}>${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
                 });
-                categoriesHtml += `        </ul>\n`;
+                categoriesHtml += `    </ul>\n`;
             }
-            
-            categoriesHtml += `    </div>\n`;
         });
 
         // Add Geek Shelf section
-        const geekShelfHtml = await this.generateGeekShelfHtml();
+        const geekShelfHtml = await this.generateGeekShelfHtml(targetAttribute);
         
         const htmlEnd = `</body>\n</html>`;
         
@@ -268,9 +272,12 @@ export class ExportManager {
         orderedResult["Top Links"] = grouped["Top Links"];
         
         // Add ALL categories in the order they appear in the JSON file (even if empty)
+        // BUT skip "More Link Collections" for now - we'll add it after "General"
         categoryOrder.forEach(categoryName => {
-            // Always include the category, even if it has no posts
-            orderedResult[categoryName] = grouped[categoryName] || [];
+            if (categoryName !== "More Link Collections") {
+                // Always include the category, even if it has no posts
+                orderedResult[categoryName] = grouped[categoryName] || [];
+            }
         });
         
         // Add the default category if it exists and isn't already included
@@ -278,9 +285,17 @@ export class ExportManager {
             orderedResult[categoriesConfig.defaultCategory] = grouped[categoriesConfig.defaultCategory] || [];
         }
         
+        // Now add "More Link Collections" after "General" (the default category)
+        if (categoryOrder.includes("More Link Collections")) {
+            orderedResult["More Link Collections"] = grouped["More Link Collections"] || [];
+        }
+        
         // Add any remaining categories not in the JSON (like unexpected categories)
+        // Skip "Top Links" and "More Link Collections" since they're already positioned
         Object.keys(grouped).forEach(categoryName => {
-            if (categoryName !== "Top Links" && !orderedResult[categoryName]) {
+            if (categoryName !== "Top Links" && 
+                categoryName !== "More Link Collections" && 
+                !orderedResult[categoryName]) {
                 orderedResult[categoryName] = grouped[categoryName];
             }
         });
@@ -351,22 +366,22 @@ export class ExportManager {
         }
     }
 
-    private async generateGeekShelfHtml(): Promise<string> {
+    private async generateGeekShelfHtml(targetAttribute: string = ''): Promise<string> {
         const book = await this.getBookOfTheDay();
         if (!book) {
             return '';
         }
 
         return `
-    <div>
-        <h3>The Geek Shelf</h3>
-        <div style="display: flex; align-items: flex-start; gap: 15px;">
-            <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
+    <h3>The Geek Shelf</h3>
+    <div style="display: flex; align-items: flex-start; gap: 15px;">
+        <a href="${book.productUrl}"${targetAttribute} style="display: flex; align-items: flex-start; gap: 15px; text-decoration: none; color: inherit;">
+            <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto; flex-shrink: 0;">
             <div>
-                <a href="${book.productUrl}" target="_blank">${this.escapeHtml(book.title)}</a> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
-                <p>${this.escapeHtml(book.description)}</p>
+                <span style="text-decoration: underline; color: #0066cc;">${this.escapeHtml(book.title)}</span> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
+                <p style="margin-top: 8px;">${this.escapeHtml(book.description)}</p>
             </div>
-        </div>
+        </a>
     </div>`;
     }
 

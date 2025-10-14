@@ -11,3 +11,4 @@ node_modules/**
 out/**
 **/*.map
 test-*.js
+CODE_REVIEW_FIXES.md

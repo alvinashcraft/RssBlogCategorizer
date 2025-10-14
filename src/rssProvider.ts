@@ -47,6 +47,17 @@ interface CategoriesConfig {
     wholeWordKeywords?: string[]; // Optional list of keywords that require whole word matching
 }
 
+interface AuthorMapping {
+    keyword: string;
+    author: string;
+}
+
+interface AuthorMappingsConfig {
+    urlContains: AuthorMapping[];
+    authorContains: AuthorMapping[];
+    authorExact: AuthorMapping[];
+}
+
 export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private _onDidChangeTreeData: vscode.EventEmitter<any | undefined | null | void> = new vscode.EventEmitter<any | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<any | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -54,9 +65,14 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private posts: BlogPost[] = [];
     private categories: Map<string, BlogPost[]> = new Map();
     private categoriesConfig: CategoriesConfig | null = null;
+    private authorMappingsConfig: AuthorMappingsConfig | null = null;
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
+    
+    // Class-level constants
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
     private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
+    private static readonly MILLISECONDS_PER_MINUTE = 1000 * 60;
+    private static readonly MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -190,6 +206,30 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         this._onDidChangeTreeData.fire(undefined);
     }
 
+    private async loadAuthorMappingsConfig(): Promise<void> {
+        try {
+            // Use extension context to get the correct path to authorMappings.json
+            const authorMappingsPath = path.join(this.context.extensionPath, 'authorMappings.json');
+            console.log(`Loading author mappings from: ${authorMappingsPath}`);
+            const authorMappingsData = await fs.promises.readFile(authorMappingsPath, 'utf8');
+            this.authorMappingsConfig = JSON.parse(authorMappingsData) as AuthorMappingsConfig;
+            console.log(`✅ Author mappings configuration loaded successfully:`);
+            console.log(`   - URL Contains: ${this.authorMappingsConfig.urlContains.length} mappings`);
+            console.log(`   - Author Contains: ${this.authorMappingsConfig.authorContains.length} mappings`);
+            console.log(`   - Author Exact: ${this.authorMappingsConfig.authorExact.length} mappings`);
+        } catch (error) {
+            console.error('❌ Error loading author mappings configuration:', error);
+            console.error('This likely means authorMappings.json is missing from the extension package');
+            // Fallback to empty config if file can't be loaded
+            this.authorMappingsConfig = {
+                urlContains: [],
+                authorContains: [],
+                authorExact: []
+            };
+            console.log('Using fallback configuration with empty author mappings');
+        }
+    }
+
     getTreeItem(element: any): vscode.TreeItem {
         if (element.posts) {
             // Category node
@@ -293,6 +333,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             await this.loadCategoriesConfig();
         }
 
+        // Load author mappings configuration if not already loaded
+        if (!this.authorMappingsConfig) {
+            await this.loadAuthorMappingsConfig();
+        }
+
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const feedUrl = config.get<string>('feedUrl') || 'https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft';
         const recordCount = config.get<number>('recordCount') || 100;
@@ -360,6 +405,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         }
 
         this.categorizePosts();
+        this.applyAuthorMappings();
     }
 
     private async fetchFeed(feedUrl: string, redirectCount: number = 0): Promise<BlogPost[]> {
@@ -523,12 +569,41 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 const title = story.story_title || 'Untitled';
                 const link = story.story_permalink || '';
                 const description = story.story_content ? this.stripHtml(story.story_content) : '';
-                const pubDate = story.shared_date || story.story_date || '';
+                
+                // NewsBlur returns Unix timestamps (seconds since epoch) as strings
+                // Convert to ISO format for consistent date handling
+                let pubDate = '';
+                const rawDate = story.shared_date || story.story_date || '';
+                if (rawDate) {
+                    // Check if it's a Unix timestamp (all digits) vs ISO string
+                    if (/^\d+$/.test(rawDate)) {
+                        // Unix timestamp - convert to ISO string
+                        const timestamp = parseInt(rawDate, 10);
+                        pubDate = new Date(timestamp * 1000).toISOString();
+                    } else {
+                        // Already an ISO string or other format
+                        pubDate = rawDate;
+                    }
+                }
+                
                 let author = story.story_authors || 'unknown';
                 
                 // Clean up author - NewsBlur sometimes returns comma-separated authors
+                // Format: 2 authors: "First & Second"
+                // Format: 3+ authors: "First, Second & Third"
                 if (author.includes(',')) {
-                    author = author.split(',')[0].trim();
+                    const authors = author.split(',').map(a => a.trim()).filter(a => a.length > 0);
+                    if (authors.length === 0) {
+                        author = 'unknown';
+                    } else if (authors.length === 1) {
+                        author = authors[0];
+                    } else if (authors.length === 2) {
+                        author = `${authors[0]} & ${authors[1]}`;
+                    } else {
+                        const lastAuthor = authors[authors.length - 1];
+                        const otherAuthors = authors.slice(0, -1);
+                        author = `${otherAuthors.join(', ')} & ${lastAuthor}`;
+                    }
                 }
                 
                 // Clean up and validate author
@@ -544,7 +619,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
                 const post: BlogPost = {
                     title: title,
-                    link: link,
+                    link: this.appendSyncfusionTracking(this.removeTrackingParameters(link)),
                     description: description,
                     pubDate: pubDate,
                     category: this.categorizePost(title, description, link),
@@ -660,7 +735,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     
                     const post: BlogPost = {
                         title: title,
-                        link: link,
+                        link: this.appendSyncfusionTracking(this.removeTrackingParameters(link)),
                         description: this.stripHtml(description),
                         pubDate: item.pubDate || item.published || item.updated || '',
                         category: this.categorizePost(title, description, link),
@@ -820,6 +895,69 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         });
     }
 
+    private applyAuthorMappings(): void {
+        if (!this.authorMappingsConfig) {
+            console.log('❌ Author mappings not loaded, skipping author name updates');
+            return;
+        }
+
+        // Store config in local variable to avoid repeated property access and ensure type safety
+        const config = this.authorMappingsConfig;
+
+        let updatedCount = 0;
+        const totalPosts = this.posts.length;
+
+        console.log(`🔍 Applying author mappings to ${totalPosts} posts...`);
+
+        // Apply mappings to each post
+        this.posts.forEach(post => {
+            const originalAuthor = post.author;
+            let newAuthor = originalAuthor;
+
+            // 1. URL Contains mappings (highest priority)
+            const urlLower = post.link.toLowerCase();
+            for (const mapping of config.urlContains) {
+                if (urlLower.includes(mapping.keyword.toLowerCase())) {
+                    newAuthor = mapping.author;
+                    console.log(`✅ URL mapping applied: "${originalAuthor}" → "${newAuthor}" (URL contains "${mapping.keyword}")`);
+                    break; // Stop at first match for efficiency
+                }
+            }
+
+            // 2. Author Contains mappings (medium priority, only if no URL match)
+            if (newAuthor === originalAuthor) {
+                const authorLower = originalAuthor.toLowerCase();
+                for (const mapping of config.authorContains) {
+                    if (authorLower.includes(mapping.keyword.toLowerCase())) {
+                        newAuthor = mapping.author;
+                        console.log(`✅ Author contains mapping applied: "${originalAuthor}" → "${newAuthor}" (author contains "${mapping.keyword}")`);
+                        break; // Stop at first match for efficiency
+                    }
+                }
+            }
+
+            // 3. Author Exact mappings (lowest priority, only if no other matches)
+            if (newAuthor === originalAuthor) {
+                const authorLower = originalAuthor.toLowerCase();
+                for (const mapping of config.authorExact) {
+                    if (authorLower === mapping.keyword.toLowerCase()) {
+                        newAuthor = mapping.author;
+                        console.log(`✅ Author exact mapping applied: "${originalAuthor}" → "${newAuthor}" (exact match "${mapping.keyword}")`);
+                        break; // Stop at first match for efficiency
+                    }
+                }
+            }
+
+            // Update the post author if a mapping was found
+            if (newAuthor !== originalAuthor) {
+                post.author = newAuthor;
+                updatedCount++;
+            }
+        });
+
+        console.log(`📝 Author mappings complete: ${updatedCount} of ${totalPosts} posts had author names updated`);
+    }
+
     private appendRecordCount(feedUrl: string, recordCount: number): string {
         const url = new URL(feedUrl);
         url.searchParams.set('n', recordCount.toString());
@@ -839,7 +977,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             if (lastDewDropDate) {
                 // Add a small buffer (5 minutes) to account for timing differences
                 // This helps avoid edge cases where posts might have similar timestamps
-                minimumDateTime = new Date(lastDewDropDate.getTime() + (5 * 60 * 1000));
+                minimumDateTime = new Date(lastDewDropDate.getTime() + (5 * RSSBlogProvider.MILLISECONDS_PER_MINUTE));
                 console.log(`Using latest Dew Drop post date as filter (with 5min buffer): posts newer than ${minimumDateTime.toISOString()}`);
             } else {
                 // Fallback to last 24 hours in UTC if we can't get the Dew Drop date
@@ -881,7 +1019,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 
                 const isIncluded = postDate > minimumDateTime;
                 if (!isIncluded) {
-                    console.log(`Excluding post "${post.title}" - too old: ${postDate.toISOString()} <= ${minimumDateTime.toISOString()}`);
+                    const timeDiffMinutes = Math.round((minimumDateTime.getTime() - postDate.getTime()) / RSSBlogProvider.MILLISECONDS_PER_MINUTE);
+                    console.log(`Excluding post "${post.title}" - too old by ${timeDiffMinutes} minutes: ${postDate.toISOString()} <= ${minimumDateTime.toISOString()}`);
                 }
                 return isIncluded;
             } catch (error) {
@@ -892,6 +1031,109 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         console.log(`Date filtering: ${filteredPosts.length} of ${posts.length} posts passed the UTC date filter`);
         return filteredPosts;
+    }
+
+    /**
+     * Removes common tracking parameters from URLs to clean them up.
+     * Common tracking parameters include: utm_*, fbclid, gclid, mc_*, ref, source, campaign, etc.
+     * 
+     * @param url - The URL to clean
+     * @returns The URL with tracking parameters removed
+     */
+    private removeTrackingParameters(url: string): string {
+        try {
+            const urlObj = new URL(url);
+            
+            // List of common tracking parameter patterns
+            const trackingParams = [
+                // UTM parameters (Google Analytics, marketing campaigns)
+                'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
+                // Facebook
+                'fbclid', 'fb_action_ids', 'fb_action_types', 'fb_ref', 'fb_source',
+                // Google
+                'gclid', 'gclsrc', 'dclid',
+                // MailChimp
+                'mc_cid', 'mc_eid',
+                // Other common tracking
+                'ref', 'referer', 'referrer', 'source', 'campaign',
+                // Microsoft/Bing
+                'msclkid',
+                // Twitter
+                'twclid',
+                // LinkedIn
+                'trk', 'trkInfo',
+                // Reddit
+                'rdt_cid',
+                // HubSpot
+                'hsa_acc', 'hsa_cam', 'hsa_grp', 'hsa_ad', 'hsa_src', 'hsa_tgt', 'hsa_kw', 'hsa_mt', 'hsa_net', 'hsa_ver',
+                // Adobe/Omniture
+                'WT.mc_id', 'icid'
+            ];
+            
+            // Remove tracking parameters
+            trackingParams.forEach(param => {
+                urlObj.searchParams.delete(param);
+            });
+            
+            const cleanedUrl = urlObj.toString();
+            
+            // Only log if we actually removed something
+            if (cleanedUrl !== url) {
+                console.log(`🧹 Cleaned tracking from URL: ${url} → ${cleanedUrl}`);
+            }
+            
+            return cleanedUrl;
+
+        } catch (error) {
+            console.error('Error removing tracking parameters:', error);
+            return url; // Return original URL if there's an error
+        }
+    }
+
+    /**
+     * Appends tracking parameters to Syncfusion URLs.
+     * Tracking format: ?utm_source=alvinashcraft&utm_medium=email&utm_campaign=alvinashcraft_blog_edm{MMMYY}
+     * Example for October 2025: ?utm_source=alvinashcraft&utm_medium=email&utm_campaign=alvinashcraft_blog_edmoct25
+     * 
+     * @param url - The URL to potentially modify
+     * @returns The URL with tracking parameters if it's a Syncfusion URL, otherwise the original URL
+     */
+    private appendSyncfusionTracking(url: string): string {
+        try {
+            // Check if this is a Syncfusion URL
+            if (!url.toLowerCase().includes('syncfusion.com')) {
+                return url;
+            }
+
+            // Generate the month/year suffix (MMMYY format)
+            const now = new Date();
+            const monthSuffix = RSSBlogProvider.MONTH_NAMES[now.getMonth()];
+            const yearSuffix = now.getFullYear().toString().slice(-2); // Last 2 digits of year
+            const campaignSuffix = `${monthSuffix}${yearSuffix}`; // e.g., "oct25"
+
+            // Build the tracking parameters
+            const trackingParams = `utm_source=alvinashcraft&utm_medium=email&utm_campaign=alvinashcraft_blog_edm${campaignSuffix}`;
+
+            // Parse the URL to add tracking parameters properly
+            const urlObj = new URL(url);
+            
+            // Check if URL already has query parameters
+            if (urlObj.search) {
+                // Append to existing parameters
+                urlObj.search += `&${trackingParams}`;
+            } else {
+                // Add as new parameters
+                urlObj.search = `?${trackingParams}`;
+            }
+
+            const trackedUrl = urlObj.toString();
+            console.log(`✅ Added Syncfusion tracking: ${url} → ${trackedUrl}`);
+            return trackedUrl;
+
+        } catch (error) {
+            console.error('Error adding Syncfusion tracking parameters:', error);
+            return url; // Return original URL if there's an error
+        }
     }
 
     private stripHtml(html: any): string {
