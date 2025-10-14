@@ -361,7 +361,9 @@ export class ExportManager {
     <div>
         <h3>The Geek Shelf</h3>
         <div style="display: flex; align-items: flex-start; gap: 15px;">
-            <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
+            <a href="${book.productUrl}" target="_blank">
+                <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
+            </a>
             <div>
                 <a href="${book.productUrl}" target="_blank">${this.escapeHtml(book.title)}</a> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
                 <p>${this.escapeHtml(book.description)}</p>
