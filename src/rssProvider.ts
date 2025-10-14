@@ -573,14 +573,16 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 // Format: 3+ authors: "First, Second & Third"
                 if (author.includes(',')) {
                     const authors = author.split(',').map(a => a.trim()).filter(a => a.length > 0);
-                    if (authors.length === 2) {
+                    if (authors.length === 0) {
+                        author = 'unknown';
+                    } else if (authors.length === 1) {
+                        author = authors[0];
+                    } else if (authors.length === 2) {
                         author = `${authors[0]} & ${authors[1]}`;
-                    } else if (authors.length > 2) {
+                    } else {
                         const lastAuthor = authors[authors.length - 1];
                         const otherAuthors = authors.slice(0, -1);
                         author = `${otherAuthors.join(', ')} & ${lastAuthor}`;
-                    } else if (authors.length === 1) {
-                        author = authors[0];
                     }
                 }
                 
@@ -879,6 +881,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             return;
         }
 
+        // Store config in local variable to avoid repeated property access and ensure type safety
+        const config = this.authorMappingsConfig;
+
         let updatedCount = 0;
         const totalPosts = this.posts.length;
 
@@ -891,7 +896,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
             // 1. URL Contains mappings (highest priority)
             const urlLower = post.link.toLowerCase();
-            for (const mapping of this.authorMappingsConfig!.urlContains) {
+            for (const mapping of config.urlContains) {
                 if (urlLower.includes(mapping.keyword.toLowerCase())) {
                     newAuthor = mapping.author;
                     console.log(`✅ URL mapping applied: "${originalAuthor}" → "${newAuthor}" (URL contains "${mapping.keyword}")`);
@@ -902,7 +907,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // 2. Author Contains mappings (medium priority, only if no URL match)
             if (newAuthor === originalAuthor) {
                 const authorLower = originalAuthor.toLowerCase();
-                for (const mapping of this.authorMappingsConfig!.authorContains) {
+                for (const mapping of config.authorContains) {
                     if (authorLower.includes(mapping.keyword.toLowerCase())) {
                         newAuthor = mapping.author;
                         console.log(`✅ Author contains mapping applied: "${originalAuthor}" → "${newAuthor}" (author contains "${mapping.keyword}")`);
@@ -914,7 +919,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // 3. Author Exact mappings (lowest priority, only if no other matches)
             if (newAuthor === originalAuthor) {
                 const authorLower = originalAuthor.toLowerCase();
-                for (const mapping of this.authorMappingsConfig!.authorExact) {
+                for (const mapping of config.authorExact) {
                     if (authorLower === mapping.keyword.toLowerCase()) {
                         newAuthor = mapping.author;
                         console.log(`✅ Author exact mapping applied: "${originalAuthor}" → "${newAuthor}" (exact match "${mapping.keyword}")`);

@@ -375,13 +375,13 @@ export class ExportManager {
         return `
     <h3>The Geek Shelf</h3>
     <div style="display: flex; align-items: flex-start; gap: 15px;">
-        <a href="${book.productUrl}"${targetAttribute}>
-            <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
+        <a href="${book.productUrl}"${targetAttribute} style="display: flex; align-items: flex-start; gap: 15px; text-decoration: none; color: inherit;">
+            <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto; flex-shrink: 0;">
+            <div>
+                <span style="text-decoration: underline; color: #0066cc;">${this.escapeHtml(book.title)}</span> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
+                <p style="margin-top: 8px;">${this.escapeHtml(book.description)}</p>
+            </div>
         </a>
-        <div>
-            <a href="${book.productUrl}"${targetAttribute}>${this.escapeHtml(book.title)}</a> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
-            <p>${this.escapeHtml(book.description)}</p>
-        </div>
     </div>`;
     }
 
