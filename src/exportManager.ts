@@ -201,26 +201,25 @@ export class ExportManager {
     <title>${this.escapeHtml(dewDropTitle)}</title>
 </head>
 <body>
-    <div>
-        <h1>${this.escapeHtml(dewDropTitle)}</h1>
-    </div>`;
+    <h1>${this.escapeHtml(dewDropTitle)}</h1>`;
 
         let categoriesHtml = '';
         Object.entries(groupedPosts).forEach(([category, categoryPosts]: [string, BlogPost[]]) => {
-            categoriesHtml += `\n    <div>\n        <h3>${category}</h3>\n`;
+            categoriesHtml += `\n    <h3>${category}</h3>\n`;
             
             if (category === "Top Links") {
-                // Add empty div for manual editing
-                categoriesHtml += `        <!-- Add top links here manually -->\n        <div></div>\n`;
+                // Add placeholder for manual editing
+                categoriesHtml += `    <!-- Add top links here manually -->\n    <ul>TBD</ul>\n`;
+            } else if (categoryPosts.length === 0) {
+                // Empty category - add placeholder
+                categoriesHtml += `    <ul>TBD</ul>\n`;
             } else {
-                categoriesHtml += `        <ul>\n`;
+                categoriesHtml += `    <ul>\n`;
                 categoryPosts.forEach(post => {
-                    categoriesHtml += `            <li><a href="${post.link}" target="_blank">${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
+                    categoriesHtml += `        <li><a href="${post.link}" target="_blank">${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
                 });
-                categoriesHtml += `        </ul>\n`;
+                categoriesHtml += `    </ul>\n`;
             }
-            
-            categoriesHtml += `    </div>\n`;
         });
 
         // Add Geek Shelf section
@@ -369,16 +368,14 @@ export class ExportManager {
         }
 
         return `
-    <div>
-        <h3>The Geek Shelf</h3>
-        <div style="display: flex; align-items: flex-start; gap: 15px;">
-            <a href="${book.productUrl}" target="_blank">
-                <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
-            </a>
-            <div>
-                <a href="${book.productUrl}" target="_blank">${this.escapeHtml(book.title)}</a> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
-                <p>${this.escapeHtml(book.description)}</p>
-            </div>
+    <h3>The Geek Shelf</h3>
+    <div style="display: flex; align-items: flex-start; gap: 15px;">
+        <a href="${book.productUrl}" target="_blank">
+            <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
+        </a>
+        <div>
+            <a href="${book.productUrl}" target="_blank">${this.escapeHtml(book.title)}</a> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
+            <p>${this.escapeHtml(book.description)}</p>
         </div>
     </div>`;
     }
