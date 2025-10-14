@@ -268,9 +268,12 @@ export class ExportManager {
         orderedResult["Top Links"] = grouped["Top Links"];
         
         // Add ALL categories in the order they appear in the JSON file (even if empty)
+        // BUT skip "More Link Collections" for now - we'll add it after "General"
         categoryOrder.forEach(categoryName => {
-            // Always include the category, even if it has no posts
-            orderedResult[categoryName] = grouped[categoryName] || [];
+            if (categoryName !== "More Link Collections") {
+                // Always include the category, even if it has no posts
+                orderedResult[categoryName] = grouped[categoryName] || [];
+            }
         });
         
         // Add the default category if it exists and isn't already included
@@ -278,9 +281,17 @@ export class ExportManager {
             orderedResult[categoriesConfig.defaultCategory] = grouped[categoriesConfig.defaultCategory] || [];
         }
         
+        // Now add "More Link Collections" after "General" (the default category)
+        if (categoryOrder.includes("More Link Collections")) {
+            orderedResult["More Link Collections"] = grouped["More Link Collections"] || [];
+        }
+        
         // Add any remaining categories not in the JSON (like unexpected categories)
+        // Skip "Top Links" and "More Link Collections" since they're already positioned
         Object.keys(grouped).forEach(categoryName => {
-            if (categoryName !== "Top Links" && !orderedResult[categoryName]) {
+            if (categoryName !== "Top Links" && 
+                categoryName !== "More Link Collections" && 
+                !orderedResult[categoryName]) {
                 orderedResult[categoryName] = grouped[categoryName];
             }
         });

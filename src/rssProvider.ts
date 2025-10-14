@@ -569,8 +569,19 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 let author = story.story_authors || 'unknown';
                 
                 // Clean up author - NewsBlur sometimes returns comma-separated authors
+                // Format: 2 authors: "First & Second"
+                // Format: 3+ authors: "First, Second & Third"
                 if (author.includes(',')) {
-                    author = author.split(',')[0].trim();
+                    const authors = author.split(',').map(a => a.trim()).filter(a => a.length > 0);
+                    if (authors.length === 2) {
+                        author = `${authors[0]} & ${authors[1]}`;
+                    } else if (authors.length > 2) {
+                        const lastAuthor = authors[authors.length - 1];
+                        const otherAuthors = authors.slice(0, -1);
+                        author = `${otherAuthors.join(', ')} & ${lastAuthor}`;
+                    } else if (authors.length === 1) {
+                        author = authors[0];
+                    }
                 }
                 
                 // Clean up and validate author
