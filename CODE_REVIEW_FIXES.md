@@ -109,6 +109,70 @@ Consolidated the image and title into a single anchor tag:
 
 ---
 
+## Fix #4: Unix Timestamp Handling (rssProvider.ts ~line 568)
+
+### Issue
+NewsBlur API returns dates as Unix timestamps (seconds since epoch) in string format, while RSS feeds return ISO date strings. This caused incorrect date comparisons during filtering, allowing posts that should have been excluded based on their share date.
+
+### Solution
+Added proper detection and conversion of Unix timestamps to ISO format:
+
+```typescript
+// NewsBlur returns Unix timestamps (seconds since epoch) as strings
+// Convert to ISO format for consistent date handling
+let pubDate = '';
+const rawDate = story.shared_date || story.story_date || '';
+if (rawDate) {
+    // Check if it's a Unix timestamp (all digits) vs ISO string
+    if (/^\d+$/.test(rawDate)) {
+        // Unix timestamp - convert to ISO string
+        const timestamp = parseInt(rawDate, 10);
+        pubDate = new Date(timestamp * 1000).toISOString();
+    } else {
+        // Already an ISO string or other format
+        pubDate = rawDate;
+    }
+}
+```
+
+### Benefits
+- Accurate date comparisons regardless of source format
+- Eliminates timezone-related edge cases
+- No hard-coded buffers needed - existing logic works correctly
+- Improved debugging with time difference logging
+
+---
+
+## Fix #5: Magic Number Constants (rssProvider.ts lines 980, 1018, 1106)
+
+### Issue
+Magic numbers and recreated arrays reduced code readability and maintainability:
+- `1000 * 60` calculation appeared multiple times without clear meaning
+- `monthNames` array was recreated on every method call, wasting memory and CPU
+
+### Solution
+Extracted values into class-level constants:
+
+```typescript
+// Class-level constants for better readability and performance
+private static readonly MILLISECONDS_PER_MINUTE = 1000 * 60;
+private static readonly MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+// Usage examples:
+const timeDiffMinutes = Math.round((minimumDateTime.getTime() - postDate.getTime()) / RSSBlogProvider.MILLISECONDS_PER_MINUTE);
+minimumDateTime = new Date(lastDewDropDate.getTime() + (5 * RSSBlogProvider.MILLISECONDS_PER_MINUTE));
+const monthSuffix = RSSBlogProvider.MONTH_NAMES[now.getMonth()];
+```
+
+### Benefits
+- Improved readability - intent is immediately clear
+- Better maintainability - change once, affects all usages
+- Performance improvement - array created once, not on every call
+- Memory efficiency - single instance shared across all calls
+- Consistent with existing class constant patterns
+
+---
+
 ## Testing
 
 All fixes have been:
@@ -123,9 +187,14 @@ All fixes have been:
 1. **src/rssProvider.ts**
    - Fix #1: Added `authors.length === 0` case handling
    - Fix #2: Removed non-null assertions, used local config constant
+   - Fix #4: Added Unix timestamp detection and conversion for NewsBlur API dates
+   - Fix #5: Extracted magic numbers and arrays into class-level constants
 
 2. **src/exportManager.ts**
    - Fix #3: Consolidated Geek Shelf HTML into single anchor tag
+
+3. **.vscodeignore**
+   - Added `CODE_REVIEW_FIXES.md` to exclusion list (not distributed to users)
 
 ---
 
@@ -135,7 +204,9 @@ All fixes have been:
 None - All fixes are internal improvements that maintain existing functionality.
 
 ### Performance Impact
-Slight improvement due to reduced property access in `applyAuthorMappings()`.
+- Reduced property access in `applyAuthorMappings()`
+- `MONTH_NAMES` array no longer recreated on every Syncfusion URL processing call
+- More efficient date handling with proper Unix timestamp conversion
 
 ### Accessibility Impact
 Improved - Single anchor tag for Geek Shelf is more accessible.
@@ -146,5 +217,17 @@ Significantly improved - Better error handling, type safety, and cleaner HTML st
 ---
 
 **Review Date**: October 14, 2025  
-**Reviewer Comments Addressed**: 3/3  
+**Reviewer Comments Addressed**: 5/5  
 **Status**: All fixes implemented and verified
+
+---
+
+## Summary of All Fixes
+
+1. ✅ Multi-author edge case handling (empty array after filtering)
+2. ✅ Removed risky non-null assertion operators
+3. ✅ Consolidated Geek Shelf into single accessible anchor tag
+4. ✅ Fixed Unix timestamp handling for NewsBlur API dates
+5. ✅ Extracted magic numbers and arrays into named constants
+
+**Code Quality**: Significantly improved readability, maintainability, type safety, and performance

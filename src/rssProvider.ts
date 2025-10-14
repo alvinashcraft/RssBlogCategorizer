@@ -67,8 +67,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private categoriesConfig: CategoriesConfig | null = null;
     private authorMappingsConfig: AuthorMappingsConfig | null = null;
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
+    
+    // Class-level constants
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
     private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
+    private static readonly MILLISECONDS_PER_MINUTE = 1000 * 60;
+    private static readonly MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
     constructor(private context: vscode.ExtensionContext) {}
 
@@ -973,7 +977,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             if (lastDewDropDate) {
                 // Add a small buffer (5 minutes) to account for timing differences
                 // This helps avoid edge cases where posts might have similar timestamps
-                minimumDateTime = new Date(lastDewDropDate.getTime() + (5 * 60 * 1000));
+                minimumDateTime = new Date(lastDewDropDate.getTime() + (5 * RSSBlogProvider.MILLISECONDS_PER_MINUTE));
                 console.log(`Using latest Dew Drop post date as filter (with 5min buffer): posts newer than ${minimumDateTime.toISOString()}`);
             } else {
                 // Fallback to last 24 hours in UTC if we can't get the Dew Drop date
@@ -1015,7 +1019,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 
                 const isIncluded = postDate > minimumDateTime;
                 if (!isIncluded) {
-                    const timeDiffMinutes = Math.round((minimumDateTime.getTime() - postDate.getTime()) / (1000 * 60));
+                    const timeDiffMinutes = Math.round((minimumDateTime.getTime() - postDate.getTime()) / RSSBlogProvider.MILLISECONDS_PER_MINUTE);
                     console.log(`Excluding post "${post.title}" - too old by ${timeDiffMinutes} minutes: ${postDate.toISOString()} <= ${minimumDateTime.toISOString()}`);
                 }
                 return isIncluded;
@@ -1103,8 +1107,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
             // Generate the month/year suffix (MMMYY format)
             const now = new Date();
-            const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-            const monthSuffix = monthNames[now.getMonth()];
+            const monthSuffix = RSSBlogProvider.MONTH_NAMES[now.getMonth()];
             const yearSuffix = now.getFullYear().toString().slice(-2); // Last 2 digits of year
             const campaignSuffix = `${monthSuffix}${yearSuffix}`; // e.g., "oct25"
 
