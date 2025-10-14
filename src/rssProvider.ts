@@ -47,6 +47,17 @@ interface CategoriesConfig {
     wholeWordKeywords?: string[]; // Optional list of keywords that require whole word matching
 }
 
+interface AuthorMapping {
+    keyword: string;
+    author: string;
+}
+
+interface AuthorMappingsConfig {
+    urlContains: AuthorMapping[];
+    authorContains: AuthorMapping[];
+    authorExact: AuthorMapping[];
+}
+
 export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private _onDidChangeTreeData: vscode.EventEmitter<any | undefined | null | void> = new vscode.EventEmitter<any | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<any | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -54,6 +65,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private posts: BlogPost[] = [];
     private categories: Map<string, BlogPost[]> = new Map();
     private categoriesConfig: CategoriesConfig | null = null;
+    private authorMappingsConfig: AuthorMappingsConfig | null = null;
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
     private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
@@ -190,6 +202,30 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         this._onDidChangeTreeData.fire(undefined);
     }
 
+    private async loadAuthorMappingsConfig(): Promise<void> {
+        try {
+            // Use extension context to get the correct path to authorMappings.json
+            const authorMappingsPath = path.join(this.context.extensionPath, 'authorMappings.json');
+            console.log(`Loading author mappings from: ${authorMappingsPath}`);
+            const authorMappingsData = await fs.promises.readFile(authorMappingsPath, 'utf8');
+            this.authorMappingsConfig = JSON.parse(authorMappingsData) as AuthorMappingsConfig;
+            console.log(`✅ Author mappings configuration loaded successfully:`);
+            console.log(`   - URL Contains: ${this.authorMappingsConfig.urlContains.length} mappings`);
+            console.log(`   - Author Contains: ${this.authorMappingsConfig.authorContains.length} mappings`);
+            console.log(`   - Author Exact: ${this.authorMappingsConfig.authorExact.length} mappings`);
+        } catch (error) {
+            console.error('❌ Error loading author mappings configuration:', error);
+            console.error('This likely means authorMappings.json is missing from the extension package');
+            // Fallback to empty config if file can't be loaded
+            this.authorMappingsConfig = {
+                urlContains: [],
+                authorContains: [],
+                authorExact: []
+            };
+            console.log('Using fallback configuration with empty author mappings');
+        }
+    }
+
     getTreeItem(element: any): vscode.TreeItem {
         if (element.posts) {
             // Category node
@@ -293,6 +329,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             await this.loadCategoriesConfig();
         }
 
+        // Load author mappings configuration if not already loaded
+        if (!this.authorMappingsConfig) {
+            await this.loadAuthorMappingsConfig();
+        }
+
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const feedUrl = config.get<string>('feedUrl') || 'https://alvinashcraft.newsblur.com/social/rss/109116/alvinashcraft';
         const recordCount = config.get<number>('recordCount') || 100;
@@ -360,6 +401,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         }
 
         this.categorizePosts();
+        this.applyAuthorMappings();
     }
 
     private async fetchFeed(feedUrl: string, redirectCount: number = 0): Promise<BlogPost[]> {
@@ -818,6 +860,66 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         this.categories.forEach(posts => {
             posts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
         });
+    }
+
+    private applyAuthorMappings(): void {
+        if (!this.authorMappingsConfig) {
+            console.log('❌ Author mappings not loaded, skipping author name updates');
+            return;
+        }
+
+        let updatedCount = 0;
+        const totalPosts = this.posts.length;
+
+        console.log(`🔍 Applying author mappings to ${totalPosts} posts...`);
+
+        // Apply mappings to each post
+        this.posts.forEach(post => {
+            const originalAuthor = post.author;
+            let newAuthor = originalAuthor;
+
+            // 1. URL Contains mappings (highest priority)
+            const urlLower = post.link.toLowerCase();
+            for (const mapping of this.authorMappingsConfig!.urlContains) {
+                if (urlLower.includes(mapping.keyword.toLowerCase())) {
+                    newAuthor = mapping.author;
+                    console.log(`✅ URL mapping applied: "${originalAuthor}" → "${newAuthor}" (URL contains "${mapping.keyword}")`);
+                    break; // Stop at first match for efficiency
+                }
+            }
+
+            // 2. Author Contains mappings (medium priority, only if no URL match)
+            if (newAuthor === originalAuthor) {
+                const authorLower = originalAuthor.toLowerCase();
+                for (const mapping of this.authorMappingsConfig!.authorContains) {
+                    if (authorLower.includes(mapping.keyword.toLowerCase())) {
+                        newAuthor = mapping.author;
+                        console.log(`✅ Author contains mapping applied: "${originalAuthor}" → "${newAuthor}" (author contains "${mapping.keyword}")`);
+                        break; // Stop at first match for efficiency
+                    }
+                }
+            }
+
+            // 3. Author Exact mappings (lowest priority, only if no other matches)
+            if (newAuthor === originalAuthor) {
+                const authorLower = originalAuthor.toLowerCase();
+                for (const mapping of this.authorMappingsConfig!.authorExact) {
+                    if (authorLower === mapping.keyword.toLowerCase()) {
+                        newAuthor = mapping.author;
+                        console.log(`✅ Author exact mapping applied: "${originalAuthor}" → "${newAuthor}" (exact match "${mapping.keyword}")`);
+                        break; // Stop at first match for efficiency
+                    }
+                }
+            }
+
+            // Update the post author if a mapping was found
+            if (newAuthor !== originalAuthor) {
+                post.author = newAuthor;
+                updatedCount++;
+            }
+        });
+
+        console.log(`📝 Author mappings complete: ${updatedCount} of ${totalPosts} posts had author names updated`);
     }
 
     private appendRecordCount(feedUrl: string, recordCount: number): string {
