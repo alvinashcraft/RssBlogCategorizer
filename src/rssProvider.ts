@@ -586,7 +586,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
                 const post: BlogPost = {
                     title: title,
-                    link: link,
+                    link: this.appendSyncfusionTracking(link),
                     description: description,
                     pubDate: pubDate,
                     category: this.categorizePost(title, description, link),
@@ -702,7 +702,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     
                     const post: BlogPost = {
                         title: title,
-                        link: link,
+                        link: this.appendSyncfusionTracking(link),
                         description: this.stripHtml(description),
                         pubDate: item.pubDate || item.published || item.updated || '',
                         category: this.categorizePost(title, description, link),
@@ -994,6 +994,53 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         console.log(`Date filtering: ${filteredPosts.length} of ${posts.length} posts passed the UTC date filter`);
         return filteredPosts;
+    }
+
+    /**
+     * Appends tracking parameters to Syncfusion URLs.
+     * Tracking format: ?utm_source=alvinashcraft&utm_medium=email&utm_campaign=alvinashcraft_blog_edm{MMMYY}
+     * Example for October 2025: ?utm_source=alvinashcraft&utm_medium=email&utm_campaign=alvinashcraft_blog_edmoct25
+     * 
+     * @param url - The URL to potentially modify
+     * @returns The URL with tracking parameters if it's a Syncfusion URL, otherwise the original URL
+     */
+    private appendSyncfusionTracking(url: string): string {
+        try {
+            // Check if this is a Syncfusion URL
+            if (!url.toLowerCase().includes('syncfusion.com')) {
+                return url;
+            }
+
+            // Generate the month/year suffix (MMMYY format)
+            const now = new Date();
+            const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+            const monthSuffix = monthNames[now.getMonth()];
+            const yearSuffix = now.getFullYear().toString().slice(-2); // Last 2 digits of year
+            const campaignSuffix = `${monthSuffix}${yearSuffix}`; // e.g., "oct25"
+
+            // Build the tracking parameters
+            const trackingParams = `utm_source=alvinashcraft&utm_medium=email&utm_campaign=alvinashcraft_blog_edm${campaignSuffix}`;
+
+            // Parse the URL to add tracking parameters properly
+            const urlObj = new URL(url);
+            
+            // Check if URL already has query parameters
+            if (urlObj.search) {
+                // Append to existing parameters
+                urlObj.search += `&${trackingParams}`;
+            } else {
+                // Add as new parameters
+                urlObj.search = `?${trackingParams}`;
+            }
+
+            const trackedUrl = urlObj.toString();
+            console.log(`✅ Added Syncfusion tracking: ${url} → ${trackedUrl}`);
+            return trackedUrl;
+
+        } catch (error) {
+            console.error('Error adding Syncfusion tracking parameters:', error);
+            return url; // Return original URL if there's an error
+        }
     }
 
     private stripHtml(html: any): string {

@@ -140,7 +140,7 @@
         "numpy"
       ]
     },
-    "DevOps and Methodology": {
+    "Design, DevOps and Methodology": {
       "titleKeywords": [
         "docker",
         "kubernetes",
@@ -303,7 +303,7 @@
         "big data"
       ]
     },
-    "Microsoft 365": {
+    "Sharepoint, Teams and Microsoft 365": {
       "titleKeywords": [
         "microsoft 365",
         "office 365",
@@ -316,7 +316,7 @@
         "onedrive"
       ]
     },
-    "Terminal": {
+    "PowerShell and Terminal": {
       "titleKeywords": [
         "bash",
         "zsh",
