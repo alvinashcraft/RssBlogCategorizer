@@ -597,7 +597,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
                 const post: BlogPost = {
                     title: title,
-                    link: this.appendSyncfusionTracking(link),
+                    link: this.appendSyncfusionTracking(this.removeTrackingParameters(link)),
                     description: description,
                     pubDate: pubDate,
                     category: this.categorizePost(title, description, link),
@@ -713,7 +713,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     
                     const post: BlogPost = {
                         title: title,
-                        link: this.appendSyncfusionTracking(link),
+                        link: this.appendSyncfusionTracking(this.removeTrackingParameters(link)),
                         description: this.stripHtml(description),
                         pubDate: item.pubDate || item.published || item.updated || '',
                         category: this.categorizePost(title, description, link),
@@ -1005,6 +1005,63 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         console.log(`Date filtering: ${filteredPosts.length} of ${posts.length} posts passed the UTC date filter`);
         return filteredPosts;
+    }
+
+    /**
+     * Removes common tracking parameters from URLs to clean them up.
+     * Common tracking parameters include: utm_*, fbclid, gclid, mc_*, ref, source, campaign, etc.
+     * 
+     * @param url - The URL to clean
+     * @returns The URL with tracking parameters removed
+     */
+    private removeTrackingParameters(url: string): string {
+        try {
+            const urlObj = new URL(url);
+            
+            // List of common tracking parameter patterns
+            const trackingParams = [
+                // UTM parameters (Google Analytics, marketing campaigns)
+                'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
+                // Facebook
+                'fbclid', 'fb_action_ids', 'fb_action_types', 'fb_ref', 'fb_source',
+                // Google
+                'gclid', 'gclsrc', 'dclid',
+                // MailChimp
+                'mc_cid', 'mc_eid',
+                // Other common tracking
+                'ref', 'referer', 'referrer', 'source', 'campaign',
+                // Microsoft/Bing
+                'msclkid',
+                // Twitter
+                'twclid',
+                // LinkedIn
+                'trk', 'trkInfo',
+                // Reddit
+                'rdt_cid',
+                // HubSpot
+                'hsa_acc', 'hsa_cam', 'hsa_grp', 'hsa_ad', 'hsa_src', 'hsa_tgt', 'hsa_kw', 'hsa_mt', 'hsa_net', 'hsa_ver',
+                // Adobe/Omniture
+                'WT.mc_id', 'icid'
+            ];
+            
+            // Remove tracking parameters
+            trackingParams.forEach(param => {
+                urlObj.searchParams.delete(param);
+            });
+            
+            const cleanedUrl = urlObj.toString();
+            
+            // Only log if we actually removed something
+            if (cleanedUrl !== url) {
+                console.log(`🧹 Cleaned tracking from URL: ${url} → ${cleanedUrl}`);
+            }
+            
+            return cleanedUrl;
+
+        } catch (error) {
+            console.error('Error removing tracking parameters:', error);
+            return url; // Return original URL if there's an error
+        }
     }
 
     /**

@@ -147,6 +147,11 @@ The extension uses the following configuration schema:
     "type": "array",
     "default": ["Daily Links", "Development"],
     "description": "Default WordPress categories for published posts"
+  },
+  "rssBlogCategorizer.openLinksInNewTab": {
+    "type": "boolean",
+    "default": false,
+    "description": "Open links in a new browser tab when clicked"
   }
 }
 ```

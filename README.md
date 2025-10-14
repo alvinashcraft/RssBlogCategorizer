@@ -15,6 +15,16 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 - 🔄 **Optional Auto-refresh** - Configurable automatic feed updates (disabled by default for on-demand usage)
 - 📚 **Book Recommendations** - Includes "The Geek Shelf" section with rotating book recommendations
 
+## What's New in 1.1.0
+
+- 📚 **Clickable Book Images** - Book cover images in "The Geek Shelf" section are now clickable hyperlinks
+- 👤 **Author Name Mapping** - Intelligent author name normalization using a comprehensive mapping database (264+ mappings)
+- 🔗 **Syncfusion URL Tracking** - Automatic addition of tracking parameters to Syncfusion blog links
+- ✍️ **Improved Author Formatting** - Grammatically correct multi-author formatting (e.g., "Author1 & Author2" or "Author1, Author2 & Author3")
+- 🧹 **Clean URLs** - Automatic removal of tracking parameters from imported URLs for cleaner output
+- 🎯 **Simplified HTML** - Streamlined HTML output with reduced div nesting for better WordPress compatibility
+- 🆕 **Optional New Tab Links** - Configurable setting to control whether links open in new tabs (disabled by default)
+
 ## Installation
 
 ### From VS Code Marketplace
@@ -167,6 +177,7 @@ Access settings via `File > Preferences > Settings` and search for "RSS Blog Cat
 - **WordPress Blog URL**: Your WordPress blog URL (e.g., `https://yourblog.com`)
 - **WordPress Username**: Your WordPress account username (password stored securely)
 - **WordPress Categories**: Default categories to assign to published posts (e.g., "Daily Links", "Development")
+- **Open Links in New Tab**: Control whether exported links open in a new browser tab (disabled by default)
 
 **Note**: Tags are automatically detected from content and don't require configuration - the system analyzes your blog post and suggests relevant technology tags during publishing.
 

@@ -193,6 +193,11 @@ export class ExportManager {
         const groupedPosts = await this.groupPostsByCategory(posts);
         const dewDropTitle = await this.generateDewDropTitle();
         
+        // Get the setting for opening links in new tab
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const openInNewTab = config.get<boolean>('openLinksInNewTab') || false;
+        const targetAttribute = openInNewTab ? ' target="_blank"' : '';
+        
         const htmlStart = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -216,14 +221,14 @@ export class ExportManager {
             } else {
                 categoriesHtml += `    <ul>\n`;
                 categoryPosts.forEach(post => {
-                    categoriesHtml += `        <li><a href="${post.link}" target="_blank">${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
+                    categoriesHtml += `        <li><a href="${post.link}"${targetAttribute}>${this.escapeHtml(post.title)}</a> (${this.escapeHtml(post.author)})</li>\n`;
                 });
                 categoriesHtml += `    </ul>\n`;
             }
         });
 
         // Add Geek Shelf section
-        const geekShelfHtml = await this.generateGeekShelfHtml();
+        const geekShelfHtml = await this.generateGeekShelfHtml(targetAttribute);
         
         const htmlEnd = `</body>\n</html>`;
         
@@ -361,7 +366,7 @@ export class ExportManager {
         }
     }
 
-    private async generateGeekShelfHtml(): Promise<string> {
+    private async generateGeekShelfHtml(targetAttribute: string = ''): Promise<string> {
         const book = await this.getBookOfTheDay();
         if (!book) {
             return '';
@@ -370,11 +375,11 @@ export class ExportManager {
         return `
     <h3>The Geek Shelf</h3>
     <div style="display: flex; align-items: flex-start; gap: 15px;">
-        <a href="${book.productUrl}" target="_blank">
+        <a href="${book.productUrl}"${targetAttribute}>
             <img src="${book.imageUrl}" alt="${this.escapeHtml(book.title)}" style="width: 100px; height: auto;">
         </a>
         <div>
-            <a href="${book.productUrl}" target="_blank">${this.escapeHtml(book.title)}</a> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
+            <a href="${book.productUrl}"${targetAttribute}>${this.escapeHtml(book.title)}</a> (${this.escapeHtml(book.author)}) <em>- Referral Link</em>
             <p>${this.escapeHtml(book.description)}</p>
         </div>
     </div>`;

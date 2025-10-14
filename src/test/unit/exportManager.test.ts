@@ -228,7 +228,7 @@ describe.skip('ExportManager', () => {
       expect(capturedContent).to.include('<html lang="en">');
       expect(capturedContent).to.include('<h1>Dew Drop');
       expect(capturedContent).to.include('<h3>Web Development</h3>');
-      expect(capturedContent).to.include('<a href="https://example.com/react-typescript" target="_blank">Building React Apps with TypeScript</a>');
+      expect(capturedContent).to.include('<a href="https://example.com/react-typescript">Building React Apps with TypeScript</a>');
       expect(capturedContent).to.include('</html>');
     });
 
