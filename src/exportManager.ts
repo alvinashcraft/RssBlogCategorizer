@@ -214,10 +214,10 @@ export class ExportManager {
             
             if (category === "Top Links") {
                 // Add placeholder for manual editing
-                categoriesHtml += `    <!-- Add top links here manually -->\n    <ul>TBD</ul>\n`;
+                categoriesHtml += `    <!-- Add top links here manually -->\n    <ul>\n        <li>TBD</li>\n    </ul>\n`;
             } else if (categoryPosts.length === 0) {
                 // Empty category - add placeholder
-                categoriesHtml += `    <ul>TBD</ul>\n`;
+                categoriesHtml += `    <ul>\n        <li>TBD</li>\n    </ul>\n`;
             } else {
                 categoriesHtml += `    <ul>\n`;
                 categoryPosts.forEach(post => {
