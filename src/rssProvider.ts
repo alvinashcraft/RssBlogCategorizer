@@ -565,7 +565,23 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 const title = story.story_title || 'Untitled';
                 const link = story.story_permalink || '';
                 const description = story.story_content ? this.stripHtml(story.story_content) : '';
-                const pubDate = story.shared_date || story.story_date || '';
+                
+                // NewsBlur returns Unix timestamps (seconds since epoch) as strings
+                // Convert to ISO format for consistent date handling
+                let pubDate = '';
+                const rawDate = story.shared_date || story.story_date || '';
+                if (rawDate) {
+                    // Check if it's a Unix timestamp (all digits) vs ISO string
+                    if (/^\d+$/.test(rawDate)) {
+                        // Unix timestamp - convert to ISO string
+                        const timestamp = parseInt(rawDate, 10);
+                        pubDate = new Date(timestamp * 1000).toISOString();
+                    } else {
+                        // Already an ISO string or other format
+                        pubDate = rawDate;
+                    }
+                }
+                
                 let author = story.story_authors || 'unknown';
                 
                 // Clean up author - NewsBlur sometimes returns comma-separated authors
@@ -999,7 +1015,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 
                 const isIncluded = postDate > minimumDateTime;
                 if (!isIncluded) {
-                    console.log(`Excluding post "${post.title}" - too old: ${postDate.toISOString()} <= ${minimumDateTime.toISOString()}`);
+                    const timeDiffMinutes = Math.round((minimumDateTime.getTime() - postDate.getTime()) / (1000 * 60));
+                    console.log(`Excluding post "${post.title}" - too old by ${timeDiffMinutes} minutes: ${postDate.toISOString()} <= ${minimumDateTime.toISOString()}`);
                 }
                 return isIncluded;
             } catch (error) {
