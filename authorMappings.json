@@ -124,6 +124,10 @@
     { "keyword": "cppcast", "author": "Rob Irving" },
     { "keyword": "ericsink", "author": "Eric Sink" },
     { "keyword": "keithclark", "author": "Keith Clark" },
+    { "keyword": "mkennedy", "author": "Michael Kennedy" },
+    { "keyword": "franksworld.com", "author": "Frank La Vigne" },
+    { "keyword": "gomakethings.com", "author": "Chris Ferdinandi" },
+    { "keyword": "blazorise", "author": "Mladen Macanović" },
     { "keyword": "kentcdodds", "author": "Kent C. Dodds" }
   ],
   "authorContains": [
@@ -158,8 +162,10 @@
   "authorExact": [
     { "keyword": "brada", "author": "Brad Abrams" },
     { "keyword": "pinaldave", "author": "Pinal Dave" },
+    { "keyword": "dotnetdave", "author": "David McCarter" },
     { "keyword": "plblum", "author": "Peter Blum" },
     { "keyword": "wwagner", "author": "Bill Wagner" },
+    { "keyword": "erinstellato", "author": "Erin Stellato" },
     { "keyword": "dotcore", "author": "Dennis Delimarsky" },
     { "keyword": "traskjd", "author": "JD Trask" },
     { "keyword": "glenz", "author": "Gunther Lenz" },

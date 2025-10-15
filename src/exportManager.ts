@@ -213,8 +213,8 @@ export class ExportManager {
             categoriesHtml += `\n    <h3>${category}</h3>\n`;
             
             if (category === "Top Links") {
-                // Add placeholder for manual editing
-                categoriesHtml += `    <!-- Add top links here manually -->\n    <ul>\n        <li>TBD</li>\n    </ul>\n`;
+                // Add Top Links placeholder for manual editing
+                categoriesHtml += `    <ul>\n        <li>TBD</li>\n    </ul>\n`;
             } else if (categoryPosts.length === 0) {
                 // Empty category - add placeholder
                 categoriesHtml += `    <ul>\n        <li>TBD</li>\n    </ul>\n`;
@@ -230,7 +230,7 @@ export class ExportManager {
         // Add Geek Shelf section
         const geekShelfHtml = await this.generateGeekShelfHtml(targetAttribute);
         
-        const htmlEnd = `</body>\n</html>`;
+        const htmlEnd = `\n</body>\n</html>`;
         
         return htmlStart + categoriesHtml + geekShelfHtml + htmlEnd;
     }
