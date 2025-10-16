@@ -6,12 +6,19 @@ export class EditorManager {
     private panel: vscode.WebviewPanel | undefined;
     private context: vscode.ExtensionContext;
     private resolvePromise: ((value: string | undefined) => void) | undefined;
+    private originalDocumentUri: vscode.Uri | undefined;
     
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
     
     public async openEditor(htmlContent: string, metadata?: { fileName?: string }): Promise<string | undefined> {
+        // Save reference to the currently active document
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor) {
+            this.originalDocumentUri = activeEditor.document.uri;
+        }
+        
         return new Promise((resolve) => {
             this.resolvePromise = resolve;
             
@@ -84,6 +91,7 @@ export class EditorManager {
                     this.resolvePromise = undefined;
                 }
                 this.panel = undefined;
+                this.originalDocumentUri = undefined;
             },
             undefined,
             this.context.subscriptions
@@ -124,17 +132,33 @@ export class EditorManager {
     }
     
     private async saveContent(content: string): Promise<void> {
-        const activeEditor = vscode.window.activeTextEditor;
-        if (activeEditor) {
+        if (!this.originalDocumentUri) {
+            vscode.window.showErrorMessage('No document to save to.');
+            return;
+        }
+        
+        try {
+            // Open the document
+            const document = await vscode.workspace.openTextDocument(this.originalDocumentUri);
+            
+            // Create an edit to replace all content
             const edit = new vscode.WorkspaceEdit();
             const fullRange = new vscode.Range(
-                activeEditor.document.positionAt(0),
-                activeEditor.document.positionAt(activeEditor.document.getText().length)
+                document.positionAt(0),
+                document.positionAt(document.getText().length)
             );
-            edit.replace(activeEditor.document.uri, fullRange, content);
-            await vscode.workspace.applyEdit(edit);
-            await activeEditor.document.save();
-            vscode.window.showInformationMessage('Changes saved successfully!');
+            edit.replace(this.originalDocumentUri, fullRange, content);
+            
+            // Apply the edit and save
+            const success = await vscode.workspace.applyEdit(edit);
+            if (success) {
+                await document.save();
+                vscode.window.showInformationMessage('Changes saved successfully!');
+            } else {
+                vscode.window.showErrorMessage('Failed to apply changes.');
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to save changes: ${error}`);
         }
     }
     
