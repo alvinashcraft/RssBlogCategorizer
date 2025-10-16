@@ -167,18 +167,20 @@ export class EditorManager {
             const bodyStartMatch = originalContent.match(/<body[^>]*>/i);
             const bodyEndMatch = originalContent.match(/<\/body>/i);
             
-            if (!bodyStartMatch || !bodyEndMatch) {
-                vscode.window.showErrorMessage('Could not find <body> tags in the HTML file.');
-                return;
+            let newContent: string;
+            
+            if (bodyStartMatch && bodyEndMatch) {
+                // HTML file with proper structure - replace only body content
+                const bodyStartIndex = bodyStartMatch.index! + bodyStartMatch[0].length;
+                const bodyEndIndex = bodyEndMatch.index!;
+                
+                const beforeBody = originalContent.substring(0, bodyStartIndex);
+                const afterBody = originalContent.substring(bodyEndIndex);
+                newContent = beforeBody + '\n' + content + '\n' + afterBody;
+            } else {
+                // HTML fragment without body tags - replace entire content
+                newContent = content;
             }
-            
-            const bodyStartIndex = bodyStartMatch.index! + bodyStartMatch[0].length;
-            const bodyEndIndex = bodyEndMatch.index!;
-            
-            // Construct the new content with original head and updated body
-            const beforeBody = originalContent.substring(0, bodyStartIndex);
-            const afterBody = originalContent.substring(bodyEndIndex);
-            const newContent = beforeBody + '\n' + content + '\n' + afterBody;
             
             // Create an edit to replace all content
             const edit = new vscode.WorkspaceEdit();
