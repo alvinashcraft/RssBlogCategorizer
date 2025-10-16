@@ -3,7 +3,7 @@
   "displayName": "RSS Blog Categorizer and Link Blog Post Generator",
   "description": "Fetches RSS feeds from developer blogs and categorizes them with HTML/Markdown export functionality to generate link blog posts.",
   "icon": "images/feedIcon.png",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -74,6 +74,11 @@
         "command": "rssBlogCategorizer.publishToWordpress",
         "title": "Publish to WordPress",
         "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "rssBlogCategorizer.openWysiwygEditor",
+        "title": "RSS Blog Categorizer: Open in WYSIWYG Editor",
+        "icon": "$(edit)"
       }
     ],
     "menus": {
@@ -110,6 +115,11 @@
         }
       ],
       "editor/title": [
+        {
+          "command": "rssBlogCategorizer.openWysiwygEditor",
+          "when": "resourceExtname == .html",
+          "group": "navigation"
+        },
         {
           "command": "rssBlogCategorizer.publishToWordpress",
           "when": "resourceExtname == .html && resourcePath =~ /.*Dew Drop.*/",
@@ -172,7 +182,10 @@
           "items": {
             "type": "string"
           },
-          "default": ["Daily Links", "Development"],
+          "default": [
+            "Daily Links",
+            "Development"
+          ],
           "description": "Default WordPress categories to assign to published posts"
         },
         "rssBlogCategorizer.openLinksInNewTab": {
@@ -208,6 +221,7 @@
     "@vscode/test-electron": "^2.3.8",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
+    "copy-webpack-plugin": "^13.0.1",
     "glob": "^10.3.10",
     "minimatch": "^5.1.6",
     "mocha": "^10.2.0",
@@ -220,6 +234,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "fast-xml-parser": "^4.3.2"
+    "fast-xml-parser": "^4.3.2",
+    "tinymce": "^8.1.2"
   }
 }

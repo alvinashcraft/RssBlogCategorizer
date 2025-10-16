@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { RSSBlogProvider } from './rssProvider';
 import { ExportManager } from './exportManager';
 import { WordPressManager } from './wordpressManager';
+import { EditorManager } from './editorManager';
 import { NEWSBLUR_PASSWORD_KEY } from './constants';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -17,6 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const exportManager = new ExportManager();
     const wordpressManager = new WordPressManager(context);
+    const editorManager = new EditorManager(context);
 
     // Register commands
     const refreshCommand = vscode.commands.registerCommand('rssBlogCategorizer.refresh', async () => {
@@ -143,6 +145,29 @@ export function activate(context: vscode.ExtensionContext) {
         await wordpressManager.publishHtmlFile(document);
     });
 
+    const openWysiwygEditorCommand = vscode.commands.registerCommand('rssBlogCategorizer.openWysiwygEditor', async () => {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (!activeEditor) {
+            vscode.window.showErrorMessage('No active editor found. Please open an HTML file first.');
+            return;
+        }
+
+        const document = activeEditor.document;
+        if (!document.fileName.endsWith('.html')) {
+            vscode.window.showErrorMessage('Please open an HTML file to edit with the WYSIWYG editor.');
+            return;
+        }
+
+        const htmlContent = document.getText();
+        const fileName = document.fileName.split(/[/\\]/).pop() || 'Untitled';
+        
+        const editedContent = await editorManager.openEditor(htmlContent, { fileName });
+        
+        if (editedContent) {
+            vscode.window.showInformationMessage('Content updated successfully!');
+        }
+    });
+
     // Auto-refresh based on configuration
     const getRefreshInterval = () => {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
@@ -204,6 +229,7 @@ export function activate(context: vscode.ExtensionContext) {
         setWordpressCredentialsCommand,
         testWordpressConnectionCommand,
         publishToWordpressCommand,
+        openWysiwygEditorCommand,
         treeView,
         configChangeHandler,
         { dispose: () => { if (refreshInterval) clearInterval(refreshInterval); } }

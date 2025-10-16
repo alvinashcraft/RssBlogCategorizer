@@ -360,6 +360,19 @@ export class ExportManager {
                 // Open the exported file
                 const doc = await vscode.workspace.openTextDocument(uri);
                 await vscode.window.showTextDocument(doc);
+                
+                // For HTML files, offer to open in WYSIWYG editor
+                if (extension === 'html') {
+                    const choice = await vscode.window.showInformationMessage(
+                        'Would you like to edit this post in the WYSIWYG editor?',
+                        'Open in Editor',
+                        'No Thanks'
+                    );
+                    
+                    if (choice === 'Open in Editor') {
+                        await vscode.commands.executeCommand('rssBlogCategorizer.openWysiwygEditor');
+                    }
+                }
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to export blog posts: ${error}`);
             }
