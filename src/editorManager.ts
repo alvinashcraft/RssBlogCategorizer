@@ -215,16 +215,6 @@ export class EditorManager {
     
     private async formatDocument(document: vscode.TextDocument): Promise<void> {
         try {
-            // Get current active editor to restore focus later
-            const currentPanel = this.panel;
-            
-            // Show the document in an editor (required for formatting)
-            const editor = await vscode.window.showTextDocument(document, { 
-                preview: false, 
-                preserveFocus: false,
-                viewColumn: vscode.ViewColumn.Two // Open in a different column
-            });
-            
             // Get HTML formatting settings
             const config = vscode.workspace.getConfiguration('html.format');
             const originalWrapAttributes = config.get('wrapAttributes');
@@ -235,20 +225,23 @@ export class EditorManager {
             await config.update('wrapLineLength', 0, vscode.ConfigurationTarget.Global);
             
             try {
-                // Execute the format document command
-                await vscode.commands.executeCommand('editor.action.formatDocument');
+                // Format the document using the formatting API without showing it
+                const edits = await vscode.commands.executeCommand<vscode.TextEdit[]>(
+                    'vscode.executeFormatDocumentProvider',
+                    document.uri,
+                    { tabSize: 4, insertSpaces: true }
+                );
                 
-                // Save after formatting
-                await document.save();
+                if (edits && edits.length > 0) {
+                    const workspaceEdit = new vscode.WorkspaceEdit();
+                    workspaceEdit.set(document.uri, edits);
+                    await vscode.workspace.applyEdit(workspaceEdit);
+                    await document.save();
+                }
             } finally {
                 // Restore original settings
                 await config.update('wrapAttributes', originalWrapAttributes, vscode.ConfigurationTarget.Global);
                 await config.update('wrapLineLength', originalWrapLineLength, vscode.ConfigurationTarget.Global);
-            }
-            
-            // Restore focus to the webview panel if it still exists
-            if (currentPanel) {
-                currentPanel.reveal(vscode.ViewColumn.One, true);
             }
         } catch (error) {
             // Formatting might fail if no formatter is available, but that's okay
