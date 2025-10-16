@@ -54,15 +54,18 @@ export class EditorManager {
             async (message) => {
                 switch (message.command) {
                     case 'save':
-                        await this.saveContent(message.content);
-                        if (this.resolvePromise) {
-                            this.resolvePromise(message.content);
-                            this.resolvePromise = undefined;
-                        }
-                        this.panel?.dispose();
+                        // Save without closing, no formatting
+                        await this.saveContent(message.content, false, false);
+                        break;
+                        
+                    case 'saveAndClose':
+                        // Save and close the editor, with formatting
+                        await this.saveContent(message.content, true, true);
                         break;
                         
                     case 'saveAndPublish':
+                        // Save with formatting, then publish
+                        await this.saveContent(message.content, false, true);
                         await this.saveAndPublishContent(message.content);
                         if (this.resolvePromise) {
                             this.resolvePromise(message.content);
@@ -118,6 +121,9 @@ export class EditorManager {
             vscode.Uri.file(path.join(this.context.extensionPath, 'media', 'tinymce'))
         ).toString();
         
+        // Extract only the body content from the HTML file
+        const bodyContent = this.extractBodyContent(htmlContent);
+        
         // Load webview HTML template
         const templatePath = path.join(this.context.extensionPath, 'webview', 'editor.html');
         let html = fs.readFileSync(templatePath, 'utf8');
@@ -126,12 +132,27 @@ export class EditorManager {
         html = html.replace(/{{cspSource}}/g, this.panel.webview.cspSource);
         html = html.replace(/{{tinyMceUri}}/g, tinyMceUri.toString());
         html = html.replace(/{{baseUrl}}/g, baseUrl);
-        html = html.replace('{{initialContent}}', this.escapeHtml(htmlContent));
+        html = html.replace('{{initialContent}}', this.escapeHtml(bodyContent));
         
         return html;
     }
     
-    private async saveContent(content: string): Promise<void> {
+    private extractBodyContent(htmlContent: string): string {
+        // Extract content between <body> tags
+        const bodyStartMatch = htmlContent.match(/<body[^>]*>/i);
+        const bodyEndMatch = htmlContent.match(/<\/body>/i);
+        
+        if (bodyStartMatch && bodyEndMatch) {
+            const bodyStartIndex = bodyStartMatch.index! + bodyStartMatch[0].length;
+            const bodyEndIndex = bodyEndMatch.index!;
+            return htmlContent.substring(bodyStartIndex, bodyEndIndex).trim();
+        }
+        
+        // If no body tags found, return the whole content
+        return htmlContent;
+    }
+    
+    private async saveContent(content: string, closeAfterSave: boolean = false, formatAfterSave: boolean = false): Promise<void> {
         if (!this.originalDocumentUri) {
             vscode.window.showErrorMessage('No document to save to.');
             return;
@@ -140,25 +161,98 @@ export class EditorManager {
         try {
             // Open the document
             const document = await vscode.workspace.openTextDocument(this.originalDocumentUri);
+            const originalContent = document.getText();
+            
+            // Find the body tags and replace only the content between them
+            const bodyStartMatch = originalContent.match(/<body[^>]*>/i);
+            const bodyEndMatch = originalContent.match(/<\/body>/i);
+            
+            if (!bodyStartMatch || !bodyEndMatch) {
+                vscode.window.showErrorMessage('Could not find <body> tags in the HTML file.');
+                return;
+            }
+            
+            const bodyStartIndex = bodyStartMatch.index! + bodyStartMatch[0].length;
+            const bodyEndIndex = bodyEndMatch.index!;
+            
+            // Construct the new content with original head and updated body
+            const beforeBody = originalContent.substring(0, bodyStartIndex);
+            const afterBody = originalContent.substring(bodyEndIndex);
+            const newContent = beforeBody + '\n' + content + '\n' + afterBody;
             
             // Create an edit to replace all content
             const edit = new vscode.WorkspaceEdit();
             const fullRange = new vscode.Range(
                 document.positionAt(0),
-                document.positionAt(document.getText().length)
+                document.positionAt(originalContent.length)
             );
-            edit.replace(this.originalDocumentUri, fullRange, content);
+            edit.replace(this.originalDocumentUri, fullRange, newContent);
             
             // Apply the edit and save
             const success = await vscode.workspace.applyEdit(edit);
             if (success) {
                 await document.save();
+                
+                // Format the document only if requested (on close/publish)
+                if (formatAfterSave) {
+                    await this.formatDocument(document);
+                }
+                
                 vscode.window.showInformationMessage('Changes saved successfully!');
+                
+                if (closeAfterSave && this.resolvePromise) {
+                    this.resolvePromise(content);
+                    this.resolvePromise = undefined;
+                    this.panel?.dispose();
+                }
             } else {
                 vscode.window.showErrorMessage('Failed to apply changes.');
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to save changes: ${error}`);
+        }
+    }
+    
+    private async formatDocument(document: vscode.TextDocument): Promise<void> {
+        try {
+            // Get current active editor to restore focus later
+            const currentPanel = this.panel;
+            
+            // Show the document in an editor (required for formatting)
+            const editor = await vscode.window.showTextDocument(document, { 
+                preview: false, 
+                preserveFocus: false,
+                viewColumn: vscode.ViewColumn.Two // Open in a different column
+            });
+            
+            // Get HTML formatting settings
+            const config = vscode.workspace.getConfiguration('html.format');
+            const originalWrapAttributes = config.get('wrapAttributes');
+            const originalWrapLineLength = config.get('wrapLineLength');
+            
+            // Temporarily update settings to prevent aggressive wrapping
+            await config.update('wrapAttributes', 'preserve', vscode.ConfigurationTarget.Global);
+            await config.update('wrapLineLength', 0, vscode.ConfigurationTarget.Global);
+            
+            try {
+                // Execute the format document command
+                await vscode.commands.executeCommand('editor.action.formatDocument');
+                
+                // Save after formatting
+                await document.save();
+            } finally {
+                // Restore original settings
+                await config.update('wrapAttributes', originalWrapAttributes, vscode.ConfigurationTarget.Global);
+                await config.update('wrapLineLength', originalWrapLineLength, vscode.ConfigurationTarget.Global);
+            }
+            
+            // Restore focus to the webview panel if it still exists
+            if (currentPanel) {
+                currentPanel.reveal(vscode.ViewColumn.One, true);
+            }
+        } catch (error) {
+            // Formatting might fail if no formatter is available, but that's okay
+            console.log('Could not format document:', error);
         }
     }
     

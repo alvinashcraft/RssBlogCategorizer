@@ -95,7 +95,8 @@
     
     <div class="button-bar">
         <button id="cancel-btn" title="Close without saving">Cancel</button>
-        <button id="save-btn" title="Save changes to file">Save Changes</button>
+        <button id="save-btn" title="Save changes to file (keep editor open)">Save</button>
+        <button id="save-close-btn" title="Save changes and close editor">Save & Close</button>
         <button id="save-publish-btn" title="Save and prepare for WordPress publishing">Save & Publish</button>
     </div>
     
@@ -147,7 +148,7 @@
                         });
                     });
                     
-                    // Handle Ctrl+S to save
+                    // Handle Ctrl+S to save (without closing)
                     editor.on('keydown', function(e) {
                         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                             e.preventDefault();
@@ -162,6 +163,16 @@
                 const content = tinymce.activeEditor.getContent();
                 vscode.postMessage({
                     command: 'save',
+                    content: content
+                });
+                // Mark as not dirty after save
+                vscode.setState({ content: content, isDirty: false });
+            });
+            
+            document.getElementById('save-close-btn').addEventListener('click', function() {
+                const content = tinymce.activeEditor.getContent();
+                vscode.postMessage({
+                    command: 'saveAndClose',
                     content: content
                 });
             });
