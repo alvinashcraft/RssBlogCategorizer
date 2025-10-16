@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'none'; 
+                   script-src {{cspSource}} 'unsafe-inline' 'unsafe-eval'; 
+                   style-src {{cspSource}} 'unsafe-inline';
+                   img-src {{cspSource}} https: data:;
+                   font-src {{cspSource}};">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dew Drop WYSIWYG Editor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+        }
+        
+        #editor-container {
+            padding: 20px;
+            height: calc(100vh - 120px);
+        }
+        
+        #editor {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .button-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px 20px;
+            background-color: var(--vscode-editor-background);
+            border-top: 1px solid var(--vscode-panel-border);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            z-index: 1000;
+        }
+        
+        .button-bar button {
+            padding: 8px 16px;
+            border-radius: 2px;
+            border: 1px solid var(--vscode-button-border);
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        
+        .button-bar button:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+        
+        .button-bar button:active {
+            opacity: 0.8;
+        }
+        
+        #save-publish-btn {
+            background-color: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
+        }
+        
+        #save-publish-btn:hover {
+            background-color: var(--vscode-button-secondaryHoverBackground);
+        }
+        
+        #cancel-btn {
+            background-color: transparent;
+            border-color: var(--vscode-button-border);
+        }
+        
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: var(--vscode-foreground);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">Loading editor...</div>
+    
+    <div id="editor-container" style="display: none;">
+        <textarea id="editor">{{initialContent}}</textarea>
+    </div>
+    
+    <div class="button-bar">
+        <button id="cancel-btn" title="Close without saving">Cancel</button>
+        <button id="save-btn" title="Save changes to file (keep editor open)">Save</button>
+        <button id="save-close-btn" title="Save changes and close editor">Save & Close</button>
+        <button id="save-publish-btn" title="Save and prepare for WordPress publishing">Save & Publish</button>
+    </div>
+    
+    <script src="{{tinyMceUri}}"></script>
+    <script>
+        (function() {
+            const vscode = acquireVsCodeApi();
+            
+            // Initialize TinyMCE
+            tinymce.init({
+                selector: '#editor',
+                base_url: '{{baseUrl}}',
+                license_key: 'gpl',
+                height: '100%',
+                resize: false,
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | ' +
+                         'bold italic forecolor | alignleft aligncenter ' +
+                         'alignright alignjustify | bullist numlist outdent indent | ' +
+                         'removeformat | link image | code | help',
+                menubar: 'edit view insert format tools table help',
+                content_style: `
+                    body { 
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        font-size: 14px;
+                        line-height: 1.6;
+                        padding: 10px;
+                    }
+                `,
+                promotion: false,
+                branding: false,
+                skin: 'oxide',
+                content_css: 'default',
+                init_instance_callback: function(editor) {
+                    // Hide loading, show editor
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('editor-container').style.display = 'block';
+                },
+                setup: function(editor) {
+                    // Track changes
+                    editor.on('change', function() {
+                        vscode.setState({ 
+                            content: editor.getContent(),
+                            isDirty: true 
+                        });
+                    });
+                    
+                    // Handle Ctrl+S to save (without closing)
+                    editor.on('keydown', function(e) {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                            e.preventDefault();
+                            document.getElementById('save-btn').click();
+                        }
+                    });
+                }
+            });
+            
+            // Button handlers
+            document.getElementById('save-btn').addEventListener('click', function() {
+                const content = tinymce.activeEditor.getContent();
+                vscode.postMessage({
+                    command: 'save',
+                    content: content
+                });
+                // Mark as not dirty after save
+                vscode.setState({ content: content, isDirty: false });
+            });
+            
+            document.getElementById('save-close-btn').addEventListener('click', function() {
+                const content = tinymce.activeEditor.getContent();
+                vscode.postMessage({
+                    command: 'saveAndClose',
+                    content: content
+                });
+            });
+            
+            document.getElementById('save-publish-btn').addEventListener('click', function() {
+                const content = tinymce.activeEditor.getContent();
+                vscode.postMessage({
+                    command: 'saveAndPublish',
+                    content: content
+                });
+            });
+            
+            document.getElementById('cancel-btn').addEventListener('click', function() {
+                const state = vscode.getState();
+                if (state && state.isDirty) {
+                    if (confirm('You have unsaved changes. Are you sure you want to close?')) {
+                        vscode.postMessage({ command: 'cancel' });
+                    }
+                } else {
+                    vscode.postMessage({ command: 'cancel' });
+                }
+            });
+            
+            // Handle messages from extension
+            window.addEventListener('message', function(event) {
+                const message = event.data;
+                switch (message.command) {
+                    case 'updateContent':
+                        if (tinymce.activeEditor) {
+                            tinymce.activeEditor.setContent(message.content);
+                            vscode.setState({ content: message.content, isDirty: false });
+                        }
+                        break;
+                }
+            });
+            
+            // Restore state if available
+            const previousState = vscode.getState();
+            if (previousState && previousState.content && tinymce.activeEditor) {
+                tinymce.activeEditor.setContent(previousState.content);
+            }
+        })();
+    </script>
+</body>
+</html>

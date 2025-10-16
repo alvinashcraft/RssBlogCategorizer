@@ -12,3 +12,5 @@ out/**
 **/*.map
 test-*.js
 CODE_REVIEW_FIXES.md
+!media/**
+!webview/**
