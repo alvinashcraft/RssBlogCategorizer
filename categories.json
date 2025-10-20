@@ -95,6 +95,7 @@
         "gemini.google.com",
         "ollama.com",
         "huggingface.co",
+        "warp.dev",
         "ai.google",
         "microsoft.com/ai",
         "microsoft.com/en-us/ai",
@@ -160,12 +161,14 @@
         "jenkins",
         "codeql",
         "gitlab",
+        "ux",
         "teamcity",
         "octopus",
         "estimation",
         "agile",
         "scrum",
         "kanban",
+        "testing",
         "patterns"
       ]
     },
@@ -244,6 +247,7 @@
         "softwaredefinedtalk.com",
         "netrocksshow.com",
         "dotnetrocks.com",
+        "transistor.fm",
         "spreaker.com",
         "libsyn.com"
       ],
@@ -306,10 +310,13 @@
     "Sharepoint, Teams and Microsoft 365": {
       "titleKeywords": [
         "microsoft 365",
+        "m365",
         "office 365",
+        "o365",
         "sharepoint",
         "teams",
         "onenote",
+        "powerpoint",
         "outlook",
         "microsoft graph",
         "excel",
@@ -360,6 +367,9 @@
     "ai",
     "ios",
     "api",
-    "rag"
+    "rag",
+    "ux",
+    "git",
+    "ide"
   ]
 }

@@ -3,7 +3,7 @@
   "displayName": "RSS Blog Categorizer and Link Blog Post Generator",
   "description": "Fetches RSS feeds from developer blogs and categorizes them with HTML/Markdown export functionality to generate link blog posts.",
   "icon": "images/feedIcon.png",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -192,6 +192,16 @@
           "type": "boolean",
           "default": false,
           "description": "Open blog post links in a new browser tab when clicked (adds target=\"_blank\" to HTML exports)"
+        },
+        "rssBlogCategorizer.enableDometrainSection": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Dometrain Course section in exports (highlights a different video training course from Dometrain every day)"
+        },
+        "rssBlogCategorizer.dometrainLastCourseId": {
+          "type": "string",
+          "default": "",
+          "description": "Last Dometrain course ID shown (used for cycling through courses). Syncs across computers if VS Code settings sync is enabled."
         }
       }
     }
