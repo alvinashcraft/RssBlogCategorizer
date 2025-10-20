@@ -68,18 +68,17 @@ Added native browser spellcheck support to the TinyMCE WYSIWYG editor.
 ### New TypeScript Interfaces
 ```typescript
 interface DometrainCourse {
-    id: string;
-    title: string;
-    subtitle?: string;
-    thumbnail: string;
-    url: string;
-    authors: Array<{ name: string }>;
-}
-
-interface DometrainCoursesResponse {
-    courses: DometrainCourse[];
+    course_id: number;
+    course_title: string;
+    course_subtitle?: string;
+    thumbnail_url: string;
+    course_url: string;
+    author_names: string[];
+    duration?: string;
 }
 ```
+
+**Note**: The interface matches the Dometrain API response structure directly for optimal performance (no transformation overhead). The API returns an array of courses directly, not wrapped in a response object.
 
 ### New Methods in ExportManager
 - `fetchDometrainCourses()`: Fetches course data from Dometrain API

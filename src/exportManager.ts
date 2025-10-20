@@ -544,18 +544,20 @@ ${book.description}
                 return null;
             }
 
-            // Get the last course ID from settings (convert to string for comparison)
-            const lastCourseId = String(config.get<string>('dometrainLastCourseId') || '');
+            // Get the last course ID from settings and parse to number for comparison
+            const lastCourseIdStr = config.get<string>('dometrainLastCourseId') || '';
             
             // Find the index of the last course (by array position, not by ID order)
             let nextIndex = 0;
-            if (lastCourseId) {
-                // Convert all course IDs to strings for comparison
-                const lastIndex = filteredCourses.findIndex((c: DometrainCourse) => String(c.course_id) === lastCourseId);
-                
-                if (lastIndex !== -1) {
-                    // Move to next course in the array (cycles through in JSON order)
-                    nextIndex = (lastIndex + 1) % filteredCourses.length;
+            if (lastCourseIdStr) {
+                const lastCourseId = parseInt(lastCourseIdStr, 10);
+                if (!isNaN(lastCourseId)) {
+                    const lastIndex = filteredCourses.findIndex((c: DometrainCourse) => c.course_id === lastCourseId);
+                    
+                    if (lastIndex !== -1) {
+                        // Move to next course in the array (cycles through in JSON order)
+                        nextIndex = (lastIndex + 1) % filteredCourses.length;
+                    }
                 }
             }
 
