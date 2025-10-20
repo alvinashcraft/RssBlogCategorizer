@@ -487,7 +487,9 @@ ${book.description}
         const authorNames = course.authors.map(a => a.name).join(', ');
         const trackingUrl = `${course.url}?ref=alvin-ashcraft&promo=morning-dew`;
 
+        // Include the course ID in a hidden meta tag so we can update the setting after successful publish
         return `
+    <!-- dometrain-course-id: ${course.id} -->
     <h3>Dometrain Course</h3>
     <div style="display: flex; align-items: flex-start; gap: 15px;">
         <a href="${trackingUrl}"${targetAttribute} style="display: flex; align-items: flex-start; gap: 15px; text-decoration: none; color: inherit;">
@@ -560,8 +562,8 @@ ${book.description}
 
             const selectedCourse = filteredCourses[nextIndex];
             
-            // Save the selected course ID for next time
-            await config.update('dometrainLastCourseId', selectedCourse.id, vscode.ConfigurationTarget.Global);
+            // NOTE: Do NOT update the setting here. It will be updated after successful WordPress publish
+            // to ensure the course only rotates when the post is actually published, not just exported.
             
             console.log(`Selected Dometrain course: ${selectedCourse.title} (ID: ${selectedCourse.id})`);
             return selectedCourse;

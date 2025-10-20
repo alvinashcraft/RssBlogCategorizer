@@ -11,9 +11,7 @@ node_modules/**
 out/**
 **/*.map
 test-*.js
-CODE_REVIEW_FIXES.md
-WORDPRESS_PUBLISHING_SUMMARY.md
-WYSIWYG_EDITOR_IMPLEMENTATION.md
+docs/dev/**
 release-notes/**
 !media/**
 !webview/**

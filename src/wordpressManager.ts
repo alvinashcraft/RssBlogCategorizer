@@ -881,6 +881,33 @@ Would you like to open your WordPress admin panel now?
             tags: finalTags
         };
 
-        return await this.publishPost(post);
+        const publishSuccess = await this.publishPost(post);
+        
+        // If publish was successful, update the Dometrain course ID to rotate to next course
+        if (publishSuccess) {
+            await this.updateDometrainCourseAfterPublish(html);
+        }
+        
+        return publishSuccess;
+    }
+
+    /**
+     * Extract and update the Dometrain course ID after successful WordPress publish
+     * This ensures the course only rotates when posts are actually published
+     */
+    private async updateDometrainCourseAfterPublish(html: string): Promise<void> {
+        try {
+            // Look for the Dometrain course ID comment in the HTML
+            const match = html.match(/<!-- dometrain-course-id: ([^\s]+) -->/);
+            if (match && match[1]) {
+                const courseId = match[1];
+                const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+                await config.update('dometrainLastCourseId', courseId, vscode.ConfigurationTarget.Global);
+                console.log(`Updated Dometrain last course ID to: ${courseId} after successful publish`);
+            }
+        } catch (error) {
+            console.error('Failed to update Dometrain course ID:', error);
+            // Don't throw - this is not critical enough to fail the publish
+        }
     }
 }
