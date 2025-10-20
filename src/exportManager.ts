@@ -7,16 +7,13 @@ import { XMLParser } from 'fast-xml-parser';
 import { BlogPost } from './rssProvider';
 
 interface DometrainCourse {
-    id: string;
-    title: string;
-    subtitle?: string;
-    thumbnail: string;
-    url: string;
-    authors: Array<{ name: string }>;
-}
-
-interface DometrainCoursesResponse {
-    courses: DometrainCourse[];
+    course_id: number;
+    course_title: string;
+    course_subtitle?: string;
+    thumbnail_url: string;
+    course_url: string;
+    author_names: string[];
+    duration?: string;
 }
 
 export class ExportManager {
@@ -489,20 +486,20 @@ ${book.description}
             return '';
         }
 
-        const authorNames = course.authors.map(a => a.name).join(', ');
-        const trackingUrl = `${course.url}?ref=alvin-ashcraft&promo=morning-dew`;
+        const authorNames = course.author_names.join(', ');
+        const trackingUrl = `https://dometrain.com${course.course_url}?ref=alvin-ashcraft&promo=morning-dew`;
 
-        console.log(`Generating Dometrain HTML for course: ${course.title}`);
+        console.log(`Generating Dometrain HTML for course: ${course.course_title}`);
 
         // Include the course ID in a hidden meta tag so we can update the setting after successful publish
         return `
-    <!-- dometrain-course-id: ${course.id} -->
+    <!-- dometrain-course-id: ${course.course_id} -->
     <h3>Dometrain Course</h3>
     <div style="display: flex; align-items: flex-start; gap: 15px;">
         <a href="${trackingUrl}"${targetAttribute} style="display: flex; align-items: flex-start; gap: 15px; text-decoration: none; color: inherit;">
-            <img src="${course.thumbnail}" alt="${this.escapeHtml(course.title)}" style="width: 100px; height: auto; flex-shrink: 0;">
+            <img src="https://dometrain.com${course.thumbnail_url}" alt="${this.escapeHtml(course.course_title)}" style="width: 100px; height: auto; flex-shrink: 0;">
             <div>
-                <span style="text-decoration: underline; color: #0066cc;">${this.escapeHtml(course.title)}</span>${course.subtitle ? ': ' + this.escapeHtml(course.subtitle) : ''} (${this.escapeHtml(authorNames)}) <em>- Referral Link</em>
+                <span style="text-decoration: underline; color: #0066cc;">${this.escapeHtml(course.course_title)}</span>${course.course_subtitle ? ': ' + this.escapeHtml(course.course_subtitle) : ''} (${this.escapeHtml(authorNames)}) <em>- Referral Link</em>
             </div>
         </a>
     </div>`;
@@ -514,15 +511,15 @@ ${book.description}
             return '';
         }
 
-        const authorNames = course.authors.map(a => a.name).join(', ');
-        const trackingUrl = `${course.url}?ref=alvin-ashcraft&promo=morning-dew`;
-        const subtitle = course.subtitle ? `: ${course.subtitle}` : '';
+        const authorNames = course.author_names.join(', ');
+        const trackingUrl = `https://dometrain.com${course.course_url}?ref=alvin-ashcraft&promo=morning-dew`;
+        const subtitle = course.course_subtitle ? `: ${course.course_subtitle}` : '';
 
         return `### Dometrain Course
 
-[![${course.title}](${course.thumbnail})](${trackingUrl})
+[![${course.course_title}](https://dometrain.com${course.thumbnail_url})](${trackingUrl})
 
-[${course.title}${subtitle}](${trackingUrl}) (${authorNames}) *- Referral Link*
+[${course.course_title}${subtitle}](${trackingUrl}) (${authorNames}) *- Referral Link*
 
 `;
     }
@@ -543,19 +540,19 @@ ${book.description}
             // Fetch courses from Dometrain API
             console.log('Fetching Dometrain courses...');
             const coursesData = await this.fetchDometrainCourses();
-            if (!coursesData || !coursesData.courses || coursesData.courses.length === 0) {
+            if (!coursesData || coursesData.length === 0) {
                 console.error('No Dometrain courses found');
                 return null;
             }
 
-            console.log(`Fetched ${coursesData.courses.length} total courses`);
+            console.log(`Fetched ${coursesData.length} total courses`);
 
             // Filter out courses with "Design Pattern" in the title
-            const filteredCourses = coursesData.courses.filter(
-                course => !course.title.toLowerCase().includes('design pattern')
+            const filteredCourses = coursesData.filter(
+                (course: DometrainCourse) => !course.course_title.toLowerCase().includes('design pattern')
             );
 
-            console.log(`After filtering: ${filteredCourses.length} courses (removed ${coursesData.courses.length - filteredCourses.length} Design Pattern courses)`);
+            console.log(`After filtering: ${filteredCourses.length} courses (removed ${coursesData.length - filteredCourses.length} Design Pattern courses)`);
 
             if (filteredCourses.length === 0) {
                 console.error('No Dometrain courses after filtering');
@@ -571,7 +568,7 @@ ${book.description}
             let nextIndex = 0;
             if (lastCourseId) {
                 // Convert all course IDs to strings for comparison
-                const lastIndex = filteredCourses.findIndex(c => String(c.id) === lastCourseId);
+                const lastIndex = filteredCourses.findIndex((c: DometrainCourse) => String(c.course_id) === lastCourseId);
                 console.log(`Found last course at index: ${lastIndex}`);
                 
                 if (lastIndex !== -1) {
@@ -590,7 +587,7 @@ ${book.description}
             // NOTE: Do NOT update the setting here. It will be updated after successful WordPress publish
             // to ensure the course only rotates when the post is actually published, not just exported.
             
-            console.log(`Selected Dometrain course at index ${nextIndex}: "${selectedCourse.title}" (ID: ${selectedCourse.id})`);
+            console.log(`Selected Dometrain course at index ${nextIndex}: "${selectedCourse.course_title}" (ID: ${selectedCourse.course_id})`);
             return selectedCourse;
             
         } catch (error) {
@@ -599,7 +596,7 @@ ${book.description}
         }
     }
 
-    private async fetchDometrainCourses(): Promise<DometrainCoursesResponse | null> {
+    private async fetchDometrainCourses(): Promise<DometrainCourse[] | null> {
         return new Promise((resolve) => {
             const url = 'https://dometrain.com/courses.json';
             
@@ -629,29 +626,29 @@ ${book.description}
                     try {
                         if (res.statusCode === 200) {
                             console.log('Parsing JSON response...');
-                            const coursesData: DometrainCoursesResponse = JSON.parse(data);
+                            const courses: DometrainCourse[] = JSON.parse(data);
                             
-                            if (!coursesData || !coursesData.courses) {
-                                console.error('Invalid response structure - missing courses array');
-                                console.log('Response structure:', Object.keys(coursesData || {}));
+                            if (!Array.isArray(courses)) {
+                                console.error('Invalid response structure - expected array');
+                                console.log('Response type:', typeof courses);
                                 resolve(null);
                                 return;
                             }
                             
-                            console.log(`Successfully fetched ${coursesData.courses.length} Dometrain courses`);
+                            console.log(`Successfully fetched ${courses.length} Dometrain courses`);
                             
                             // Log first course as sample
-                            if (coursesData.courses.length > 0) {
-                                const sample = coursesData.courses[0];
+                            if (courses.length > 0) {
+                                const sample = courses[0];
                                 console.log('Sample course:', {
-                                    id: sample.id,
-                                    title: sample.title,
-                                    hasAuthors: !!sample.authors,
-                                    authorCount: sample.authors?.length || 0
+                                    id: sample.course_id,
+                                    title: sample.course_title,
+                                    hasAuthors: !!sample.author_names,
+                                    authorCount: sample.author_names?.length || 0
                                 });
                             }
                             
-                            resolve(coursesData);
+                            resolve(courses);
                         } else {
                             console.error(`Failed to fetch Dometrain courses: HTTP ${res.statusCode}`);
                             if (data.length < 1000) {
