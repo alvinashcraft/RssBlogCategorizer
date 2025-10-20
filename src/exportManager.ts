@@ -6,6 +6,19 @@ import * as os from 'os';
 import { XMLParser } from 'fast-xml-parser';
 import { BlogPost } from './rssProvider';
 
+interface DometrainCourse {
+    id: string;
+    title: string;
+    subtitle?: string;
+    thumbnail: string;
+    url: string;
+    authors: Array<{ name: string }>;
+}
+
+interface DometrainCoursesResponse {
+    courses: DometrainCourse[];
+}
+
 export class ExportManager {
     
     async exportAsMarkdown(posts: BlogPost[]): Promise<void> {
@@ -168,7 +181,7 @@ export class ExportManager {
         
         let content = `# ${dewDropTitle}\n\n`;
 
-        Object.entries(groupedPosts).forEach(([category, categoryPosts]: [string, BlogPost[]]) => {
+        for (const [category, categoryPosts] of Object.entries(groupedPosts)) {
             content += `### ${category}\n\n`;
             
             if (category === "Top Links") {
@@ -180,7 +193,13 @@ export class ExportManager {
                 });
                 content += `\n`;
             }
-        });
+
+            // Add Dometrain Course section after "Screencasts and Videos"
+            if (category === "Screencasts and Videos") {
+                const dometrainMarkdown = await this.generateDometrainMarkdown();
+                content += dometrainMarkdown;
+            }
+        }
 
         // Add Geek Shelf section
         const geekShelfMarkdown = await this.generateGeekShelfMarkdown();
@@ -209,7 +228,7 @@ export class ExportManager {
     <h1>${this.escapeHtml(dewDropTitle)}</h1>`;
 
         let categoriesHtml = '';
-        Object.entries(groupedPosts).forEach(([category, categoryPosts]: [string, BlogPost[]]) => {
+        for (const [category, categoryPosts] of Object.entries(groupedPosts)) {
             categoriesHtml += `\n    <h3>${category}</h3>\n`;
             
             if (category === "Top Links") {
@@ -225,7 +244,13 @@ export class ExportManager {
                 });
                 categoriesHtml += `    </ul>\n`;
             }
-        });
+
+            // Add Dometrain Course section after "Screencasts and Videos"
+            if (category === "Screencasts and Videos") {
+                const dometrainHtml = await this.generateDometrainHtml(targetAttribute);
+                categoriesHtml += dometrainHtml;
+            }
+        }
 
         // Add Geek Shelf section
         const geekShelfHtml = await this.generateGeekShelfHtml(targetAttribute);
@@ -451,6 +476,135 @@ ${book.description}
             console.error('Failed to load books config:', error);
             return null;
         }
+    }
+
+    private async generateDometrainHtml(targetAttribute: string = ''): Promise<string> {
+        const course = await this.getDometrainCourseOfTheDay();
+        if (!course) {
+            return '';
+        }
+
+        const authorNames = course.authors.map(a => a.name).join(', ');
+        const trackingUrl = `${course.url}?ref=alvin-ashcraft&promo=morning-dew`;
+
+        return `
+    <h3>Dometrain Course</h3>
+    <div style="display: flex; align-items: flex-start; gap: 15px;">
+        <a href="${trackingUrl}"${targetAttribute} style="display: flex; align-items: flex-start; gap: 15px; text-decoration: none; color: inherit;">
+            <img src="${course.thumbnail}" alt="${this.escapeHtml(course.title)}" style="width: 100px; height: auto; flex-shrink: 0;">
+            <div>
+                <span style="text-decoration: underline; color: #0066cc;">${this.escapeHtml(course.title)}</span>${course.subtitle ? ': ' + this.escapeHtml(course.subtitle) : ''} (${this.escapeHtml(authorNames)}) <em>- Referral Link</em>
+            </div>
+        </a>
+    </div>`;
+    }
+
+    private async generateDometrainMarkdown(): Promise<string> {
+        const course = await this.getDometrainCourseOfTheDay();
+        if (!course) {
+            return '';
+        }
+
+        const authorNames = course.authors.map(a => a.name).join(', ');
+        const trackingUrl = `${course.url}?ref=alvin-ashcraft&promo=morning-dew`;
+        const subtitle = course.subtitle ? `: ${course.subtitle}` : '';
+
+        return `### Dometrain Course
+
+[![${course.title}](${course.thumbnail})](${trackingUrl})
+
+[${course.title}${subtitle}](${trackingUrl}) (${authorNames}) *- Referral Link*
+
+`;
+    }
+
+    private async getDometrainCourseOfTheDay(): Promise<DometrainCourse | null> {
+        try {
+            // Check if Dometrain section is enabled
+            const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+            const isEnabled = config.get<boolean>('enableDometrainSection');
+            
+            if (!isEnabled) {
+                return null;
+            }
+
+            // Fetch courses from Dometrain API
+            const coursesData = await this.fetchDometrainCourses();
+            if (!coursesData || !coursesData.courses || coursesData.courses.length === 0) {
+                console.error('No Dometrain courses found');
+                return null;
+            }
+
+            // Filter out courses with "Design Pattern" in the title
+            const filteredCourses = coursesData.courses.filter(
+                course => !course.title.toLowerCase().includes('design pattern')
+            );
+
+            if (filteredCourses.length === 0) {
+                console.error('No Dometrain courses after filtering');
+                return null;
+            }
+
+            // Get the last course ID from settings
+            const lastCourseId = config.get<string>('dometrainLastCourseId') || '';
+            
+            // Find the index of the last course
+            let nextIndex = 0;
+            if (lastCourseId) {
+                const lastIndex = filteredCourses.findIndex(c => c.id === lastCourseId);
+                if (lastIndex !== -1) {
+                    // Move to next course
+                    nextIndex = (lastIndex + 1) % filteredCourses.length;
+                }
+            }
+
+            const selectedCourse = filteredCourses[nextIndex];
+            
+            // Save the selected course ID for next time
+            await config.update('dometrainLastCourseId', selectedCourse.id, vscode.ConfigurationTarget.Global);
+            
+            console.log(`Selected Dometrain course: ${selectedCourse.title} (ID: ${selectedCourse.id})`);
+            return selectedCourse;
+            
+        } catch (error) {
+            console.error('Error getting Dometrain course of the day:', error);
+            return null;
+        }
+    }
+
+    private async fetchDometrainCourses(): Promise<DometrainCoursesResponse | null> {
+        return new Promise((resolve, reject) => {
+            const url = 'https://dometrain.com/courses.json';
+            
+            console.log(`Fetching Dometrain courses from: ${url}`);
+            
+            https.get(url, (res) => {
+                let data = '';
+                
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+                
+                res.on('end', () => {
+                    try {
+                        if (res.statusCode === 200) {
+                            const coursesData: DometrainCoursesResponse = JSON.parse(data);
+                            console.log(`Successfully fetched ${coursesData.courses?.length || 0} Dometrain courses`);
+                            resolve(coursesData);
+                        } else {
+                            console.error(`Failed to fetch Dometrain courses: HTTP ${res.statusCode}`);
+                            resolve(null);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing Dometrain courses JSON:', error);
+                        resolve(null);
+                    }
+                });
+            }).on('error', (error) => {
+                console.error('Error fetching Dometrain courses:', error);
+                resolve(null);
+            });
+        });
     }
 
     private escapeHtml(text: string): string {
