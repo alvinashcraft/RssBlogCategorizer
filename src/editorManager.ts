@@ -67,11 +67,6 @@ export class EditorManager {
                         // Save with formatting, then publish
                         await this.saveContent(message.content, false, true);
                         await this.saveAndPublishContent(message.content);
-                        if (this.resolvePromise) {
-                            this.resolvePromise(message.content);
-                            this.resolvePromise = undefined;
-                        }
-                        this.panel?.dispose();
                         break;
                         
                     case 'cancel':
@@ -252,6 +247,7 @@ export class EditorManager {
     }
     
     private async saveAndPublishContent(content: string): Promise<void> {
+        // First ensure we save the content
         await this.saveContent(content);
         
         // Trigger WordPress publishing
@@ -261,9 +257,25 @@ export class EditorManager {
             'No'
         );
         
-        if (result === 'Yes') {
-            await vscode.commands.executeCommand('rssBlogCategorizer.publishToWordpress');
+        if (result === 'Yes' && this.originalDocumentUri) {
+            try {
+                // Ensure the original document is open and active before publishing
+                const document = await vscode.workspace.openTextDocument(this.originalDocumentUri);
+                await vscode.window.showTextDocument(document);
+                
+                // Now execute the publish command - it will find the active editor
+                await vscode.commands.executeCommand('rssBlogCategorizer.publishToWordpress');
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to open document for publishing: ${error}`);
+            }
         }
+        
+        // Close the editor after the publish workflow is complete (or cancelled)
+        if (this.resolvePromise) {
+            this.resolvePromise(content);
+            this.resolvePromise = undefined;
+        }
+        this.panel?.dispose();
     }
     
     private escapeHtml(html: string): string {
