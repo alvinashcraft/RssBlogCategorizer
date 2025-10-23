@@ -16,3 +16,4 @@ release-notes/**
 .github/**
 !media/**
 !webview/**
+!images/**

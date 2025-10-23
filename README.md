@@ -25,6 +25,20 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 - 🎯 **Simplified HTML** - Streamlined HTML output with reduced div nesting for better WordPress compatibility
 - 🆕 **Optional New Tab Links** - Configurable setting to control whether links open in new tabs (disabled by default)
 
+## Screenshots
+
+### Dev Blog Posts Panel
+
+![Dev Blog Posts Panel](images/rss_blog_categorizer_posts.png)
+
+*The "Dev Blog Posts" view in the Explorer panel showing categorized blog posts with context menu options for exporting and managing feeds.*
+
+### Visual Editor
+
+![WYSIWYG Editor](images/rss_blog_categorizer_editor.png)
+
+*The built-in TinyMCE WYSIWYG editor for visually editing blog post content before publishing to WordPress.*
+
 ## Installation
 
 ### From VS Code Marketplace
@@ -114,6 +128,31 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
 
 - `Dew_Drop_October_11_2025_4517.html`
 - `Dew_Drop_October_11_2025_4517.md`
+
+### WYSIWYG Editor
+
+After exporting to HTML, you can optionally edit your blog post content using the built-in WYSIWYG editor:
+
+**Opening the Editor:**
+
+1. **From Export**: After HTML export, click "Open in Editor" when prompted
+2. **From HTML File**: Open any HTML file and click the edit icon (📝) in the toolbar
+3. **Command Palette**: Use "RSS Blog Categorizer: Open in WYSIWYG Editor"
+
+**Editor Features:**
+
+- **Rich Text Editing**: Full WYSIWYG editing with TinyMCE
+- **Browser Spellcheck**: Native spellcheck with red underlines and right-click corrections
+- **Formatting Tools**: Bold, italic, colors, alignment, lists, links, images
+- **Keyboard Shortcuts**: Ctrl+S (Cmd+S on Mac) to save
+- **VS Code Integration**: Respects your VS Code theme and settings
+
+**Workflow:**
+
+1. Edit your content visually in the WYSIWYG editor
+2. Click "Save" to update the HTML file
+3. Click "Save & Publish" to save and proceed to WordPress publishing
+4. Click "Cancel" to close without saving (with confirmation if changes exist)
 
 ### Publishing to WordPress
 

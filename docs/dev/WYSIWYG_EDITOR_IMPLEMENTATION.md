@@ -46,6 +46,7 @@ Successfully implemented a TinyMCE-based WYSIWYG editor for the RSS Blog Categor
 
 ### Editor Capabilities
 - **Full WYSIWYG Editing**: Rich text editing with TinyMCE's powerful editor
+- **Browser Spellcheck**: Native spellcheck with red underlines and right-click correction suggestions
 - **Toolbar Actions**: 
   - Text formatting (bold, italic, colors)
   - Alignment options
@@ -117,6 +118,8 @@ Successfully implemented a TinyMCE-based WYSIWYG editor for the RSS Blog Categor
 - [ ] Editor opens when clicking the edit icon on an HTML file
 - [ ] TinyMCE loads with all toolbar buttons visible
 - [ ] Can type and format text in the editor
+- [ ] Browser spellcheck shows red underlines for misspelled words
+- [ ] Right-click on misspelled words shows correction suggestions
 - [ ] Save button updates the original HTML file
 - [ ] Cancel button closes the editor without saving
 - [ ] Unsaved changes prompt appears when closing with changes
@@ -178,12 +181,13 @@ No additional configuration required. TinyMCE runs with default settings optimiz
 - Image upload/insertion from local files
 - Custom snippets for common blog post patterns
 - Preview mode that matches WordPress theme
-- Spell check integration
 - Markdown export from WYSIWYG content
 - Auto-save functionality
 - Multi-document editing support
 
 ## Version History
+
+- **v2.1.2** (October 23, 2025) - Added browser spellcheck integration with red underlines and right-click corrections
 - **v2.0.0** (October 16, 2025) - Initial WYSIWYG editor implementation with TinyMCE
 
 ## Support
