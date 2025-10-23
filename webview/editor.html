@@ -195,9 +195,116 @@
                             
                             console.log('Spellcheck enabled on editor body');
                         }
+                        
+                        // Set initial focus to the editor
+                        setTimeout(function() {
+                            editor.focus();
+                        }, 100);
+                    });
+                    
+                    // Store cursor position when editor loses focus
+                    editor.on('blur', function() {
+                        var bookmark = editor.selection.getBookmark(2, true);
+                        vscode.setState({ 
+                            content: editor.getContent(),
+                            isDirty: vscode.getState()?.isDirty || false,
+                            cursorPosition: bookmark
+                        });
+                    });
+                    
+                    // Restore cursor position when editor gains focus
+                    editor.on('focus', function() {
+                        var state = vscode.getState();
+                        if (state && state.cursorPosition) {
+                            // Small delay to ensure editor is ready
+                            setTimeout(function() {
+                                try {
+                                    editor.selection.moveToBookmark(state.cursorPosition);
+                                } catch (e) {
+                                    // If bookmark restoration fails, just place cursor at end
+                                    editor.selection.select(editor.getBody(), true);
+                                    editor.selection.collapse(false);
+                                }
+                            }, 50);
+                        }
                     });
                 }
             });
+            
+            // Focus management for window focus changes (Alt+Tab scenario)
+            let lastFocusTime = Date.now();
+            let focusCheckInterval;
+            
+            // Track when the window loses focus
+            window.addEventListener('blur', function() {
+                lastFocusTime = Date.now();
+                // Clear any existing focus check interval
+                if (focusCheckInterval) {
+                    clearInterval(focusCheckInterval);
+                }
+            });
+            
+            // Track when the window regains focus
+            window.addEventListener('focus', function() {
+                var timeSinceFocus = Date.now() - lastFocusTime;
+                
+                // If focus was lost for more than 100ms, restore focus to editor
+                if (timeSinceFocus > 100 && tinymce.activeEditor) {
+                    setTimeout(function() {
+                        try {
+                            tinymce.activeEditor.focus();
+                            console.log('Focus restored to TinyMCE editor');
+                        } catch (e) {
+                            console.log('Could not restore focus to editor:', e);
+                        }
+                    }, 100);
+                }
+            });
+            
+            // Additional focus restoration using visibility API
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && tinymce.activeEditor) {
+                    // Page became visible, restore focus after short delay
+                    setTimeout(function() {
+                        try {
+                            tinymce.activeEditor.focus();
+                            console.log('Focus restored via visibility change');
+                        } catch (e) {
+                            console.log('Could not restore focus via visibility change:', e);
+                        }
+                    }, 150);
+                }
+            });
+            
+            // Periodic focus check as fallback (only when editor should have focus)
+            function startFocusCheck() {
+                if (focusCheckInterval) {
+                    clearInterval(focusCheckInterval);
+                }
+                
+                focusCheckInterval = setInterval(function() {
+                    // Only restore focus if no other element in the page has focus
+                    var activeElement = document.activeElement;
+                    var isButtonFocused = activeElement && (
+                        activeElement.id === 'save-btn' || 
+                        activeElement.id === 'save-close-btn' || 
+                        activeElement.id === 'save-publish-btn' || 
+                        activeElement.id === 'cancel-btn'
+                    );
+                    
+                    // If no button is focused and editor exists but doesn't have focus
+                    if (!isButtonFocused && tinymce.activeEditor && !tinymce.activeEditor.hasFocus()) {
+                        try {
+                            tinymce.activeEditor.focus();
+                        } catch (e) {
+                            // Silent fail for focus attempts
+                        }
+                    }
+                }, 2000); // Check every 2 seconds
+            }
+            
+            // Start focus checking after editor is initialized
+            setTimeout(startFocusCheck, 1000);
             
             // Button handlers
             document.getElementById('save-btn').addEventListener('click', function() {
@@ -245,6 +352,20 @@
                         if (tinymce.activeEditor) {
                             tinymce.activeEditor.setContent(message.content);
                             vscode.setState({ content: message.content, isDirty: false });
+                            
+                            // Restore focus after content update
+                            setTimeout(function() {
+                                tinymce.activeEditor.focus();
+                            }, 100);
+                        }
+                        break;
+                        
+                    case 'focusEditor':
+                        // Handle explicit focus requests from extension
+                        if (tinymce.activeEditor) {
+                            setTimeout(function() {
+                                tinymce.activeEditor.focus();
+                            }, 50);
                         }
                         break;
                 }
