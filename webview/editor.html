@@ -124,25 +124,12 @@
                          'alignright alignjustify | bullist numlist outdent indent | ' +
                          'removeformat | link image | code | help',
                 menubar: 'edit view insert format tools table help',
-                browser_spellcheck: true,
-                gecko_spellcheck: true,
-                // Additional spellcheck configuration
-                contextmenu: 'spellchecker',
-                contextmenu_never_use_native: false,
-                // Ensure the editor iframe allows spellcheck
-                iframe_attrs: {
-                    spellcheck: 'true'
-                },
                 content_style: `
                     body { 
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
                         font-size: 14px;
                         line-height: 1.6;
                         padding: 10px;
-                        /* Ensure spellcheck is enabled on the content body */
-                    }
-                    /* Style for spellcheck underlines to ensure they're visible */
-                    *[spellcheck="true"] {
                     }
                 `,
                 promotion: false,
@@ -171,26 +158,8 @@
                         }
                     });
                     
-                    // Ensure spellcheck is enabled after editor initialization
+                    // Set initial focus to the editor after initialization
                     editor.on('init', function() {
-                        // Get the editor's iframe document
-                        var iframeDoc = editor.getDoc();
-                        var body = iframeDoc.body;
-                        
-                        // Force enable spellcheck on the body element
-                        if (body) {
-                            body.setAttribute('spellcheck', 'true');
-                            body.setAttribute('contenteditable', 'true');
-                            
-                            // Also set it on the document element
-                            if (iframeDoc.documentElement) {
-                                iframeDoc.documentElement.setAttribute('spellcheck', 'true');
-                            }
-                            
-                            console.log('Spellcheck enabled on editor body');
-                        }
-                        
-                        // Set initial focus to the editor
                         setTimeout(function() {
                             editor.focus();
                         }, 100);

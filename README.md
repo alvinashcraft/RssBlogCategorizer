@@ -142,10 +142,11 @@ After exporting to HTML, you can optionally edit your blog post content using th
 **Editor Features:**
 
 - **Rich Text Editing**: Full WYSIWYG editing with TinyMCE
-- **Browser Spellcheck**: Native spellcheck with red underlines and right-click corrections
 - **Formatting Tools**: Bold, italic, colors, alignment, lists, links, images
 - **Keyboard Shortcuts**: Ctrl+S (Cmd+S on Mac) to save
 - **VS Code Integration**: Respects your VS Code theme and settings
+
+**Note on Spellcheck**: Advanced spellcheck features (red underlines, suggestions) are not currently available as TinyMCE removed the free spellcheck plugin in version 6.0. The editor relies on your browser's native spellcheck functionality. Enhanced spellcheck is not on the roadmap due to this limitation.
 
 **Workflow:**
 
