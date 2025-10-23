@@ -63,15 +63,27 @@ This file contains the categories and keywords used to automatically categorize 
 
 ## Date Filtering
 
-The extension filters posts by publication date using **UTC timezone**:
+The extension filters posts by publication date using **UTC timezone** with both past and future boundaries:
 
-- **Smart default**: Automatically uses the date of the latest "Dew Drop" post from alvinashcraft.com
+**Date Range:**
+
+- **Minimum**: Uses the date of the latest "Dew Drop" post from alvinashcraft.com (smart default)
+- **Maximum**: Current time + 30 minutes (prevents future-dated posts from appearing prematurely)
 - **Fallback**: If the blog date can't be fetched, uses posts from the last 24 hours (UTC)
 - **Custom filter**: Set `minimumDateTime` in VS Code settings using UTC format
-- **Format examples**:
-  - `2025-01-01T00:00:00Z` (midnight UTC on Jan 1, 2025)
-  - `2025-09-27T12:00:00.000Z` (noon UTC on Sep 27, 2025)
-- **Important**: All date comparisons use UTC to ensure consistency across timezones
+
+**Why Future Filtering?**
+
+- Prevents duplicate posts from RSS feeds with inconsistent timestamps
+- Ensures posts with future dates appear in tomorrow's collection instead of today's
+- Handles timezone discrepancies and sharing delays in RSS feeds
+
+**Format examples:**
+
+- `2025-01-01T00:00:00Z` (midnight UTC on Jan 1, 2025)
+- `2025-09-27T12:00:00.000Z` (noon UTC on Sep 27, 2025)
+
+**Important**: All date comparisons use UTC to ensure consistency across timezones
 
 ### NewsBlur Date Filtering
 
@@ -88,6 +100,7 @@ The optional `wholeWordKeywords` array contains keywords that should only match 
 - **Performance**: Regex patterns are cached for efficiency during categorization
 - **Use cases**: Short keywords like "ai", "js", "go", "c" that often appear within other words
 - **Example configuration**:
+
   ```json
   "wholeWordKeywords": [
     "ai",

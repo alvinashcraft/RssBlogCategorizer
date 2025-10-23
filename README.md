@@ -183,11 +183,18 @@ Access settings via `File > Preferences > Settings` and search for "RSS Blog Cat
 
 ### Smart Date Filtering
 
-The extension uses intelligent date filtering:
+The extension uses intelligent date filtering with both past and future boundaries:
 
 1. **Automatic Mode** (default): Uses the publication date of the latest "Dew Drop" post from alvinashcraft.com
 2. **Fallback**: If unavailable, filters to posts from the last 24 hours (UTC)
 3. **Manual Override**: Set a custom UTC datetime in settings
+4. **Future Filter**: Excludes posts with dates more than 30 minutes in the future to prevent duplicates from shared posts with incorrect timestamps
+
+**Date Range Logic:**
+
+- **Minimum**: Posts newer than the last Dew Drop date (or 24 hours ago)
+- **Maximum**: Posts not more than 30 minutes in the future from current time
+- **Purpose**: Prevents today's collection from including posts that should appear tomorrow due to timezone issues or sharing delays
 
 Example UTC formats:
 

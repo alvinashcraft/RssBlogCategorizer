@@ -332,6 +332,54 @@ describe('RSSBlogProvider', () => {
         expect(posts).to.be.an('array');
       });
     });
+
+    it('should filter out posts that appear to be in the future', async () => {
+      // Create RSS with posts having future dates (more than 30 minutes from now)
+      const futureDate = new Date();
+      futureDate.setHours(futureDate.getHours() + 2); // 2 hours in the future
+      
+      const nearFutureDate = new Date();
+      nearFutureDate.setMinutes(nearFutureDate.getMinutes() + 15); // 15 minutes in the future (should be included)
+      
+      const testRss = `<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <item>
+              <title>Future Post Should Be Excluded</title>
+              <link>https://example.com/future-post</link>
+              <description>This post has a date too far in the future</description>
+              <pubDate>${futureDate.toUTCString()}</pubDate>
+              <author>Future Author</author>
+            </item>
+            <item>
+              <title>Near Future Post Should Be Included</title>
+              <link>https://example.com/near-future</link>
+              <description>This post is within the 30-minute buffer</description>
+              <pubDate>${nearFutureDate.toUTCString()}</pubDate>
+              <author>Present Author</author>
+            </item>
+          </channel>
+        </rss>`;
+
+      const mockResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(testRss);
+          if (event === 'end') callback();
+        })
+      };
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockResponse);
+        return { on: sinon.stub() };
+      });
+
+      await provider.refresh();
+      const posts = await provider.getAllPosts();
+      
+      // Should exclude the far future post but include the near future post
+      expect(posts.find(p => p.title.includes('Future Post Should Be Excluded'))).to.be.undefined;
+      expect(posts.find(p => p.title.includes('Near Future Post Should Be Included'))).to.exist;
+    });
   });
 
   describe('Configuration Management', () => {

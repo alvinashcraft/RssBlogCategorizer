@@ -67,6 +67,23 @@ describe('Basic Tests', () => {
       
       expect(isNaN(invalidDate.getTime())).to.be.true;
     });
+
+    it('should handle future date filtering logic', () => {
+      const now = new Date();
+      const bufferMinutes = 30;
+      const maxDateTime = new Date(now.getTime() + (bufferMinutes * 60 * 1000));
+      
+      // Post within buffer (should be included)
+      const nearFutureDate = new Date(now.getTime() + (15 * 60 * 1000)); // 15 minutes
+      expect(nearFutureDate <= maxDateTime).to.be.true;
+      
+      // Post beyond buffer (should be excluded)
+      const farFutureDate = new Date(now.getTime() + (60 * 60 * 1000)); // 60 minutes
+      expect(farFutureDate > maxDateTime).to.be.true;
+      
+      // Current time (should be included)
+      expect(now <= maxDateTime).to.be.true;
+    });
   });
 
   describe('String Utilities', () => {
