@@ -1004,6 +1004,13 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             }
         }
 
+        // Calculate maximum date time (current time + 30 minutes buffer)
+        // This filters out posts that appear to be in the future, which might be shared posts
+        // with incorrect timestamps that should be included tomorrow instead
+        const now = new Date();
+        const maximumDateTime = new Date(now.getTime() + (30 * RSSBlogProvider.MILLISECONDS_PER_MINUTE));
+        console.log(`Future date filter: posts older than ${maximumDateTime.toISOString()} (30min buffer from now)`);
+
         const filteredPosts = posts.filter(post => {
             if (!post.pubDate) {
                 console.log(`Excluding post "${post.title}" - no publication date`);
@@ -1017,19 +1024,30 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     return false; // Exclude posts with invalid dates
                 }
                 
-                const isIncluded = postDate > minimumDateTime;
-                if (!isIncluded) {
+                // Check if post is too old (before minimum date)
+                const isTooOld = postDate <= minimumDateTime;
+                if (isTooOld) {
                     const timeDiffMinutes = Math.round((minimumDateTime.getTime() - postDate.getTime()) / RSSBlogProvider.MILLISECONDS_PER_MINUTE);
                     console.log(`Excluding post "${post.title}" - too old by ${timeDiffMinutes} minutes: ${postDate.toISOString()} <= ${minimumDateTime.toISOString()}`);
+                    return false;
                 }
-                return isIncluded;
+                
+                // Check if post appears to be in the future (beyond our 30-minute buffer)
+                const isTooFuture = postDate > maximumDateTime;
+                if (isTooFuture) {
+                    const timeDiffMinutes = Math.round((postDate.getTime() - maximumDateTime.getTime()) / RSSBlogProvider.MILLISECONDS_PER_MINUTE);
+                    console.log(`Excluding post "${post.title}" - appears to be in future by ${timeDiffMinutes} minutes: ${postDate.toISOString()} > ${maximumDateTime.toISOString()}`);
+                    return false;
+                }
+                
+                return true; // Post is within acceptable date range
             } catch (error) {
                 console.log(`Excluding post "${post.title}" - date parsing error: ${error}`);
                 return false; // Exclude posts with invalid dates
             }
         });
 
-        console.log(`Date filtering: ${filteredPosts.length} of ${posts.length} posts passed the UTC date filter`);
+        console.log(`Date filtering: ${filteredPosts.length} of ${posts.length} posts passed the date range filter (${minimumDateTime.toISOString()} to ${maximumDateTime.toISOString()})`);
         return filteredPosts;
     }
 

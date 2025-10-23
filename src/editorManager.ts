@@ -50,6 +50,22 @@ export class EditorManager {
         
         this.panel.webview.html = this.getWebviewContent(htmlContent);
         
+        // Handle panel visibility changes to restore focus
+        this.panel.onDidChangeViewState(
+            (e) => {
+                if (e.webviewPanel.visible) {
+                    // Panel became visible, request focus restoration
+                    setTimeout(() => {
+                        this.panel?.webview.postMessage({
+                            command: 'focusEditor'
+                        });
+                    }, 200); // Delay to ensure panel is fully rendered
+                }
+            },
+            null,
+            this.context.subscriptions
+        );
+        
         this.panel.webview.onDidReceiveMessage(
             async (message) => {
                 switch (message.command) {

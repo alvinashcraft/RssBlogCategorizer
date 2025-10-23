@@ -13,5 +13,7 @@ out/**
 test-*.js
 docs/dev/**
 release-notes/**
+.github/**
 !media/**
 !webview/**
+!images/**
