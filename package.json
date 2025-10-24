@@ -3,7 +3,7 @@
   "displayName": "RSS Blog Categorizer and Link Blog Post Generator",
   "description": "Fetches RSS feeds from developer blogs and categorizes them with HTML/Markdown export functionality to generate link blog posts.",
   "icon": "images/feedIcon.png",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -146,6 +146,18 @@
           "type": "string",
           "default": "",
           "description": "Minimum datetime for blog posts in UTC (ISO format, e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00.000Z). Leave empty to automatically use the date of the latest 'Dew Drop' post from alvinashcraft.com, or fall back to last 24 hours (UTC) if unavailable. All date comparisons use UTC timezone."
+        },
+        "rssBlogCategorizer.enablePostFilteringBuffer": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable buffer time when filtering posts by date to avoid edge cases where posts might be missed due to timing differences"
+        },
+        "rssBlogCategorizer.postFilteringBufferMinutes": {
+          "type": "number",
+          "default": 5,
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Number of minutes to add as buffer when filtering posts (only applies when buffer is enabled)"
         },
         "rssBlogCategorizer.enableAutoRefresh": {
           "type": "boolean",

@@ -9,7 +9,7 @@ export interface BlogPost {
     title: string;
     link: string;
     description: string;
-    pubDate: string;
+    pubDate: string; // For NewsBlur: this contains the shared_date, for RSS: this contains pubDate
     category: string;
     source: string;
     author: string;
@@ -241,7 +241,40 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // Blog post node
             const item = new vscode.TreeItem(element.title, vscode.TreeItemCollapsibleState.None);
             item.tooltip = element.description;
-            item.description = element.source;
+            
+            // Display shared date for NewsBlur posts, otherwise fall back to source
+            if (element.source === 'NewsBlur Shared Stories' && element.pubDate) {
+                // Format the publication/shared date for display in local timezone
+                try {
+                    const sharedDate = new Date(element.pubDate);
+                    if (!isNaN(sharedDate.getTime())) {
+                        // The shared_date from NewsBlur is in UTC format: "2025-10-24 12:15:55.237000"
+                        // Simply create a Date object and let JavaScript handle local timezone conversion
+                        const utcDateString = element.pubDate;
+                        
+                        // Make sure it's treated as UTC by appending 'Z' if needed
+                        const utcDate = new Date(utcDateString.includes('Z') ? utcDateString : utcDateString + 'Z');
+                        
+                        if (!isNaN(utcDate.getTime())) {
+                            // JavaScript Date.prototype methods automatically convert to local timezone
+                            const month = (utcDate.getMonth() + 1).toString().padStart(2, '0');
+                            const day = utcDate.getDate().toString().padStart(2, '0');
+                            const hours = utcDate.getHours().toString().padStart(2, '0');
+                            const minutes = utcDate.getMinutes().toString().padStart(2, '0');
+                            item.description = `${month}/${day} ${hours}:${minutes}`;
+                        } else {
+                            item.description = element.source;
+                        }
+                    } else {
+                        item.description = element.source;
+                    }
+                } catch (error) {
+                    item.description = element.source;
+                }
+            } else {
+                item.description = element.source;
+            }
+            
             item.command = {
                 command: 'rssBlogCategorizer.openPost',
                 title: 'Open Post',
@@ -552,6 +585,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         });
     }
 
+
     private parseNewsBlurApiResponse(apiResponse: NewsBlurApiResponse, feedUrl: string): BlogPost[] {
         const posts: BlogPost[] = [];
         const seenLinks = new Set<string>(); // Track duplicate links
@@ -572,6 +606,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 
                 // NewsBlur returns Unix timestamps (seconds since epoch) as strings
                 // Convert to ISO format for consistent date handling
+                // NOTE: We prioritize shared_date (when you shared the post) over story_date (when it was published)
                 let pubDate = '';
                 const rawDate = story.shared_date || story.story_date || '';
                 if (rawDate) {
@@ -621,11 +656,13 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     title: title,
                     link: this.appendSyncfusionTracking(this.removeTrackingParameters(link)),
                     description: description,
-                    pubDate: pubDate,
+                    pubDate: pubDate, // For NewsBlur, this already contains the shared_date
                     category: this.categorizePost(title, description, link),
                     source: feedTitle,
                     author: author
                 };
+                
+
                 
                 this.addPostIfNotDuplicate(post, posts, seenLinks);
             } catch (itemError) {
@@ -964,6 +1001,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return url.toString();
     }
 
+    /**
+     * Filters posts by date, prioritizing shared dates over publication dates.
+     * For NewsBlur API data, this uses the shared_date (when you shared the post).
+     * For RSS feeds, this uses the pubDate from the feed.
+     * Posts with invalid dates are included (better to include than exclude).
+     */
     private async filterPostsByDate(posts: BlogPost[]): Promise<BlogPost[]> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const minimumDateTimeStr = config.get<string>('minimumDateTime') || '';
@@ -975,10 +1018,20 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const lastDewDropDate = await this.getLastDewDropDate();
             
             if (lastDewDropDate) {
-                // Add a small buffer (5 minutes) to account for timing differences
-                // This helps avoid edge cases where posts might have similar timestamps
-                minimumDateTime = new Date(lastDewDropDate.getTime() + (5 * RSSBlogProvider.MILLISECONDS_PER_MINUTE));
-                console.log(`Using latest Dew Drop post date as filter (with 5min buffer): posts newer than ${minimumDateTime.toISOString()}`);
+                // Get buffer configuration settings
+                const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+                const enableBuffer = config.get<boolean>('enablePostFilteringBuffer', true);
+                const bufferMinutes = config.get<number>('postFilteringBufferMinutes', 5);
+                
+                if (enableBuffer && bufferMinutes > 0) {
+                    // Add configurable buffer to account for timing differences
+                    minimumDateTime = new Date(lastDewDropDate.getTime() + (bufferMinutes * RSSBlogProvider.MILLISECONDS_PER_MINUTE));
+                    console.log(`Using latest Dew Drop post date as filter (with ${bufferMinutes}min buffer): posts newer than ${minimumDateTime.toISOString()}`);
+                } else {
+                    // No buffer - use exact Dew Drop date
+                    minimumDateTime = new Date(lastDewDropDate.getTime());
+                    console.log(`Using latest Dew Drop post date as filter (no buffer): posts newer than ${minimumDateTime.toISOString()}`);
+                }
             } else {
                 // Fallback to last 24 hours in UTC if we can't get the Dew Drop date
                 minimumDateTime = new Date();
@@ -1004,24 +1057,20 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             }
         }
 
-        // Calculate maximum date time (current time + 30 minutes buffer)
-        // This filters out posts that appear to be in the future, which might be shared posts
-        // with incorrect timestamps that should be included tomorrow instead
-        const now = new Date();
-        const maximumDateTime = new Date(now.getTime() + (30 * RSSBlogProvider.MILLISECONDS_PER_MINUTE));
-        console.log(`Future date filter: posts older than ${maximumDateTime.toISOString()} (30min buffer from now)`);
-
         const filteredPosts = posts.filter(post => {
-            if (!post.pubDate) {
-                console.log(`Excluding post "${post.title}" - no publication date`);
-                return false; // Exclude posts without dates
+            // If there's no date at all, we have to exclude it
+            if (!post.pubDate || post.pubDate.trim() === '') {
+                console.log(`Excluding post "${post.title}" - no date available`);
+                return false;
             }
             
             try {
                 const postDate = new Date(post.pubDate);
+                
+                // If we can't parse the date, include the post anyway (better to include than exclude)
                 if (isNaN(postDate.getTime())) {
-                    console.log(`Excluding post "${post.title}" - invalid date format: "${post.pubDate}"`);
-                    return false; // Exclude posts with invalid dates
+                    console.log(`Including post "${post.title}" despite invalid date format: "${post.pubDate}" - assuming it's recent`);
+                    return true;
                 }
                 
                 // Check if post is too old (before minimum date)
@@ -1032,22 +1081,15 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     return false;
                 }
                 
-                // Check if post appears to be in the future (beyond our 30-minute buffer)
-                const isTooFuture = postDate > maximumDateTime;
-                if (isTooFuture) {
-                    const timeDiffMinutes = Math.round((postDate.getTime() - maximumDateTime.getTime()) / RSSBlogProvider.MILLISECONDS_PER_MINUTE);
-                    console.log(`Excluding post "${post.title}" - appears to be in future by ${timeDiffMinutes} minutes: ${postDate.toISOString()} > ${maximumDateTime.toISOString()}`);
-                    return false;
-                }
-                
                 return true; // Post is within acceptable date range
             } catch (error) {
-                console.log(`Excluding post "${post.title}" - date parsing error: ${error}`);
-                return false; // Exclude posts with invalid dates
+                // If there's any error parsing the date, include the post anyway
+                console.log(`Including post "${post.title}" despite date parsing error: ${error} - assuming it's recent`);
+                return true;
             }
         });
 
-        console.log(`Date filtering: ${filteredPosts.length} of ${posts.length} posts passed the date range filter (${minimumDateTime.toISOString()} to ${maximumDateTime.toISOString()})`);
+        console.log(`Date filtering: ${filteredPosts.length} of ${posts.length} posts passed the date filter (newer than ${minimumDateTime.toISOString()})`);
         return filteredPosts;
     }
 

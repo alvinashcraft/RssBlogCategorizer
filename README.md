@@ -218,23 +218,25 @@ Access settings via `File > Preferences > Settings` and search for "RSS Blog Cat
 - **WordPress Username**: Your WordPress account username (password stored securely)
 - **WordPress Categories**: Default categories to assign to published posts (e.g., "Daily Links", "Development")
 - **Open Links in New Tab**: Control whether exported links open in a new browser tab (disabled by default)
+- **Enable Post Filtering Buffer**: Enable buffer time when filtering posts by date (enabled by default)
+- **Post Filtering Buffer Minutes**: Number of minutes to add as buffer when filtering posts (default: 5 minutes, range: 0-60)
 
 **Note**: Tags are automatically detected from content and don't require configuration - the system analyzes your blog post and suggests relevant technology tags during publishing.
 
 ### Smart Date Filtering
 
-The extension uses intelligent date filtering with both past and future boundaries:
+The extension uses intelligent date filtering to ensure you get the most relevant recent posts:
 
 1. **Automatic Mode** (default): Uses the publication date of the latest "Dew Drop" post from alvinashcraft.com
 2. **Fallback**: If unavailable, filters to posts from the last 24 hours (UTC)
 3. **Manual Override**: Set a custom UTC datetime in settings
-4. **Future Filter**: Excludes posts with dates more than 30 minutes in the future to prevent duplicates from shared posts with incorrect timestamps
+4. **Buffer Time**: Optional configurable buffer (default 5 minutes) added to avoid edge cases with timing differences
 
-**Date Range Logic:**
+**Date Filtering Logic:**
 
-- **Minimum**: Posts newer than the last Dew Drop date (or 24 hours ago)
-- **Maximum**: Posts not more than 30 minutes in the future from current time
-- **Purpose**: Prevents today's collection from including posts that should appear tomorrow due to timezone issues or sharing delays
+- **Minimum**: Posts newer than the last Dew Drop date (plus optional buffer)
+- **Future Posts**: All future-dated posts are now included (no future date filtering)
+- **Purpose**: Captures shared stories and posts with proper timezone handling
 
 Example UTC formats:
 

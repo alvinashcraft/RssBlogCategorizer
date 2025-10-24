@@ -10,6 +10,7 @@ This is a Visual Studio Code extension called "RSS Blog Categorizer" that fetche
 
 - **Always check documentation**: After implementing any fix or new feature, review and update the `README.md` file and any relevant documentation in the `docs/` folder
 - **Always check tests**: After implementing any fix or new feature, add or update corresponding tests in the `src/test/` directory
+- **Fix markdown linting**: Always address markdown linting issues when creating or updating documentation files to maintain proper formatting and readability
 - **Documentation structure**: 
   - General documentation goes in `docs/`
   - Developer-specific documentation goes in `docs/dev/`
