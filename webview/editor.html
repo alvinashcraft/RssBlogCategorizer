@@ -149,6 +149,8 @@
                     'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
                     'insertdatetime', 'media', 'table', 'help', 'wordcount'
                 ],
+                // Enable link tooltips to show URL on hover
+                link_context_toolbar: true,
                 toolbar: 'undo redo | blocks | ' +
                          'bold italic forecolor | alignleft aligncenter ' +
                          'alignright alignjustify | bullist numlist outdent indent | ' +
@@ -172,6 +174,28 @@
                     document.getElementById('editor-container').style.display = 'block';
                 },
                 setup: function(editor) {
+                    // Add custom link tooltip functionality
+                    editor.on('init', function() {
+                        var editorBody = editor.getBody();
+                        
+                        // Add mouse events to show URL tooltips on link hover
+                        editorBody.addEventListener('mouseover', function(e) {
+                            if (e.target.tagName === 'A' && e.target.href) {
+                                e.target.title = e.target.href;
+                            }
+                        });
+                        
+                        // Optional: Clean up title attribute on mouseout to avoid duplicate tooltips
+                        editorBody.addEventListener('mouseout', function(e) {
+                            if (e.target.tagName === 'A') {
+                                // Keep the title for accessibility, just don't duplicate it
+                                if (e.target.title === e.target.href) {
+                                    // Title was set by our hover handler, keep it
+                                }
+                            }
+                        });
+                    });
+                    
                     // Track changes
                     editor.on('change', function() {
                         vscode.setState({ 
