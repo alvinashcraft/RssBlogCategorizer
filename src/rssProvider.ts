@@ -662,8 +662,6 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     author: author
                 };
                 
-
-                
                 this.addPostIfNotDuplicate(post, posts, seenLinks);
             } catch (itemError) {
                 console.error(`Error processing NewsBlur story ${index}:`, itemError);
