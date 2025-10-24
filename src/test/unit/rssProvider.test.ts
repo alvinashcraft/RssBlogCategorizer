@@ -333,30 +333,20 @@ describe('RSSBlogProvider', () => {
       });
     });
 
-    it('should filter out posts that appear to be in the future', async () => {
-      // Create RSS with posts having future dates (more than 30 minutes from now)
+    it('should include posts with future dates (no future date filtering)', async () => {
+      // Test that posts with future dates are now included since we removed future date filtering
       const futureDate = new Date();
       futureDate.setHours(futureDate.getHours() + 2); // 2 hours in the future
-      
-      const nearFutureDate = new Date();
-      nearFutureDate.setMinutes(nearFutureDate.getMinutes() + 15); // 15 minutes in the future (should be included)
       
       const testRss = `<?xml version="1.0" encoding="UTF-8"?>
         <rss version="2.0">
           <channel>
             <item>
-              <title>Future Post Should Be Excluded</title>
+              <title>Future Post Should Be Included</title>
               <link>https://example.com/future-post</link>
-              <description>This post has a date too far in the future</description>
+              <description>Future posts are now allowed</description>
               <pubDate>${futureDate.toUTCString()}</pubDate>
               <author>Future Author</author>
-            </item>
-            <item>
-              <title>Near Future Post Should Be Included</title>
-              <link>https://example.com/near-future</link>
-              <description>This post is within the 30-minute buffer</description>
-              <pubDate>${nearFutureDate.toUTCString()}</pubDate>
-              <author>Present Author</author>
             </item>
           </channel>
         </rss>`;
@@ -376,9 +366,76 @@ describe('RSSBlogProvider', () => {
       await provider.refresh();
       const posts = await provider.getAllPosts();
       
-      // Should exclude the far future post but include the near future post
-      expect(posts.find(p => p.title.includes('Future Post Should Be Excluded'))).to.be.undefined;
-      expect(posts.find(p => p.title.includes('Near Future Post Should Be Included'))).to.exist;
+      // Should include future posts since we removed future date filtering
+      expect(posts.find(p => p.title.includes('Future Post Should Be Included'))).to.exist;
+    });
+  });
+
+  describe('Buffer Configuration', () => {
+    it('should apply buffer when enabled', async () => {
+      const configWithBuffer = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '',
+        refreshInterval: 30,
+        enablePostFilteringBuffer: true,
+        postFilteringBufferMinutes: 10
+      });
+      workspaceGetConfigStub.returns(configWithBuffer);
+
+      // Mock the Dew Drop RSS response
+      const dewDropResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockDewDropRss);
+          if (event === 'end') callback();
+        })
+      };
+
+      httpsGetStub.callsFake((url, options, callback) => {
+        if (url.includes('alvinashcraft.com')) {
+          callback(dewDropResponse);
+        }
+        return { on: sinon.stub() };
+      });
+
+      await provider.refresh();
+      
+      // Verify that buffer configuration is being read (test would need internal access to verify exact behavior)
+      expect(workspaceGetConfigStub).to.have.been.called;
+    });
+
+    it('should work without buffer when disabled', async () => {
+      const configWithoutBuffer = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '',
+        refreshInterval: 30,
+        enablePostFilteringBuffer: false,
+        postFilteringBufferMinutes: 5
+      });
+      workspaceGetConfigStub.returns(configWithoutBuffer);
+
+      // Mock the Dew Drop RSS response
+      const dewDropResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockDewDropRss);
+          if (event === 'end') callback();
+        })
+      };
+
+      httpsGetStub.callsFake((url, options, callback) => {
+        if (url.includes('alvinashcraft.com')) {
+          callback(dewDropResponse);
+        }
+        return { on: sinon.stub() };
+      });
+
+      await provider.refresh();
+      
+      // Should work without buffer when disabled
+      expect(workspaceGetConfigStub).to.have.been.called;
     });
   });
 

@@ -216,9 +216,104 @@ case 'focusEditor':
 - ✅ Uninterrupted typing workflow
 - ✅ Professional editor experience matching native applications
 
+## Update - October 24, 2025: Dialog Focus Fix
+
+### Issue with Initial Fix
+
+The focus restoration fix introduced a new issue: TinyMCE dialogs/popups (like the URL/link dialog) couldn't maintain focus. Every time a user tried to click into a dialog input field, the focus restoration logic would immediately return focus to the main editor behind it.
+
+### Root Cause
+
+The focus restoration mechanisms were too aggressive and didn't distinguish between:
+1. **Legitimate focus restoration scenarios** (Alt+Tab, window switching)
+2. **Dialog interaction scenarios** where focus should remain on the dialog
+
+### Additional Fix Applied
+
+Enhanced all focus restoration methods to check for open TinyMCE dialogs before restoring focus:
+
+```javascript
+// Helper function to detect if TinyMCE has any dialogs/popups open
+function isTinyMCEDialogOpen() {
+    try {
+        // Method 1: Check for TinyMCE dialog elements in the DOM
+        var dialogElements = document.querySelectorAll('.tox-dialog, .mce-window, .tox-dialog-wrap');
+        if (dialogElements && dialogElements.length > 0) {
+            return true;
+        }
+        
+        // Method 2: Check TinyMCE's windowManager if available
+        if (tinymce.activeEditor && tinymce.activeEditor.windowManager) {
+            var windows = tinymce.activeEditor.windowManager.getWindows();
+            if (windows && windows.length > 0) {
+                return true;
+            }
+        }
+        
+        // Method 3: Check for any element with focus that might be a dialog input
+        var activeElement = document.activeElement;
+        if (activeElement && activeElement.closest && activeElement.closest('.tox-dialog, .mce-window')) {
+            return true;
+        }
+        
+        return false;
+    } catch (e) {
+        return false;
+    }
+}
+```
+
+Updated all focus restoration points to respect dialog state:
+
+```javascript
+// Window focus restoration
+if (timeSinceFocus > 100 && tinymce.activeEditor && !isTinyMCEDialogOpen()) {
+    // Only restore focus if no dialogs are open
+}
+
+// Visibility change restoration  
+if (!document.hidden && tinymce.activeEditor && !isTinyMCEDialogOpen()) {
+    // Only restore focus if no dialogs are open
+}
+
+// Periodic focus check
+if (!isButtonFocused && tinymce.activeEditor && !tinymce.activeEditor.hasFocus() && !isTinyMCEDialogOpen()) {
+    // Only restore focus if no dialogs are open
+}
+```
+
+### Testing the Dialog Fix
+
+1. **Link Dialog Test**:
+   - Open TinyMCE editor
+   - Select text and click the link button (or press Ctrl+K)
+   - ✅ URL dialog should open and receive focus
+   - ✅ You should be able to type in the URL field without focus jumping back to the editor
+   - ✅ Alt+Tab away and back should not interfere with the dialog
+
+2. **Other Dialog Tests**:
+   - Image dialog
+   - Table dialog  
+   - Any other TinyMCE popup
+   - ✅ All dialogs should maintain focus properly
+
+### Technical Details
+
+The dialog detection uses a multi-layered approach:
+
+1. **DOM Query**: Searches for TinyMCE dialog CSS classes
+2. **WindowManager API**: Uses TinyMCE's built-in window tracking 
+3. **Active Element Check**: Verifies if focused element is within a dialog
+
+This ensures maximum compatibility across different TinyMCE versions and themes.
+
 ---
 
 **Date**: October 23, 2025  
 **Issue**: TinyMCE focus not returning after Alt+Tab  
+**Status**: Fixed and ready for testing  
+
+**Date**: October 24, 2025  
+**Issue**: TinyMCE dialogs losing focus due to aggressive focus restoration  
 **Status**: Fixed and ready for testing  
 **Priority**: High (user experience critical)

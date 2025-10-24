@@ -107,6 +107,36 @@
         (function() {
             const vscode = acquireVsCodeApi();
             
+            // Helper function to detect if TinyMCE has any dialogs/popups open
+            function isTinyMCEDialogOpen() {
+                try {
+                    // Method 1: Check for TinyMCE dialog elements in the DOM
+                    var dialogElements = document.querySelectorAll('.tox-dialog, .mce-window, .tox-dialog-wrap');
+                    if (dialogElements && dialogElements.length > 0) {
+                        return true;
+                    }
+                    
+                    // Method 2: Check TinyMCE's windowManager if available
+                    if (tinymce.activeEditor && tinymce.activeEditor.windowManager) {
+                        var windows = tinymce.activeEditor.windowManager.getWindows();
+                        if (windows && windows.length > 0) {
+                            return true;
+                        }
+                    }
+                    
+                    // Method 3: Check for any element with focus that might be a dialog input
+                    var activeElement = document.activeElement;
+                    if (activeElement && activeElement.closest && activeElement.closest('.tox-dialog, .mce-window')) {
+                        return true;
+                    }
+                    
+                    return false;
+                } catch (e) {
+                    // If there's any error checking for dialogs, assume no dialog is open
+                    return false;
+                }
+            }
+            
             // Initialize TinyMCE
             tinymce.init({
                 selector: '#editor',
@@ -212,7 +242,8 @@
                 var timeSinceFocus = Date.now() - lastFocusTime;
                 
                 // If focus was lost for more than 100ms, restore focus to editor
-                if (timeSinceFocus > 100 && tinymce.activeEditor) {
+                // BUT only if TinyMCE doesn't have any dialogs open
+                if (timeSinceFocus > 100 && tinymce.activeEditor && !isTinyMCEDialogOpen()) {
                     setTimeout(function() {
                         try {
                             tinymce.activeEditor.focus();
@@ -226,7 +257,7 @@
             
             // Additional focus restoration using visibility API
             document.addEventListener('visibilitychange', function() {
-                if (!document.hidden && tinymce.activeEditor) {
+                if (!document.hidden && tinymce.activeEditor && !isTinyMCEDialogOpen()) {
                     // Page became visible, restore focus after short delay
                     setTimeout(function() {
                         try {
@@ -256,7 +287,8 @@
                     );
                     
                     // If no button is focused and editor exists but doesn't have focus
-                    if (!isButtonFocused && tinymce.activeEditor && !tinymce.activeEditor.hasFocus()) {
+                    // BUT only if TinyMCE doesn't have any dialogs open
+                    if (!isButtonFocused && tinymce.activeEditor && !tinymce.activeEditor.hasFocus() && !isTinyMCEDialogOpen()) {
                         try {
                             tinymce.activeEditor.focus();
                         } catch (e) {
