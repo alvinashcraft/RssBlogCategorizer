@@ -1016,8 +1016,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const lastDewDropDate = await this.getLastDewDropDate();
             
             if (lastDewDropDate) {
-                // Get buffer configuration settings
-                const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+                // Get buffer configuration settings (reuse existing config)
                 const enableBuffer = config.get<boolean>('enablePostFilteringBuffer', true);
                 const bufferMinutes = config.get<number>('postFilteringBufferMinutes', 5);
                 
