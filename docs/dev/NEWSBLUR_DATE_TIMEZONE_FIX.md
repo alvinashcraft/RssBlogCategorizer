@@ -32,15 +32,19 @@ Modified `parseNewsBlurApiResponse()` in `src/rssProvider.ts` to append 'Z' to N
 
 ```typescript
 // Handle NewsBlur date strings robustly:
-if (/T.*(Z|[+-]\d{2}:?\d{2})$/.test(rawDate)) {
-    // ISO8601 with timezone info (e.g., 2025-10-27T06:09:00Z or 2025-10-27T06:09:00+00:00)
+if (rawDate && rawDate.includes(' ')) {
+    // NewsBlur's custom format (e.g., 2025-10-27 06:09:00.237000)
+    // Convert to ISO8601 by replacing space with 'T' and appending 'Z'
+    pubDate = rawDate.split('.')[0].replace(' ', 'T') + 'Z';
+} else if (rawDate && rawDate.endsWith('Z')) {
+    // ISO8601 with UTC timezone (e.g., 2025-10-27T06:09:00Z)
     pubDate = rawDate;
-} else if (/T/.test(rawDate)) {
+} else if (rawDate && rawDate.includes('T')) {
     // ISO8601 without timezone (e.g., 2025-10-27T06:09:00)
     pubDate = rawDate + 'Z';
 } else {
-    // NewsBlur's custom format (e.g., 2025-10-27 06:09:00.237000)
-    pubDate = rawDate.replace(' ', 'T').replace(/(\.\d+)?$/, 'Z');
+    // Fallback: use as-is
+    pubDate = rawDate;
 }
 ```
 
@@ -52,7 +56,7 @@ This ensures that:
 
 ## Files Modified
 
-- `src/rssProvider.ts` - Updated `parseNewsBlurApiResponse()` method (lines 619-628)
+- `src/rssProvider.ts` - Updated `parseNewsBlurApiResponse()` method (lines 619-635)
 
 ## Testing
 
