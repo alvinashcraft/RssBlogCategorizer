@@ -114,12 +114,14 @@
         "openai",
         "perplexity",
         "vibe coding",
+        "vibe coded",
         "bard",
         "claude",
         "gemini",
         "gemma",
         "llm",
         "gpt",
+        "phi-4",
         "rag",
         "copilot",
         "mcp",
@@ -161,6 +163,7 @@
         "jenkins",
         "codeql",
         "gitlab",
+        "leadership",
         "ux",
         "teamcity",
         "octopus",
@@ -268,6 +271,9 @@
       ]
     },
     "Community": {
+      "urlKeywords": [
+        "hachyderm.io"
+      ],
       "titleKeywords": [
         "community",
         "events",
@@ -354,6 +360,9 @@
         "vscode",
         "ide",
         "editor",
+        "firefox",
+        "vivaldi",
+        "duckduckgo",
         "productivity",
         "powertoys"
       ]

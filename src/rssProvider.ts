@@ -616,8 +616,23 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                         const timestamp = parseInt(rawDate, 10);
                         pubDate = new Date(timestamp * 1000).toISOString();
                     } else {
-                        // Already an ISO string or other format
-                        pubDate = rawDate;
+                        // NewsBlur returns dates in UTC format like "2025-10-27 06:09:00.237000"
+                        // but without the 'Z' timezone indicator. We need to add it so JavaScript
+                        // treats it as UTC instead of local time.
+                        // Check for timezone info: 'Z' at end or offset like '+hh:mm' or '-hh:mm'
+                        if (/(Z$|[+-]\\d{2}:\\d{2}$)/.test(rawDate)) {
+                            // Already has timezone info
+                            pubDate = rawDate;
+                        } else if (/\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?/.test(rawDate)) {
+                            // ISO 8601 format with 'T' separator but no timezone
+                            // Handles timestamps with or without fractional seconds
+                            // This is UTC from NewsBlur, add 'Z' indicator
+                            pubDate = rawDate + 'Z';
+                        } else {
+                            // Plain date string without 'T' separator (NewsBlur format)
+                            // Add 'Z' to indicate UTC timezone
+                            pubDate = rawDate + 'Z';
+                        }
                     }
                 }
                 
