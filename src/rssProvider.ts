@@ -616,8 +616,16 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                         const timestamp = parseInt(rawDate, 10);
                         pubDate = new Date(timestamp * 1000).toISOString();
                     } else {
-                        // Already an ISO string or other format
-                        pubDate = rawDate;
+                        // NewsBlur returns dates in UTC format like "2025-10-27 06:09:00.237000"
+                        // but without the 'Z' timezone indicator. We need to add it so JavaScript
+                        // treats it as UTC instead of local time.
+                        if (rawDate.includes('Z') || rawDate.includes('+') || rawDate.includes('T')) {
+                            // Already has timezone info or is proper ISO format
+                            pubDate = rawDate;
+                        } else {
+                            // Add 'Z' to indicate UTC timezone
+                            pubDate = rawDate + 'Z';
+                        }
                     }
                 }
                 
