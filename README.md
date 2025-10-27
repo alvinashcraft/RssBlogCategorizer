@@ -9,11 +9,18 @@ A Visual Studio Code extension that fetches RSS feeds from developer blogs, auto
 - 🏷️ **Smart Categorization** - Automatically categorizes posts by technology (JavaScript, Python, DevOps, etc.)
 - 🌳 **Tree View Integration** - Displays categorized posts in VS Code sidebar with expandable categories
 - 📄 **Export Functionality** - Generates HTML and Markdown files with professional templates
-- 🚀 **WordPress Publishing** - Direct publishing to WordPress blogs via REST API with secure credential storage
+- 🚀 **WordPress Publishing** - Direct publishing to WordPress blogs via REST API with secure credential storage and duplicate prevention
 - 🏷️ **Automatic Tag Detection** - Intelligent extraction of technology tags from blog post content
 - ⚙️ **Configurable Settings** - Customizable RSS feed URLs, refresh intervals, and date filtering
 - 🔄 **Optional Auto-refresh** - Configurable automatic feed updates (disabled by default for on-demand usage)
 - 📚 **Book Recommendations** - Includes "The Geek Shelf" section with rotating book recommendations
+
+## What's New in 2.2.0
+
+- 📊 **Publication Tracking** - Export metadata automatically tracks publication status and prevents duplicate WordPress posts
+- 🔒 **Duplicate Prevention** - WordPress publishing now checks for existing publications and warns before creating duplicates
+- 🏷️ **Content Identification** - Unique content IDs generated based on date and content hash for reliable tracking
+- 🔄 **Automatic Metadata Updates** - Publication metadata automatically updated after successful WordPress publishing
 
 ## What's New in 1.1.0
 
@@ -176,6 +183,17 @@ After exporting to HTML, you can publish directly to your WordPress blog:
 6. **Choose publish status**: Publish immediately or save as draft
 7. **Confirmation**: The extension will confirm successful publication with the post ID, assigned categories, and tag count
 
+**Publication Tracking:**
+
+Starting with version 2.2.0, the extension automatically tracks publication status to prevent duplicates:
+
+- **Metadata Embedding**: All exported HTML and Markdown files include publication metadata comments
+- **Duplicate Detection**: When publishing, the extension checks if content has already been published to WordPress
+- **Automatic Updates**: After successful publishing, the file metadata is updated with the WordPress post ID and publication date
+- **User Confirmation**: If duplicate publication is detected, you'll be prompted to confirm before proceeding
+
+For more details, see [Publication Tracking Documentation](docs/PUBLICATION_TRACKING.md).
+
 **WordPress Setup Requirements:**
 
 - WordPress site with REST API enabled (enabled by default in WordPress 4.7+)
@@ -262,6 +280,12 @@ See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 | `RSS Blog Categorizer: Publish to WordPress` | Publish HTML file to WordPress blog |
 
 All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.
+
+## Documentation
+
+- **[Publication Tracking](docs/PUBLICATION_TRACKING.md)** - Detailed guide to publication metadata and duplicate prevention
+- **[Development Roadmap](docs/ROADMAP.md)** - Planned features and upcoming enhancements
+- **[Development Guide](docs/DEVELOPMENT.md)** - Development setup, building, and contribution information
 
 ## Development
 

@@ -217,6 +217,24 @@
                         setTimeout(function() {
                             editor.focus();
                         }, 100);
+                        
+                        // Add click handler to editor container for reliable focus restoration
+                        var editorContainer = document.getElementById('editor-container');
+                        if (editorContainer) {
+                            editorContainer.addEventListener('click', function() {
+                                // User explicitly clicked in editor area - safe to restore focus
+                                if (!isTinyMCEDialogOpen()) {
+                                    setTimeout(function() {
+                                        try {
+                                            editor.focus();
+                                            updateUserInteractionTime();
+                                        } catch (e) {
+                                            // Silent fail
+                                        }
+                                    }, 50);
+                                }
+                            });
+                        }
                     });
                     
                     // Store cursor position when editor loses focus
@@ -248,82 +266,100 @@
                 }
             });
             
-            // Focus management for window focus changes (Alt+Tab scenario)
-            let lastFocusTime = Date.now();
-            let focusCheckInterval;
+            // Conservative focus management - only restore focus in specific scenarios
+            let lastUserInteractionTime = Date.now();
+            let lastBlurTime = 0;
+            let focusRestorationTimeout;
             
-            // Track when the window loses focus
+            // Track user interactions to understand when they're actively using the editor
+            function updateUserInteractionTime() {
+                lastUserInteractionTime = Date.now();
+            }
+            
+            // Listen for user interactions that indicate active editor use
+            document.addEventListener('keydown', updateUserInteractionTime);
+            document.addEventListener('mousedown', updateUserInteractionTime);
+            
+            // Helper to determine if focus restoration is appropriate
+            function shouldRestoreFocus() {
+                // Don't restore focus if TinyMCE has dialogs open
+                if (isTinyMCEDialogOpen()) {
+                    return false;
+                }
+                
+                // Don't restore focus if a button is currently focused
+                var activeElement = document.activeElement;
+                if (activeElement && (
+                    activeElement.id === 'save-btn' || 
+                    activeElement.id === 'save-close-btn' || 
+                    activeElement.id === 'save-publish-btn' || 
+                    activeElement.id === 'cancel-btn'
+                )) {
+                    return false;
+                }
+                
+                // Don't restore focus if user hasn't interacted recently (they might be using other VS Code UI)
+                var timeSinceInteraction = Date.now() - lastUserInteractionTime;
+                if (timeSinceInteraction > 30000) { // 30 seconds
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            // Conservative window focus handling - only for true Alt+Tab scenarios
             window.addEventListener('blur', function() {
-                lastFocusTime = Date.now();
-                // Clear any existing focus check interval
-                if (focusCheckInterval) {
-                    clearInterval(focusCheckInterval);
+                lastBlurTime = Date.now();
+                // Clear any pending focus restoration
+                if (focusRestorationTimeout) {
+                    clearTimeout(focusRestorationTimeout);
+                    focusRestorationTimeout = null;
                 }
             });
             
-            // Track when the window regains focus
             window.addEventListener('focus', function() {
-                var timeSinceFocus = Date.now() - lastFocusTime;
+                var timeSinceBlur = Date.now() - lastBlurTime;
                 
-                // If focus was lost for more than 100ms, restore focus to editor
-                // BUT only if TinyMCE doesn't have any dialogs open
-                if (timeSinceFocus > 100 && tinymce.activeEditor && !isTinyMCEDialogOpen()) {
-                    setTimeout(function() {
+                // Only restore focus if:
+                // 1. Window was blurred for a significant time (likely Alt+Tab, not menu interaction)
+                // 2. It's appropriate to restore focus
+                // 3. User clicked in the webview (not just window activation)
+                if (timeSinceBlur > 500 && shouldRestoreFocus() && tinymce.activeEditor) {
+                    // Use a longer delay to ensure this is intentional focus, not menu interaction
+                    focusRestorationTimeout = setTimeout(function() {
                         try {
-                            tinymce.activeEditor.focus();
-                            console.log('Focus restored to TinyMCE editor');
+                            // Double-check that focus restoration is still appropriate
+                            if (shouldRestoreFocus()) {
+                                tinymce.activeEditor.focus();
+                                console.log('Focus restored to TinyMCE editor after window focus');
+                            }
                         } catch (e) {
                             console.log('Could not restore focus to editor:', e);
                         }
-                    }, 100);
+                    }, 200);
                 }
             });
             
-            // Additional focus restoration using visibility API
+            // Even more conservative visibility change handling
             document.addEventListener('visibilitychange', function() {
-                if (!document.hidden && tinymce.activeEditor && !isTinyMCEDialogOpen()) {
-                    // Page became visible, restore focus after short delay
-                    setTimeout(function() {
-                        try {
-                            tinymce.activeEditor.focus();
-                            console.log('Focus restored via visibility change');
-                        } catch (e) {
-                            console.log('Could not restore focus via visibility change:', e);
-                        }
-                    }, 150);
+                // Only restore focus if the page becomes visible AND user recently interacted
+                if (!document.hidden && shouldRestoreFocus() && tinymce.activeEditor) {
+                    var timeSinceInteraction = Date.now() - lastUserInteractionTime;
+                    // Only restore if user interacted within the last 10 seconds
+                    if (timeSinceInteraction < 10000) {
+                        setTimeout(function() {
+                            try {
+                                if (shouldRestoreFocus()) {
+                                    tinymce.activeEditor.focus();
+                                    console.log('Focus restored via visibility change');
+                                }
+                            } catch (e) {
+                                console.log('Could not restore focus via visibility change:', e);
+                            }
+                        }, 300);
+                    }
                 }
             });
-            
-            // Periodic focus check as fallback (only when editor should have focus)
-            function startFocusCheck() {
-                if (focusCheckInterval) {
-                    clearInterval(focusCheckInterval);
-                }
-                
-                focusCheckInterval = setInterval(function() {
-                    // Only restore focus if no other element in the page has focus
-                    var activeElement = document.activeElement;
-                    var isButtonFocused = activeElement && (
-                        activeElement.id === 'save-btn' || 
-                        activeElement.id === 'save-close-btn' || 
-                        activeElement.id === 'save-publish-btn' || 
-                        activeElement.id === 'cancel-btn'
-                    );
-                    
-                    // If no button is focused and editor exists but doesn't have focus
-                    // BUT only if TinyMCE doesn't have any dialogs open
-                    if (!isButtonFocused && tinymce.activeEditor && !tinymce.activeEditor.hasFocus() && !isTinyMCEDialogOpen()) {
-                        try {
-                            tinymce.activeEditor.focus();
-                        } catch (e) {
-                            // Silent fail for focus attempts
-                        }
-                    }
-                }, 2000); // Check every 2 seconds
-            }
-            
-            // Start focus checking after editor is initialized
-            setTimeout(startFocusCheck, 1000);
             
             // Button handlers
             document.getElementById('save-btn').addEventListener('click', function() {
@@ -363,6 +399,29 @@
                 }
             });
             
+            // Monitor for TinyMCE dialog events to handle focus properly
+            let dialogWasOpen = false;
+            
+            // Check for dialog state changes periodically
+            setInterval(function() {
+                var dialogCurrentlyOpen = isTinyMCEDialogOpen();
+                
+                // If dialog just closed, restore focus after a short delay
+                if (dialogWasOpen && !dialogCurrentlyOpen && tinymce.activeEditor) {
+                    setTimeout(function() {
+                        try {
+                            tinymce.activeEditor.focus();
+                            updateUserInteractionTime();
+                            console.log('Focus restored after TinyMCE dialog closed');
+                        } catch (e) {
+                            // Silent fail
+                        }
+                    }, 100);
+                }
+                
+                dialogWasOpen = dialogCurrentlyOpen;
+            }, 250); // Check every 250ms for responsive dialog handling
+            
             // Handle messages from extension
             window.addEventListener('message', function(event) {
                 const message = event.data;
@@ -375,22 +434,22 @@
                             // Restore focus after content update
                             setTimeout(function() {
                                 tinymce.activeEditor.focus();
+                                updateUserInteractionTime();
                             }, 100);
                         }
                         break;
                         
                     case 'focusEditor':
                         // Handle explicit focus requests from extension
-                        if (tinymce.activeEditor) {
+                        if (tinymce.activeEditor && !isTinyMCEDialogOpen()) {
                             setTimeout(function() {
                                 tinymce.activeEditor.focus();
+                                updateUserInteractionTime();
                             }, 50);
                         }
                         break;
                 }
-            });
-            
-            // Restore state if available
+            });            // Restore state if available
             const previousState = vscode.getState();
             if (previousState && previousState.content && tinymce.activeEditor) {
                 tinymce.activeEditor.setContent(previousState.content);

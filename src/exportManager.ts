@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as os from 'os';
 import { XMLParser } from 'fast-xml-parser';
 import { BlogPost } from './rssProvider';
+import { createHash } from 'crypto';
 
 interface DometrainCourse {
     course_id: number;
@@ -14,6 +15,14 @@ interface DometrainCourse {
     course_url: string;
     author_names: string[];
     duration?: string;
+}
+
+interface PublicationMetadata {
+    contentId: string;
+    publishedDate?: string;
+    wordpressPostId?: number;
+    status: 'draft' | 'published';
+    lastModified: string;
 }
 
 export class ExportManager {
@@ -26,6 +35,115 @@ export class ExportManager {
     async exportAsHtml(posts: BlogPost[]): Promise<void> {
         const content = await this.generateHtmlContent(posts);
         await this.saveExport(content, 'html', 'html');
+    }
+
+    /**
+     * Generate publication metadata for the export
+     */
+    private generatePublicationMetadata(posts: BlogPost[]): PublicationMetadata {
+        // Create a unique content ID based on the posts and date
+        const contentHash = this.generateContentHash(posts);
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        const contentId = `dewdrop-${today}-${contentHash}`;
+        
+        return {
+            contentId,
+            status: 'draft',
+            lastModified: new Date().toISOString()
+        };
+    }
+
+    /**
+     * Generate a hash of the post content for unique identification
+     */
+    private generateContentHash(posts: BlogPost[]): string {
+        const contentString = posts
+            .map(post => `${post.title}-${post.link}-${post.author}`)
+            .sort()
+            .join('|');
+        return createHash('md5').update(contentString).digest('hex').substring(0, 8);
+    }
+
+    /**
+     * Parse publication metadata from content
+     */
+    parsePublicationMetadata(content: string): PublicationMetadata | null {
+        const metadataRegex = /<!-- PUBLICATION_METADATA:\s*({[^}]+})\s*-->/;
+        const match = content.match(metadataRegex);
+        
+        if (match && match[1]) {
+            try {
+                return JSON.parse(match[1]);
+            } catch (error) {
+                console.error('Failed to parse publication metadata:', error);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update publication metadata in content
+     */
+    updatePublicationMetadata(content: string, metadata: Partial<PublicationMetadata>): string {
+        const existingMetadata = this.parsePublicationMetadata(content);
+        
+        if (existingMetadata) {
+            // Update existing metadata
+            const updatedMetadata = { 
+                ...existingMetadata, 
+                ...metadata, 
+                lastModified: new Date().toISOString() 
+            };
+            const metadataJson = JSON.stringify(updatedMetadata);
+            const newMetadataComment = `<!-- PUBLICATION_METADATA: ${metadataJson} -->`;
+            
+            return content.replace(
+                /<!-- PUBLICATION_METADATA:\s*{[^}]+}\s*-->/,
+                newMetadataComment
+            );
+        }
+        return content;
+    }
+
+    /**
+     * Check if content has already been published
+     */
+    isContentPublished(content: string): boolean {
+        const metadata = this.parsePublicationMetadata(content);
+        return metadata?.status === 'published' && metadata?.wordpressPostId !== undefined;
+    }
+
+    /**
+     * Mark content as published with WordPress post ID
+     * This should be called after successful WordPress publishing
+     */
+    async markAsPublished(filePath: string, wordpressPostId: number): Promise<void> {
+        try {
+            const content = fs.readFileSync(filePath, 'utf8');
+            const updatedContent = this.updatePublicationMetadata(content, {
+                status: 'published',
+                wordpressPostId,
+                publishedDate: new Date().toISOString()
+            });
+            
+            fs.writeFileSync(filePath, updatedContent, 'utf8');
+            console.log(`Updated publication metadata for ${filePath} with WordPress post ID: ${wordpressPostId}`);
+        } catch (error) {
+            console.error(`Failed to update publication metadata for ${filePath}:`, error);
+        }
+    }
+
+    /**
+     * Get publication metadata from a file
+     */
+    async getPublicationMetadata(filePath: string): Promise<PublicationMetadata | null> {
+        try {
+            const content = fs.readFileSync(filePath, 'utf8');
+            return this.parsePublicationMetadata(content);
+        } catch (error) {
+            console.error(`Failed to read publication metadata from ${filePath}:`, error);
+            return null;
+        }
     }
 
     private async generateDewDropTitle(): Promise<string> {
@@ -176,7 +294,11 @@ export class ExportManager {
         const groupedPosts = await this.groupPostsByCategory(posts);
         const dewDropTitle = await this.generateDewDropTitle();
         
-        let content = `# ${dewDropTitle}\n\n`;
+        // Generate publication metadata
+        const metadata = this.generatePublicationMetadata(posts);
+        const metadataComment = `<!-- PUBLICATION_METADATA: ${JSON.stringify(metadata)} -->`;
+        
+        let content = `${metadataComment}\n\n# ${dewDropTitle}\n\n`;
 
         for (const [category, categoryPosts] of Object.entries(groupedPosts)) {
             content += `### ${category}\n\n`;
@@ -209,6 +331,10 @@ export class ExportManager {
         const groupedPosts = await this.groupPostsByCategory(posts);
         const dewDropTitle = await this.generateDewDropTitle();
         
+        // Generate publication metadata
+        const metadata = this.generatePublicationMetadata(posts);
+        const metadataComment = `<!-- PUBLICATION_METADATA: ${JSON.stringify(metadata)} -->`;
+        
         // Get the setting for opening links in new tab
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const openInNewTab = config.get<boolean>('openLinksInNewTab') || false;
@@ -222,6 +348,7 @@ export class ExportManager {
     <title>${this.escapeHtml(dewDropTitle)}</title>
 </head>
 <body>
+    ${metadataComment}
     <h1>${this.escapeHtml(dewDropTitle)}</h1>`;
 
         let categoriesHtml = '';
