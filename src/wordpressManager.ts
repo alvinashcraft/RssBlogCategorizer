@@ -609,7 +609,7 @@ Would you like to open your WordPress admin panel now?
     /**
      * Publish post to WordPress using REST API
      */
-    async publishPost(post: WordPressPost): Promise<boolean> {
+    async publishPost(post: WordPressPost): Promise<{ success: boolean; postId?: number }> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const blogUrl = config.get<string>('wordpressBlogUrl');
         const username = config.get<string>('wordpressUsername');
@@ -617,7 +617,7 @@ Would you like to open your WordPress admin panel now?
 
         if (!blogUrl || !username || !password) {
             vscode.window.showErrorMessage('WordPress credentials not configured. Please set them first.');
-            return false;
+            return { success: false };
         }
 
         try {
@@ -682,14 +682,14 @@ Would you like to open your WordPress admin panel now?
                 }
                 
                 vscode.window.showInformationMessage(message);
-                return true;
+                return { success: true, postId: result.id };
             } else {
                 vscode.window.showErrorMessage('Failed to create post: No post ID returned');
-                return false;
+                return { success: false };
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to publish post: ${error}`);
-            return false;
+            return { success: false };
         }
     }
 
@@ -748,6 +748,29 @@ Would you like to open your WordPress admin panel now?
      */
     async publishHtmlFile(document: vscode.TextDocument): Promise<boolean> {
         const html = document.getText();
+        
+        // Check if this content has already been published
+        try {
+            const { ExportManager } = await import('./exportManager');
+            const exportManager = new ExportManager();
+            
+            if (exportManager.isContentPublished(html)) {
+                const metadata = exportManager.parsePublicationMetadata(html);
+                const choice = await vscode.window.showWarningMessage(
+                    `This content appears to have already been published to WordPress (Post ID: ${metadata?.wordpressPostId}). Do you want to continue anyway?`,
+                    'Continue Publishing',
+                    'Cancel'
+                );
+                
+                if (choice !== 'Continue Publishing') {
+                    return false;
+                }
+            }
+        } catch (error) {
+            console.error('Failed to check publication status:', error);
+            // Continue with publishing if we can't check the status
+        }
+        
         const title = this.extractTitleFromHtml(html);
         const bodyContent = this.extractBodyContent(html);
 
@@ -881,14 +904,27 @@ Would you like to open your WordPress admin panel now?
             tags: finalTags
         };
 
-        const publishSuccess = await this.publishPost(post);
+        const publishResult = await this.publishPost(post);
         
         // If publish was successful, update the Dometrain course ID to rotate to next course
-        if (publishSuccess) {
+        if (publishResult.success) {
             await this.updateDometrainCourseAfterPublish(html);
+            
+            // If we have a post ID and this was actually published (not just saved as draft), 
+            // update the file metadata to mark it as published
+            if (publishResult.postId && post.status === 'publish') {
+                try {
+                    const { ExportManager } = await import('./exportManager');
+                    const exportManager = new ExportManager();
+                    await exportManager.markAsPublished(document.fileName, publishResult.postId);
+                } catch (error) {
+                    console.error('Failed to update publication metadata:', error);
+                    // Don't fail the overall publish operation for this
+                }
+            }
         }
         
-        return publishSuccess;
+        return publishResult.success;
     }
 
     /**

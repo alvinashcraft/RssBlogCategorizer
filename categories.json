@@ -174,7 +174,8 @@
     },
     "Mobile and Game Development": {
       "urlKeywords": [
-        "android-developers"
+        "android-developers",
+        "gamedevreport"
       ],
       "titleKeywords": [
         "ios",
@@ -183,7 +184,7 @@
         "flutter",
         "swift",
         "kotlin",
-        ".net maui",
+        "maui",
         "jetpack compose",
         "unity",
         "unreal",
@@ -243,6 +244,8 @@
         "audioboom.com",
         "pythonbytes.fm",
         "future-knowledge-episode",
+        "oasisofcourage.com",
+        "developertea.com",
         "se-radio.net",
         "boagworld.com/season",
         "talkpython.fm",
@@ -359,6 +362,7 @@
       "urlKeywords": [
         "sergeytihon.com",
         "azureweekly.info",
+        "links-for-you",
         "dotnetnews.co",
         "blog.cwa.me.uk"
       ],
