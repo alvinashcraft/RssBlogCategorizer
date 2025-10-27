@@ -619,8 +619,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                         // NewsBlur returns dates in UTC format like "2025-10-27 06:09:00.237000"
                         // but without the 'Z' timezone indicator. We need to add it so JavaScript
                         // treats it as UTC instead of local time.
-                        if (rawDate.includes('Z') || rawDate.includes('+') || rawDate.includes('T')) {
-                            // Already has timezone info or is proper ISO format
+                        // Check for timezone info: 'Z' at end or offset like '+hh:mm' or '-hh:mm'
+                        if (/(Z$|[+-]\d{2}:\d{2}$)/.test(rawDate)) {
+                            // Already has timezone info
                             pubDate = rawDate;
                         } else {
                             // Add 'Z' to indicate UTC timezone
