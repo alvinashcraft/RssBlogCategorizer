@@ -31,12 +31,16 @@ However, this string lacks a timezone indicator (no 'Z' suffix). When JavaScript
 Modified `parseNewsBlurApiResponse()` in `src/rssProvider.ts` to append 'Z' to NewsBlur date strings that don't already have timezone information:
 
 ```typescript
-if (rawDate.includes('Z') || rawDate.includes('+') || rawDate.includes('T')) {
-    // Already has timezone info or is proper ISO format
+// Handle NewsBlur date strings robustly:
+if (/T.*(Z|[+-]\d{2}:?\d{2})$/.test(rawDate)) {
+    // ISO8601 with timezone info (e.g., 2025-10-27T06:09:00Z or 2025-10-27T06:09:00+00:00)
     pubDate = rawDate;
-} else {
-    // Add 'Z' to indicate UTC timezone
+} else if (/T/.test(rawDate)) {
+    // ISO8601 without timezone (e.g., 2025-10-27T06:09:00)
     pubDate = rawDate + 'Z';
+} else {
+    // NewsBlur's custom format (e.g., 2025-10-27 06:09:00.237000)
+    pubDate = rawDate.replace(' ', 'T').replace(/(\.\d+)?$/, 'Z');
 }
 ```
 
