@@ -56,7 +56,7 @@ This ensures that:
 
 ## Files Modified
 
-- `src/rssProvider.ts` - Updated `parseNewsBlurApiResponse()` method (lines 619-628)
+- `src/rssProvider.ts` - Updated `parseNewsBlurApiResponse()` method (lines 619-635)
 
 ## Testing
 
