@@ -514,11 +514,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         }
         const apiUrl = `https://www.newsblur.com${apiPath}?limit=${recordCount}`;
         
-        return this.fetchNewsBlurApiUrl(apiUrl, feedUrl, recordCount, username, password, redirectCount);
+        return this.fetchNewsBlurApiUrl(apiUrl, feedUrl, recordCount, username, password, redirectCount, 0);
     }
 
-    private async fetchNewsBlurApiUrl(apiUrl: string, originalFeedUrl: string, recordCount: number, username: string, password: string, redirectCount: number = 0): Promise<BlogPost[]> {
+    private async fetchNewsBlurApiUrl(apiUrl: string, originalFeedUrl: string, recordCount: number, username: string, password: string, redirectCount: number = 0, retryCount: number = 0): Promise<BlogPost[]> {
         const MAX_REDIRECTS = 5;
+        const MAX_RETRIES = 1;
         
         // Prevent infinite redirect loops
         if (redirectCount > MAX_REDIRECTS) {
@@ -546,12 +547,18 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     const redirectUrl = response.headers.location;
                     if (redirectUrl.match(RSSBlogProvider.NEWSBLUR_API_PATTERN)) {
                         // Use the redirect URL directly without conversion round-trip
-                        return this.fetchNewsBlurApiUrl(redirectUrl, originalFeedUrl, recordCount, username, password, redirectCount + 1).then(resolve).catch(() => resolve([]));
+                        return this.fetchNewsBlurApiUrl(redirectUrl, originalFeedUrl, recordCount, username, password, redirectCount + 1, retryCount).then(resolve).catch(() => resolve([]));
                     } else {
                         console.error(`Redirected to non-NewsBlur API URL: ${redirectUrl}`);
                         resolve([]);
                         return;
                     }
+                }
+
+                // Check for 502 Bad Gateway and retry once
+                if (response.statusCode === 502 && retryCount < MAX_RETRIES) {
+                    console.log(`Received 502 Bad Gateway from NewsBlur API, retrying (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+                    return this.fetchNewsBlurApiUrl(apiUrl, originalFeedUrl, recordCount, username, password, redirectCount, retryCount + 1).then(resolve).catch(() => resolve([]));
                 }
 
                 // Check for successful response

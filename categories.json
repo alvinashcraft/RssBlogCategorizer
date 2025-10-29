@@ -144,6 +144,12 @@
       ]
     },
     "Design, DevOps and Methodology": {
+      "urlKeywords": [
+        "sourcesofinsight.com",
+        "agilealliance.org",
+        "agilemanifesto.org",
+        "advancedinstaller.com"
+      ],
       "titleKeywords": [
         "docker",
         "kubernetes",
@@ -256,6 +262,7 @@
         "runasradio.com",
         "syntax.fm",
         "softwaredefinedtalk.com",
+        "usps.com",
         "netrocksshow.com",
         "dotnetrocks.com",
         "transistor.fm",
