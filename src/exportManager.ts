@@ -26,6 +26,9 @@ interface PublicationMetadata {
 }
 
 export class ExportManager {
+    // Category name constants for special positioning logic
+    private static readonly SCREENCASTS_CATEGORY = "Screencasts and Videos";
+    private static readonly MORE_LINKS_CATEGORY = "More Link Collections";
     
     async exportAsMarkdown(posts: BlogPost[]): Promise<void> {
         const content = await this.generateMarkdownContent(posts);
@@ -314,7 +317,7 @@ export class ExportManager {
             }
 
             // Add Dometrain Course section after "Screencasts and Videos"
-            if (category === "Screencasts and Videos") {
+            if (category === ExportManager.SCREENCASTS_CATEGORY) {
                 const dometrainMarkdown = await this.generateDometrainMarkdown();
                 content += dometrainMarkdown;
             }
@@ -370,7 +373,7 @@ export class ExportManager {
             }
 
             // Add Dometrain Course section after "Screencasts and Videos"
-            if (category === "Screencasts and Videos") {
+            if (category === ExportManager.SCREENCASTS_CATEGORY) {
                 const dometrainHtml = await this.generateDometrainHtml(targetAttribute);
                 categoriesHtml += dometrainHtml;
             }
@@ -423,7 +426,7 @@ export class ExportManager {
         // Add ALL categories in the order they appear in the JSON file (even if empty)
         // BUT skip "More Link Collections" for now - we'll add it after "General"
         categoryOrder.forEach(categoryName => {
-            if (categoryName !== "More Link Collections") {
+            if (categoryName !== ExportManager.MORE_LINKS_CATEGORY) {
                 // Always include the category, even if it has no posts
                 orderedResult[categoryName] = grouped[categoryName] || [];
             }
@@ -435,15 +438,15 @@ export class ExportManager {
         }
         
         // Now add "More Link Collections" after "General" (the default category)
-        if (categoryOrder.includes("More Link Collections")) {
-            orderedResult["More Link Collections"] = grouped["More Link Collections"] || [];
+        if (categoryOrder.includes(ExportManager.MORE_LINKS_CATEGORY)) {
+            orderedResult[ExportManager.MORE_LINKS_CATEGORY] = grouped[ExportManager.MORE_LINKS_CATEGORY] || [];
         }
         
         // Add any remaining categories not in the JSON (like unexpected categories)
         // Skip "Top Links" and "More Link Collections" since they're already positioned
         Object.keys(grouped).forEach(categoryName => {
             if (categoryName !== "Top Links" && 
-                categoryName !== "More Link Collections" && 
+                categoryName !== ExportManager.MORE_LINKS_CATEGORY && 
                 !orderedResult[categoryName]) {
                 orderedResult[categoryName] = grouped[categoryName];
             }

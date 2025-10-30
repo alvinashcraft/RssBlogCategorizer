@@ -1,6 +1,6 @@
 {
   "categories": {
-    "Web Development": {
+    "Web and Cloud Development": {
       "titleKeywords": [
         "html",
         "css", 
@@ -56,7 +56,7 @@
         "windows app sdk"
       ]
     },
-    ".NET": {
+    ".NET and Visual Studio": {
       "titleKeywords": [
         ".net",
         "c#",
@@ -277,7 +277,7 @@
         ".net rocks"
       ]
     },
-    "Community": {
+    "Community and Events": {
       "urlKeywords": [
         "hachyderm.io"
       ],
