@@ -26,7 +26,9 @@ interface PublicationMetadata {
 }
 
 export class ExportManager {
-    // Category name constants for special positioning logic
+    // Category name constants for categories with specific placement requirements in the export output.
+    // "Screencasts and Videos" is used to trigger Dometrain content insertion at a specific point in the output.
+    // "More Link Collections" is always positioned after the "General" category in the exported ordering.
     private static readonly SCREENCASTS_CATEGORY = "Screencasts and Videos";
     private static readonly MORE_LINKS_CATEGORY = "More Link Collections";
     
