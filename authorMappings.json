@@ -61,7 +61,10 @@
     { "keyword": "robmiles", "author": "Rob Miles" },
     { "keyword": "ariankulp", "author": "Arian Kulp" },
     { "keyword": "gweek.libsyn", "author": "Mark Frauenfelder" },
-    { "keyword": "windowsphonedevpodcast", "author": "Ryan Lowdermilk & Travis Lowdermilk" },
+    {
+      "keyword": "windowsphonedevpodcast",
+      "author": "Ryan Lowdermilk & Travis Lowdermilk"
+    },
     { "keyword": "netcave.org", "author": "Alan Stevens" },
     { "keyword": "codingqa", "author": "Mark Berryman & Jim Wang" },
     { "keyword": "wpf.2000things", "author": "Sean Sexton" },
@@ -75,7 +78,10 @@
     { "keyword": "platinumbay", "author": "Steve Andrews" },
     { "keyword": "rtipton.wordpress", "author": "Rhonda Tipton" },
     { "keyword": "coderant", "author": "Mike Hadlow" },
-    { "keyword": "herdingcode", "author": "Jon Galloway, K. Scott Allen, Scott Koon & Kevin Dente" },
+    {
+      "keyword": "herdingcode",
+      "author": "Jon Galloway, K. Scott Allen, Scott Koon & Kevin Dente"
+    },
     { "keyword": "coolthingoftheday", "author": "Greg Duncan" },
     { "keyword": "charlespetzold", "author": "Charles Petzold" },
     { "keyword": "blackwasp", "author": "Richard Carr" },
@@ -113,7 +119,7 @@
     { "keyword": "roundthecode", "author": "David Grace" },
     { "keyword": "pottereric", "author": "Eric Potter" },
     { "keyword": "peterritchie", "author": "Peter Ritchie" },
-    { "keyword": "dotnetnews.co", "author": "Jasen" },
+    { "keyword": "dotnetnews.co", "author": "Jasen Fici" },
     { "keyword": "The-Dev-Talk-Show", "author": "Chris Gomez & Rich Ross" },
     { "keyword": "p0w3rsh3ll", "author": "Emin Atac" },
     { "keyword": "gatesnotes", "author": "Bill Gates" },
@@ -139,7 +145,9 @@
     { "keyword": "franksworld.com", "author": "Frank La Vigne" },
     { "keyword": "gomakethings.com", "author": "Chris Ferdinandi" },
     { "keyword": "blazorise", "author": "Mladen Macanović" },
-    { "keyword": "kentcdodds", "author": "Kent C. Dodds" }
+    { "keyword": "kentcdodds", "author": "Kent C. Dodds" },
+    { "keyword": "elbruno.com", "author": "Bruno Capuano" },
+    { "keyword": "thecsspodcast", "author": "Una Kravets & Adam Argyle" }
   ],
   "authorContains": [
     { "keyword": "sam gentile", "author": "Sam Gentile" },
@@ -148,6 +156,7 @@
     { "keyword": "camerons", "author": "Cameron Skinner" },
     { "keyword": "clemensreijnen", "author": "Clemens Reijnen" },
     { "keyword": "metadataconsulting", "author": "Mark Pahulje" },
+    { "keyword": "mipsytipsy", "author": "Charity Majors" },
     { "keyword": "ricardo peres", "author": "Ricardo Peres" },
     { "keyword": "bart wullems", "author": "Bart Wullems" },
     { "keyword": "jamie_maguire", "author": "Jamie Maguire" },
@@ -165,7 +174,10 @@
     { "keyword": "the evil empire", "author": "Bertrand Le Roy" },
     { "keyword": "kltripp", "author": "Kimberly Tripp" },
     { "keyword": "powerscripting", "author": "Jonathan Walz & Hal Rottenberg" },
-    { "keyword": "sharepoint pod show", "author": "Rob Foster, Nick Swan & Brett Lonsdale" },
+    {
+      "keyword": "sharepoint pod show",
+      "author": "Rob Foster, Nick Swan & Brett Lonsdale"
+    },
     { "keyword": "michael kimsal", "author": "Michael Kimsal" },
     { "keyword": "marc grabanski", "author": "Marc Grabanski" },
     { "keyword": "david giard", "author": "David Giard" },
