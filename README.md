@@ -1,6 +1,6 @@
 # Blog Categorizer and Link Blog Publisher
 
-A Visual Studio Code extension that fetches developer blogs from RSS or the Newsblur API, automatically categorizes posts by technology topics, and provides export functionality in HTML and Markdown formats for blog publishing.
+A Visual Studio Code extension that fetches developer blogs from RSS or the NewsBlur API, automatically categorizes posts by technology topics, and provides export functionality in HTML and Markdown formats for blog publishing.
 
 ## Features
 
