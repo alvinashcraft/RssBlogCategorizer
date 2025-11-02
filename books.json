@@ -36,18 +36,18 @@
       "description": "Build a full-featured app swiftly with MVVM, CRUD, AI, authentication, real-time updates, and more."
     },
     {
-      "title": "Real-World Web Development with .NET 9",
-      "author": "Mark J. Price",
-      "imageUrl": "https://m.media-amazon.com/images/I/41U0fZzCtXL._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/B0DK1KGH8R/?tag=amavin-20",
-      "description": "Build websites and services using mature and proven ASP.NET Core MVC, Web API, and Umbraco CMS."
+      "title": "Writing Is Designing",
+      "author": "Michael J. Metts and Andy Welfle",
+      "imageUrl": "https://m.media-amazon.com/images/I/413TVdnVYcL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1933820667/?tag=amavin-20",
+      "description": "Words and the User Experience."
     },
     {
-      "title": "'Looks Good To Me'",
-      "author": "Adrienne Braganza",
-      "imageUrl": "https://m.media-amazon.com/images/I/41GJYy3aYgL._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/1633438120/?tag=amavin-20",
-      "description": "Constructive code reviews."
+      "title": "Tools and Skills for .NET 10",
+      "author": "Mark J. Price",
+      "imageUrl": "https://m.media-amazon.com/images/I/411QG6IUzjL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1835882501/?tag=amavin-20",
+      "description": "Get the career you want with good practices and patterns to design, debug, and test your solutions."
     },
     {
       "title": "Programming APIs with C# and .NET",
