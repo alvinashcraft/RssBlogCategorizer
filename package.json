@@ -1,9 +1,9 @@
 {
   "name": "rss-blog-categorizer",
-  "displayName": "RSS Blog Categorizer and Link Blog Post Generator",
-  "description": "Fetches RSS feeds from developer blogs and categorizes them with HTML/Markdown export functionality to generate link blog posts.",
+  "displayName": "Blog Categorizer and Link Blog Publisher",
+  "description": "Fetches developer blog posts from the NewBlur API or an RSS feed and categorizes them with HTML/Markdown export functionality to generate and publish link blog posts.",
   "icon": "images/rssBlogIcon.png",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
