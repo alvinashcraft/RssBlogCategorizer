@@ -3,7 +3,7 @@
   "displayName": "Blog Categorizer and Link Blog Publisher",
   "description": "Fetches developer blog posts from the NewBlur API or an RSS feed and categorizes them with HTML/Markdown export functionality to generate and publish link blog posts.",
   "icon": "images/rssBlogIcon.png",
-  "version": "2.2.5",
+  "version": "2.3.0",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",

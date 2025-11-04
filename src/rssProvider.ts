@@ -67,6 +67,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private categoriesConfig: CategoriesConfig | null = null;
     private authorMappingsConfig: AuthorMappingsConfig | null = null;
     private wholeWordRegexCache: Map<string, RegExp> = new Map(); // Cache for whole word regex patterns
+    private isLoading: boolean = false; // Track loading state
     
     // Class-level constants
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
@@ -202,8 +203,14 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     async refresh(): Promise<void> {
-        await this.loadFeeds();
+        this.isLoading = true;
         this._onDidChangeTreeData.fire(undefined);
+        try {
+            await this.loadFeeds();
+        } finally {
+            this.isLoading = false;
+            this._onDidChangeTreeData.fire(undefined);
+        }
     }
 
     private async loadAuthorMappingsConfig(): Promise<void> {
@@ -231,7 +238,13 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
     getTreeItem(element: any): vscode.TreeItem {
-        if (element.posts) {
+        if (element.isLoadingIndicator) {
+            // Loading indicator node
+            const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.None);
+            item.iconPath = new vscode.ThemeIcon('loading~spin');
+            item.contextValue = 'loading';
+            return item;
+        } else if (element.posts) {
             // Category node
             const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.Expanded);
             item.tooltip = `${element.posts.length} posts`;
@@ -287,6 +300,15 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     getChildren(element?: any): Thenable<any[]> {
         if (!element) {
+            // Show loading indicator if currently loading
+            if (this.isLoading) {
+                return Promise.resolve([{
+                    label: 'Loading feed data...',
+                    isLoadingIndicator: true,
+                    collapsibleState: vscode.TreeItemCollapsibleState.None
+                }]);
+            }
+            
             // Return categories
             const categoryNodes: CategoryNode[] = [];
             this.categories.forEach((posts, category) => {
