@@ -615,4 +615,222 @@ describe('RSSBlogProvider', () => {
       expect(posts).to.have.length(0);
     });
   });
+
+  describe('Loading State', () => {
+    it('should set isLoading to true before loading starts', async () => {
+      // Setup a delayed response to verify loading state during operation
+      let resolveResponse: any;
+      const responsePromise = new Promise(resolve => { resolveResponse = resolve; });
+      
+      const mockResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          responsePromise.then(() => {
+            if (event === 'data') callback(mockRssXml);
+            if (event === 'end') callback();
+          });
+        })
+      };
+      
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockResponse);
+        return { on: sinon.stub() };
+      });
+
+      // Start refresh but don't await it yet
+      const refreshPromise = provider.refresh();
+      
+      // Check loading state immediately after refresh is called
+      await new Promise(resolve => setTimeout(resolve, 10)); // Small delay to let refresh start
+      const childrenDuringLoad = await provider.getChildren();
+      
+      // Should show loading indicator
+      expect(childrenDuringLoad).to.have.length(1);
+      expect(childrenDuringLoad[0]).to.have.property('isLoadingIndicator', true);
+      expect(childrenDuringLoad[0].label).to.equal('Loading feed data...');
+      
+      // Complete the response
+      resolveResponse();
+      await refreshPromise;
+    });
+
+    it('should display loading indicator in getChildren when loading', async () => {
+      // Mock a slow response
+      let resolveResponse: any;
+      const responsePromise = new Promise(resolve => { resolveResponse = resolve; });
+      
+      const mockResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          responsePromise.then(() => {
+            if (event === 'data') callback(mockRssXml);
+            if (event === 'end') callback();
+          });
+        })
+      };
+      
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockResponse);
+        return { on: sinon.stub() };
+      });
+
+      const refreshPromise = provider.refresh();
+      
+      // Wait a bit for loading to start
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
+      // Get children while loading - should return loading indicator
+      const children = await provider.getChildren();
+      expect(children).to.have.length(1);
+      expect(children[0]).to.deep.include({
+        label: 'Loading feed data...',
+        isLoadingIndicator: true,
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      });
+      
+      // Complete the response
+      resolveResponse();
+      await refreshPromise;
+    });
+
+    it('should reset isLoading to false after successful load', async () => {
+      const mockResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+      
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockResponse);
+        return { on: sinon.stub() };
+      });
+
+      await provider.refresh();
+      
+      // After successful refresh, should not show loading indicator
+      const children = await provider.getChildren();
+      expect(children).to.not.be.empty;
+      expect(children[0]).to.not.have.property('isLoadingIndicator');
+      expect(children[0]).to.have.property('posts'); // Should have actual categories
+    });
+
+    it('should reset isLoading to false after error occurs', async () => {
+      // Simulate a network error
+      httpsGetStub.callsFake(() => {
+        const request = { on: sinon.stub() };
+        setTimeout(() => {
+          const errorCallback = request.on.args.find(call => call[0] === 'error')?.[1];
+          if (errorCallback) errorCallback(new Error('Network error'));
+        }, 0);
+        return request;
+      });
+
+      await provider.refresh();
+      
+      // After error, loading state should be cleared
+      const children = await provider.getChildren();
+      // Should return empty or default categories, not loading indicator
+      expect(children.every(c => !c.isLoadingIndicator)).to.be.true;
+    });
+
+    it('should create tree item with loading icon for loading indicator', () => {
+      const loadingElement = {
+        label: 'Loading feed data...',
+        isLoadingIndicator: true,
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      };
+
+      const treeItem = provider.getTreeItem(loadingElement);
+      
+      expect(treeItem.label).to.equal('Loading feed data...');
+      expect(treeItem.collapsibleState).to.equal(vscode.TreeItemCollapsibleState.None);
+      expect(treeItem.contextValue).to.equal('loading');
+      expect(treeItem.iconPath).to.be.instanceOf(vscode.ThemeIcon);
+      expect((treeItem.iconPath as vscode.ThemeIcon).id).to.equal('loading~spin');
+    });
+
+    it('should fire onDidChangeTreeData event when loading starts', (done) => {
+      const mockResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+      
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockResponse);
+        return { on: sinon.stub() };
+      });
+
+      let eventFiredCount = 0;
+      const disposable = provider.onDidChangeTreeData(() => {
+        eventFiredCount++;
+        if (eventFiredCount === 2) {
+          // First event: loading starts, Second event: loading completes
+          expect(eventFiredCount).to.equal(2);
+          disposable.dispose();
+          done();
+        }
+      });
+
+      provider.refresh();
+    });
+
+    it('should fire onDidChangeTreeData event when loading completes', async () => {
+      const mockResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+      
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockResponse);
+        return { on: sinon.stub() };
+      });
+
+      let eventFiredCount = 0;
+      const disposable = provider.onDidChangeTreeData(() => {
+        eventFiredCount++;
+      });
+
+      await provider.refresh();
+      
+      // Should fire at least twice: once when loading starts, once when it completes
+      expect(eventFiredCount).to.be.at.least(2);
+      disposable.dispose();
+    });
+
+    it('should handle rapid successive refresh calls correctly', async () => {
+      const mockResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+      
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockResponse);
+        return { on: sinon.stub() };
+      });
+
+      // Call refresh multiple times in succession
+      const promises = [
+        provider.refresh(),
+        provider.refresh(),
+        provider.refresh()
+      ];
+
+      await Promise.all(promises);
+      
+      // After all refreshes complete, should not be in loading state
+      const children = await provider.getChildren();
+      expect(children.every(c => !c.isLoadingIndicator)).to.be.true;
+    });
+  });
 });
