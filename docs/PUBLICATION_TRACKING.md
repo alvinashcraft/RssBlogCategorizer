@@ -4,7 +4,7 @@ This document describes the publication tracking metadata system that prevents d
 
 ## Overview
 
-Starting with version 2.2.0, the RSS Blog Categorizer includes a metadata tracking system that:
+Starting with version 2.2.0, the Dev Feed Curator includes a metadata tracking system that:
 
 1. **Adds metadata to exports**: Both HTML and Markdown exports now include publication metadata comments
 2. **Tracks publication status**: Metadata tracks whether content has been published and the WordPress post ID

@@ -1,6 +1,6 @@
-# RSS Blog Categorizer Roadmap
+# Dev Feed Curator Roadmap
 
-This document outlines planned features and enhancements for future versions of the RSS Blog Categorizer extension.
+This document outlines planned features and enhancements for future versions of the Dev Feed Curator extension.
 
 ## Version 2.5.0 - WordPress Post Management
 

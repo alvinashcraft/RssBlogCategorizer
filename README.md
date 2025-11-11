@@ -1,6 +1,6 @@
-# Blog Categorizer and Link Blog Publisher
+# Dev Feed Curator
 
-A Visual Studio Code extension that fetches developer blogs from RSS or the NewsBlur API, automatically categorizes posts by technology topics, and provides export functionality in HTML and Markdown formats for blog publishing.
+Streamline your developer link blogging workflow. Fetch RSS feeds, auto-categorize posts by technology, and publish directly to WordPress—all from VS Code. Perfect for curating tech content like the "Dew Drop" series.
 
 ## Features
 
@@ -52,7 +52,7 @@ A Visual Studio Code extension that fetches developer blogs from RSS or the News
 
 1. Open VS Code
 2. Go to Extensions view (`Ctrl+Shift+X`)
-3. Search for "RSS Blog Categorizer"
+3. Search for "Dev Feed Curator"
 4. Click Install
 
 ### From VSIX Package
@@ -83,7 +83,7 @@ A Visual Studio Code extension that fetches developer blogs from RSS or the News
 **Via Command Palette:**
 
 1. Open Command Palette (`Ctrl+Shift+P`)
-2. Run "RSS Blog Categorizer: Set RSS Feed"
+2. Run "Dev Feed Curator: Set RSS Feed"
 3. Enter your RSS feed URL when prompted
 
 Click the refresh button to load new content after updating the feed URL.
@@ -103,7 +103,7 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
 
 1. **Enable NewsBlur API**: Set `rssBlogCategorizer.useNewsblurApi` to `true` in settings
 2. **Set Username**: Configure your NewsBlur username in `rssBlogCategorizer.newsblurUsername`
-3. **Set Credentials**: Use Command Palette → "RSS Blog Categorizer: Set NewsBlur Credentials" to securely store your password
+3. **Set Credentials**: Use Command Palette → "Dev Feed Curator: Set NewsBlur Credentials" to securely store your password
 
 **Benefits of NewsBlur API:**
 
@@ -121,7 +121,7 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
 **Via Command Palette:**
 
 1. Open Command Palette (`Ctrl+Shift+P`)
-2. Run "RSS Blog Categorizer: Export as Markdown" or "RSS Blog Categorizer: Export as HTML"
+2. Run "Dev Feed Curator: Export as Markdown" or "Dev Feed Curator: Export as HTML"
 
 **Export Process:**
 
@@ -144,7 +144,7 @@ After exporting to HTML, you can optionally edit your blog post content using th
 
 1. **From Export**: After HTML export, click "Open in Editor" when prompted
 2. **From HTML File**: Open any HTML file and click the edit icon (📝) in the toolbar
-3. **Command Palette**: Use "RSS Blog Categorizer: Open in WYSIWYG Editor"
+3. **Command Palette**: Use "Dev Feed Curator: Open in WYSIWYG Editor"
 
 **Editor Features:**
 
@@ -169,14 +169,14 @@ After exporting to HTML, you can publish directly to your WordPress blog:
 **Prerequisites:**
 
 1. **Configure WordPress Settings**: Set your blog URL and username in settings
-2. **Set Credentials**: Use Command Palette → "RSS Blog Categorizer: Set WordPress Credentials" to securely store your login
+2. **Set Credentials**: Use Command Palette → "Dev Feed Curator: Set WordPress Credentials" to securely store your login
 
 **Publishing Process:**
 
 1. **Export to HTML** first using the export functionality above
 2. **Open the HTML file** in VS Code editor
 3. **Click the WordPress publish button** in the editor toolbar (cloud upload icon)
-   - Or use Command Palette → "RSS Blog Categorizer: Publish to WordPress"
+   - Or use Command Palette → "Dev Feed Curator: Publish to WordPress"
    - Only the content inside `<body>` tags is published (excludes `<html>`, `<head>`, etc.)
 4. **Choose categories**: Use default categories (configurable in settings), customize for this post, or publish without categories
 5. **Review auto-detected tags**: The extension automatically detects technology tags from content - use detected tags, customize them, or skip
@@ -223,7 +223,7 @@ The system intelligently matches content against a comprehensive technology keyw
 
 ## Configuration
 
-Access settings via `File > Preferences > Settings` and search for "RSS Blog Categorizer":
+Access settings via `File > Preferences > Settings` and search for "Dev Feed Curator":
 
 - **Feed URL**: Single RSS feed URL to monitor
 - **Record Count**: Number of records to retrieve (10-500)
@@ -271,13 +271,13 @@ See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 
 | Command | Description |
 |---------|-------------|
-| `RSS Blog Categorizer: Refresh` | Refresh the RSS feed |
-| `RSS Blog Categorizer: Export as Markdown` | Export posts to Markdown |
-| `RSS Blog Categorizer: Export as HTML` | Export posts to HTML |
-| `RSS Blog Categorizer: Set RSS Feed` | Configure RSS feed URL |
-| `RSS Blog Categorizer: Set NewsBlur Credentials` | Securely configure NewsBlur API credentials |
-| `RSS Blog Categorizer: Set WordPress Credentials` | Securely configure WordPress publishing credentials |
-| `RSS Blog Categorizer: Publish to WordPress` | Publish HTML file to WordPress blog |
+| `Dev Feed Curator: Refresh` | Refresh the RSS feed |
+| `Dev Feed Curator: Export as Markdown` | Export posts to Markdown |
+| `Dev Feed Curator: Export as HTML` | Export posts to HTML |
+| `Dev Feed Curator: Set RSS Feed` | Configure RSS feed URL |
+| `Dev Feed Curator: Set NewsBlur Credentials` | Securely configure NewsBlur API credentials |
+| `Dev Feed Curator: Set WordPress Credentials` | Securely configure WordPress publishing credentials |
+| `Dev Feed Curator: Publish to WordPress` | Publish HTML file to WordPress blog |
 
 All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.
 

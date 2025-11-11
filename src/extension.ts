@@ -6,7 +6,7 @@ import { EditorManager } from './editorManager';
 import { NEWSBLUR_PASSWORD_KEY } from './constants';
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('RSS Blog Categorizer extension is now active!');
+    console.log('Dev Feed Curator extension is now active!');
 
     const provider = new RSSBlogProvider(context);
     
@@ -236,7 +236,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     // No initial refresh - manual only unless auto-refresh is enabled
-    console.log('RSS Blog Categorizer extension activated. Use refresh button or enable auto-refresh in settings.');
+    console.log('Dev Feed Curator extension activated. Use refresh button or enable auto-refresh in settings.');
 }
 
 export function deactivate() {}
