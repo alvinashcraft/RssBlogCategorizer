@@ -14,7 +14,7 @@
 
 ### 2. Test the Fixed Save and Publish Flow
 1. With the HTML file open, click the edit icon (📝) in the editor toolbar
-   - Or use Command Palette: `RSS Blog Categorizer: Open in WYSIWYG Editor`
+   - Or use Command Palette: `Dev Feed Curator: Open in WYSIWYG Editor`
 2. The WYSIWYG editor should open with TinyMCE loaded
 3. Make some changes to the content (add text, format something)
 4. Click the **"Save & Publish"** button

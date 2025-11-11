@@ -1,7 +1,7 @@
 # WYSIWYG Editor Implementation - v2.0.0
 
 ## Overview
-Successfully implemented a TinyMCE-based WYSIWYG editor for the RSS Blog Categorizer extension. This feature allows you to visually edit exported HTML blog posts before publishing them to WordPress.
+Successfully implemented a TinyMCE-based WYSIWYG editor for the Dev Feed Curator extension. This feature allows you to visually edit exported HTML blog posts before publishing them to WordPress.
 
 ## What Was Implemented
 
@@ -86,7 +86,7 @@ Successfully implemented a TinyMCE-based WYSIWYG editor for the RSS Blog Categor
 **Method 3: Command Palette**
 1. Open an HTML file
 2. Press `Ctrl+Shift+P` (Cmd+Shift+P on Mac)
-3. Type "RSS Blog Categorizer: Open in WYSIWYG Editor"
+3. Type "Dev Feed Curator: Open in WYSIWYG Editor"
 4. Press Enter
 
 ### Publishing Workflow

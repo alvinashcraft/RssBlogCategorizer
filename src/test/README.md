@@ -1,6 +1,6 @@
 # Testing Guide
 
-This document explains how to run and write tests for the RSS Blog Categorizer extension.
+This document explains how to run and write tests for the Dev Feed Curator extension.
 
 ## Test Structure
 

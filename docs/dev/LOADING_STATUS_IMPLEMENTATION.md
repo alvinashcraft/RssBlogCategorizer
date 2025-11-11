@@ -2,7 +2,7 @@
 
 ## Overview
 
-Added a loading status indicator to the RSS Blog Categorizer tree view panel to provide visual feedback when fetching and filtering data from the RSS feed or NewsBlur API.
+Added a loading status indicator to the Dev Feed Curator tree view panel to provide visual feedback when fetching and filtering data from the RSS feed or NewsBlur API.
 
 ## Implementation Details
 

@@ -1,6 +1,6 @@
-# Unit Testing for RSS Blog Categorizer
+# Unit Testing for Dev Feed Curator
 
-This document describes the unit testing setup for the RSS Blog Categorizer VS Code extension.
+This document describes the unit testing setup for the Dev Feed Curator VS Code extension.
 
 ## Testing Architecture
 

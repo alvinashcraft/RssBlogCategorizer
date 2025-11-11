@@ -295,7 +295,7 @@ Would you like to open your WordPress admin panel now?
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'User-Agent': 'VS Code RSS Blog Categorizer Extension',
+                    'User-Agent': 'VS Code Dev Feed Curator Extension',
                     'Accept': 'application/json'
                 } as any
             };

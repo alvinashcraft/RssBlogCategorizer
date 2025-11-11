@@ -24,7 +24,7 @@ When you export blog posts to HTML, you'll now see a prompt asking if you want t
 
 #### Manual Access
 - Click the **edit icon (📝)** in the toolbar when viewing any HTML file
-- Or use Command Palette: `RSS Blog Categorizer: Open in WYSIWYG Editor`
+- Or use Command Palette: `Dev Feed Curator: Open in WYSIWYG Editor`
 
 ### Editor Actions
 - **Save Changes**: Updates the HTML file with your edits

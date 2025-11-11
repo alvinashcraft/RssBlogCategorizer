@@ -1,5 +1,5 @@
 /**
- * Shared constants for the RSS Blog Categorizer extension
+ * Shared constants for the Dev Feed Curator extension
  */
 
 /**

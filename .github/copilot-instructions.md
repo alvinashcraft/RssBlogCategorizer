@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a Visual Studio Code extension called "RSS Blog Categorizer" that fetches RSS feeds from developer blogs, automatically categorizes posts by technology topics, and provides export functionality in HTML and Markdown formats for blog publishing.
+This is a Visual Studio Code extension called "Dev Feed Curator" that fetches RSS feeds from developer blogs, automatically categorizes posts by technology topics, and provides export functionality in HTML and Markdown formats for blog publishing.
 
 ## Development Guidelines
 

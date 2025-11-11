@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide contains developer-specific instructions for building, testing, and contributing to the RSS Blog Categorizer extension.
+This guide contains developer-specific instructions for building, testing, and contributing to the Dev Feed Curator extension.
 
 ## Prerequisites
 
