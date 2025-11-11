@@ -15,22 +15,12 @@ Streamline your developer link blogging workflow. Fetch RSS feeds, auto-categori
 - 🔄 **Optional Auto-refresh** - Configurable automatic feed updates (disabled by default for on-demand usage)
 - 📚 **Book Recommendations** - Includes "The Geek Shelf" section with rotating book recommendations
 
-## What's New in 2.2.0
+## What's New in 3.0.0
 
-- 📊 **Publication Tracking** - Export metadata automatically tracks publication status and prevents duplicate WordPress posts
-- 🔒 **Duplicate Prevention** - WordPress publishing now checks for existing publications and warns before creating duplicates
-- 🏷️ **Content Identification** - Unique content IDs generated based on date and content hash for reliable tracking
-- 🔄 **Automatic Metadata Updates** - Publication metadata automatically updated after successful WordPress publishing
-
-## What's New in 1.1.0
-
-- 📚 **Clickable Book Images** - Book cover images in "The Geek Shelf" section are now clickable hyperlinks
-- 👤 **Author Name Mapping** - Intelligent author name normalization using a comprehensive mapping database (264+ mappings)
-- 🔗 **Syncfusion URL Tracking** - Automatic addition of tracking parameters to Syncfusion blog links
-- ✍️ **Improved Author Formatting** - Grammatically correct multi-author formatting (e.g., "Author1 & Author2" or "Author1, Author2 & Author3")
-- 🧹 **Clean URLs** - Automatic removal of tracking parameters from imported URLs for cleaner output
-- 🎯 **Simplified HTML** - Streamlined HTML output with reduced div nesting for better WordPress compatibility
-- 🆕 **Optional New Tab Links** - Configurable setting to control whether links open in new tabs (disabled by default)
+- 🎨 **New Brand Identity** - Rebranded to "Dev Feed Curator" with a modern, professional icon and clearer messaging
+- ✍️ **New Writing Category** - Added dedicated "Writing" category for content writing, blogging, grammar, and editing posts
+- ⚠️ **Breaking Changes** - Command names updated to reflect new branding (see [release notes](release-notes/RELEASE_NOTES_3.0.0.md))
+- 📝 **Updated Documentation** - Comprehensive documentation refresh throughout the project
 
 ## Screenshots
 
