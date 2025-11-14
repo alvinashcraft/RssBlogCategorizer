@@ -152,13 +152,17 @@
     { "keyword": "peopleandprojectspodcast", "author": "Andy Kaufman" },
     { "keyword": "mostlylucid.net", "author": "Scott Galloway" },
     { "keyword": "ageekleader", "author": "John Rouda" },
+    { "keyword": "softwaredefinedtalk.com", "author": "Brandon Whichard, Coté & Matt Ray" },
     { "keyword": "brucelawson.co.uk", "author": "Bruce Lawson" },
     { "keyword": "elbruno.com", "author": "Bruno Capuano" },
-    { "keyword": "thecsspodcast", "author": "Una Kravets & Adam Argyle" }
+    { "keyword": "julieyack.com", "author": "Julie Yack" },
+    { "keyword": "thecsspodcast", "author": "Una Kravets & Bramus Van Damme" }
   ],
   "authorContains": [
     { "keyword": "sam gentile", "author": "Sam Gentile" },
     { "keyword": "ayende", "author": "Oren Eini" },
+    { "keyword": "williamsrabia", "author": "Rabia Williams" },
+    { "keyword": "ssw tv", "author": "SSW TV" },
     { "keyword": "ray vernagus", "author": "Ray Vernagus" },
     { "keyword": "dbafromthecold", "author": "Andrew Pruski" },
     { "keyword": "camerons", "author": "Cameron Skinner" },
