@@ -1,6 +1,9 @@
 {
   "categories": {
     "Web and Cloud Development": {
+      "urlKeywords": [
+        "css-tricks.com"
+      ],
       "titleKeywords": [
         "html",
         "css", 
@@ -13,6 +16,7 @@
         "aws",
         "aspire",
         "gcp",
+        "eslint",
         "webassembly",
         "wasm",
         "javascript",
@@ -42,6 +46,11 @@
       ]
     },
     "Windows Development": {
+      "urlKeywords": [
+        "devblogs.microsoft.com/oldnewthing",
+        "windows/apps",
+        "blogs.windows.com/windowsdeveloper"
+      ],
       "titleKeywords": [
         "windows desktop",
         "uwp",
@@ -89,7 +98,7 @@
     "AI": {
       "urlKeywords": [
         "openai.com",
-        "chat.openai.com",
+        "replit.com",
         "perplexity.ai",
         "bard.google.com",
         "claude.ai",
@@ -98,6 +107,9 @@
         "huggingface.co",
         "warp.dev",
         "ai.google",
+        "devblogs.microsoft.com/foundry",
+        "microsoft-foundry-blog",
+        "azure-ai-foundry-blog",
         "microsoft.com/ai",
         "microsoft.com/en-us/ai",
         "microsoft.com/en-us/ai/azure-openai",
@@ -417,6 +429,8 @@
         "links-for-you",
         "dotnetnews.co",
         "codrops/collective",
+        "aws-weekly-roundup",
+        "samestuffdifferentday.com",
         "brucelawson.co.uk",
         "csharpdigest.net",
         "reading-list",
