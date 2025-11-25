@@ -400,6 +400,9 @@
       ]
     },
     "Tools": {
+      "urlKeywords": [
+        "files.community"
+      ],
       "titleKeywords": [
         "git",
         "vscode",
@@ -430,7 +433,7 @@
         "dotnetnews.co",
         "codrops/collective",
         "aws-weekly-roundup",
-        "samestuffdifferentday.com",
+        "samestuffdifferentday.net",
         "brucelawson.co.uk",
         "csharpdigest.net",
         "reading-list",
