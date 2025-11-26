@@ -171,6 +171,9 @@
     { "keyword": "agileotter.blogspot.com", "author": "Tim Ottinger" },
     { "keyword": "learn.microsoft.com", "author": "Microsoft Learn" },
     { "keyword": "jessitron.com", "author": "Jessica Kerr" },
+    { "keyword": "lhotka.net", "author": "Rocky Lhotka" },
+    { "keyword": "zachleat.com", "author": "Zach Leatherman" },
+    { "keyword": "dbakevlar.com", "author": "Kellyn Gorman" },
     { "keyword": "stephaniestimac.com", "author": "Stephanie Stimac" },
     { "keyword": "elbruno.com", "author": "Bruno Capuano" },
     { "keyword": "cazzulino.com", "author": "Daniel Cazzulino" },
@@ -180,6 +183,7 @@
   "authorContains": [
     { "keyword": "sam gentile", "author": "Sam Gentile" },
     { "keyword": "ayende", "author": "Oren Eini" },
+    { "keyword": "jillarmourmicrosoft", "author": "Jill Armour" },
     { "keyword": "williamsrabia", "author": "Rabia Williams" },
     { "keyword": "anthonygiretti", "author": "Anthony Giretti" },
     { "keyword": "kurtsh", "author": "Kurt Shintaku" },
