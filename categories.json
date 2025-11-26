@@ -2,7 +2,8 @@
   "categories": {
     "Web and Cloud Development": {
       "urlKeywords": [
-        "css-tricks.com"
+        "css-tricks.com",
+        "zachleat.com"
       ],
       "titleKeywords": [
         "html",
@@ -278,6 +279,7 @@
         "usps.com",
         "netrocksshow.com",
         "dotnetrocks.com",
+        "podtrac.com",
         "transistor.fm",
         "spreaker.com",
         "libsyn.com"
@@ -321,6 +323,15 @@
       ]
     },
     "Database": {
+      "urlKeywords": [
+        "sqlservercentral.com",
+        "sqlauthority.com",
+        "erikdarling.com",
+        "dbakevlar.com",
+        "cosmosdb/",
+        "brentozar.com",
+        "sqlkitty.com"
+      ],
       "titleKeywords": [
         "sql",
         "database",
