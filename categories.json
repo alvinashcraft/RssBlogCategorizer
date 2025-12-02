@@ -148,6 +148,12 @@
       ]
     },
     "Python": {
+      "urlKeywords": [
+        "pycoders.com",
+        "pymotw.com",
+        "pythonlibrary.org",
+        "pythontips.com"
+      ],
       "titleKeywords": [
         "python",
         "django",
