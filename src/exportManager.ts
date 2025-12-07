@@ -172,9 +172,6 @@ export class ExportManager {
             const title = `Dew Drop - ${month} ${day}, ${year} (#${nextPostNumber})`;
             console.log(`Generated Dew Drop title: "${title}"`);
             
-            // Show a notification to confirm the title generation worked
-            vscode.window.showInformationMessage(`Generated title: ${title}`);
-            
             return title;
             
         } catch (error) {
@@ -191,7 +188,6 @@ export class ExportManager {
             
             const fallbackTitle = `Dew Drop - ${month} ${day}, ${year} (#4507)`;
             console.log(`Using fallback Dew Drop title: "${fallbackTitle}"`);
-            vscode.window.showWarningMessage(`Using fallback title: ${fallbackTitle}`);
             return fallbackTitle;
         }
     }
@@ -199,7 +195,6 @@ export class ExportManager {
     private async getLatestDewDropNumber(): Promise<number> {
         try {
             console.log('Fetching RSS feed from alvinashcraft.com...');
-            vscode.window.showInformationMessage('Fetching latest Dew Drop post number...');
             
             // Fetch the RSS feed from alvinashcraft.com
             const rssData = await this.fetchRssFeed('https://www.alvinashcraft.com/feed/');
@@ -240,13 +235,11 @@ export class ExportManager {
                 if (match && title.toLowerCase().includes('dew drop')) {
                     const postNumber = parseInt(match[1], 10);
                     console.log(`✓ Latest Dew Drop post found: "${title}" (number: ${postNumber})`);
-                    vscode.window.showInformationMessage(`Found latest Dew Drop: #${postNumber}`);
                     return postNumber;
                 }
             }
             
             console.warn('No Dew Drop posts with numbers found in first 10 items, using fallback number 4506');
-            vscode.window.showWarningMessage('No Dew Drop posts found, using fallback #4506');
             return 4506; // Fallback - change this number as needed
             
         } catch (error) {
