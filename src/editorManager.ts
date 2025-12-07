@@ -211,8 +211,6 @@ export class EditorManager {
                     await this.formatDocument(document);
                 }
                 
-                vscode.window.showInformationMessage('Changes saved successfully!');
-                
                 if (closeAfterSave && this.resolvePromise) {
                     this.resolvePromise(content);
                     this.resolvePromise = undefined;
