@@ -502,7 +502,6 @@ export class ExportManager {
         if (uri) {
             try {
                 await vscode.workspace.fs.writeFile(uri, Buffer.from(content, 'utf8'));
-                vscode.window.showInformationMessage(`Blog posts exported successfully to ${format.toUpperCase()} format!`);
                 
                 // Open the exported file
                 const doc = await vscode.workspace.openTextDocument(uri);

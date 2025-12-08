@@ -3,6 +3,7 @@
     "Web and Cloud Development": {
       "urlKeywords": [
         "css-tricks.com",
+        "patrickbrosset.com",
         "zachleat.com"
       ],
       "titleKeywords": [
@@ -266,11 +267,13 @@
         "mergeconflict.fm",
         "ageekleader.com",
         "cppcast.com",
+        "reactnativeradio.com",
         "podcasts.apple.com",
         "aiunprompted.substack.com",
         "techcrunch.com/podcast",
         "theaifix.show",
         "smooth-scaling-podcast",
+        "theamphour.com",
         "azuredevops.show",
         "audioboom.com",
         "pythonbytes.fm",
@@ -405,7 +408,8 @@
     },
     "Writing": {
       "urlKeywords": [
-        "idratherbewriting.com"
+        "idratherbewriting.com",
+        "writerswrite.co.za"
       ],
       "titleKeywords": [
         "writing",
