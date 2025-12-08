@@ -41,8 +41,20 @@
             border-top: 1px solid var(--vscode-panel-border);
             display: flex;
             gap: 10px;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             z-index: 1000;
+        }
+        
+        .last-saved {
+            color: var(--vscode-descriptionForeground);
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
         }
         
         .button-bar button {
@@ -96,10 +108,13 @@
     </div>
     
     <div class="button-bar">
-        <button id="cancel-btn" title="Close without saving">Cancel</button>
-        <button id="save-btn" title="Save changes to file (keep editor open)">Save</button>
-        <button id="save-close-btn" title="Save changes and close editor">Save & Close</button>
-        <button id="save-publish-btn" title="Save and prepare for WordPress publishing">Save & Publish</button>
+        <div class="last-saved" id="last-saved"></div>
+        <div class="button-group">
+            <button id="cancel-btn" title="Close without saving">Cancel</button>
+            <button id="save-btn" title="Save changes to file (keep editor open)">Save</button>
+            <button id="save-close-btn" title="Save changes and close editor">Save & Close</button>
+            <button id="save-publish-btn" title="Save and prepare for WordPress publishing">Save & Publish</button>
+        </div>
     </div>
     
     <script src="{{tinyMceUri}}"></script>
@@ -361,6 +376,18 @@
                 }
             });
             
+            // Function to update last saved timestamp
+            function updateLastSaved() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true 
+                });
+                document.getElementById('last-saved').textContent = `Last saved: ${timeString}`;
+            }
+            
             // Button handlers
             document.getElementById('save-btn').addEventListener('click', function() {
                 const content = tinymce.activeEditor.getContent();
@@ -370,6 +397,7 @@
                 });
                 // Mark as not dirty after save
                 vscode.setState({ content: content, isDirty: false });
+                updateLastSaved();
             });
             
             document.getElementById('save-close-btn').addEventListener('click', function() {
@@ -386,6 +414,7 @@
                     command: 'saveAndPublish',
                     content: content
                 });
+                updateLastSaved();
             });
             
             document.getElementById('cancel-btn').addEventListener('click', function() {
