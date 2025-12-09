@@ -507,7 +507,7 @@ describe('RSSBlogProvider', () => {
       await provider.refresh();
     });
 
-    it('should create tree items for summary node', () => {
+    it('should create tree items for summary node with posts', () => {
       const summaryNode = {
         label: 'Total: 2 posts fetched and categorized',
         isSummary: true,
@@ -517,6 +517,21 @@ describe('RSSBlogProvider', () => {
       const treeItem = provider.getTreeItem(summaryNode);
       
       expect(treeItem.label).to.equal('Total: 2 posts fetched and categorized');
+      expect(treeItem.collapsibleState).to.equal(vscode.TreeItemCollapsibleState.None);
+      expect(treeItem.contextValue).to.equal('summary');
+      expect(treeItem.iconPath).to.be.instanceOf(vscode.ThemeIcon);
+    });
+
+    it('should create tree items for summary node with no posts', () => {
+      const summaryNode = {
+        label: 'No posts loaded - click refresh to load feeds',
+        isSummary: true,
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      };
+
+      const treeItem = provider.getTreeItem(summaryNode);
+      
+      expect(treeItem.label).to.equal('No posts loaded - click refresh to load feeds');
       expect(treeItem.collapsibleState).to.equal(vscode.TreeItemCollapsibleState.None);
       expect(treeItem.contextValue).to.equal('summary');
       expect(treeItem.iconPath).to.be.instanceOf(vscode.ThemeIcon);
@@ -554,6 +569,18 @@ describe('RSSBlogProvider', () => {
       expect(children[0]).to.have.property('isSummary', true); // First item is summary
       expect(children[1]).to.have.property('posts'); // Second item is first category
       expect(children[1]).to.have.property('label');
+    });
+
+    it('should show appropriate message when no posts are loaded', async () => {
+      // Create a new provider instance without loading any feeds
+      const emptyProvider = new RSSBlogProvider(mockContext);
+      
+      const children = await emptyProvider.getChildren();
+      
+      expect(children).to.be.an('array');
+      expect(children.length).to.equal(1); // Only summary node when no posts
+      expect(children[0]).to.have.property('isSummary', true);
+      expect(children[0].label).to.equal('No posts loaded - click refresh to load feeds');
     });
 
     it('should return posts as category children', async () => {

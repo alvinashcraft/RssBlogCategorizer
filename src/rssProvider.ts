@@ -317,8 +317,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             
             // Create summary node
             const totalPosts = this.posts.length;
+            const summaryLabel = totalPosts === 0 
+                ? 'No posts loaded - click refresh to load feeds'
+                : `Total: ${totalPosts} post${totalPosts !== 1 ? 's' : ''} fetched and categorized`;
             const summaryNode = {
-                label: `Total: ${totalPosts} post${totalPosts !== 1 ? 's' : ''} fetched and categorized`,
+                label: summaryLabel,
                 isSummary: true,
                 collapsibleState: vscode.TreeItemCollapsibleState.None
             };
