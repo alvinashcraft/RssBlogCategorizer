@@ -244,6 +244,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             item.iconPath = new vscode.ThemeIcon('loading~spin');
             item.contextValue = 'loading';
             return item;
+        } else if (element.isSummary) {
+            // Summary node
+            const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.None);
+            item.iconPath = new vscode.ThemeIcon('info');
+            item.contextValue = 'summary';
+            return item;
         } else if (element.posts) {
             // Category node
             const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.Expanded);
@@ -309,6 +315,14 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 }]);
             }
             
+            // Create summary node
+            const totalPosts = this.posts.length;
+            const summaryNode = {
+                label: `Total: ${totalPosts} post${totalPosts !== 1 ? 's' : ''} fetched and categorized`,
+                isSummary: true,
+                collapsibleState: vscode.TreeItemCollapsibleState.None
+            };
+            
             // Return categories
             const categoryNodes: CategoryNode[] = [];
             this.categories.forEach((posts, category) => {
@@ -318,7 +332,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     collapsibleState: vscode.TreeItemCollapsibleState.Expanded
                 });
             });
-            return Promise.resolve(categoryNodes);
+            
+            // Return summary node first, then categories
+            return Promise.resolve([summaryNode, ...categoryNodes]);
         } else if (element.posts) {
             // Return posts in category
             return Promise.resolve(element.posts);
