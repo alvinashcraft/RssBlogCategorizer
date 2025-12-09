@@ -3,7 +3,7 @@
   "displayName": "Dev Feed Curator",
   "description": "Streamline your developer link blogging workflow. Fetch RSS feeds, auto-categorize posts by technology, and publish directly to WordPress—all from VS Code.",
   "icon": "images/rssBlogIcon.png",
-  "version": "3.1.1",
+  "version": "3.1.3",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
