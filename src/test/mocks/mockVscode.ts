@@ -1,10 +1,12 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
+import * as vscode from "vscode";
+import * as path from "path";
 
 export class MockExtensionContext implements vscode.ExtensionContext {
   public subscriptions: vscode.Disposable[] = [];
   public workspaceState: vscode.Memento;
-  public globalState: vscode.Memento & { setKeysForSync(keys: readonly string[]): void; };
+  public globalState: vscode.Memento & {
+    setKeysForSync(keys: readonly string[]): void;
+  };
   public secrets: vscode.SecretStorage;
   public extensionUri: vscode.Uri;
   public extensionPath: string;
@@ -21,22 +23,28 @@ export class MockExtensionContext implements vscode.ExtensionContext {
 
   constructor(testResourcesPath?: string) {
     // Set up paths for testing
-    this.extensionPath = testResourcesPath || path.join(__dirname, '..', '..', '..');
+    this.extensionPath =
+      testResourcesPath || path.join(__dirname, "..", "..", "..");
     this.extensionUri = vscode.Uri.file(this.extensionPath);
-    this.globalStoragePath = path.join(this.extensionPath, 'test-global-storage');
+    this.globalStoragePath = path.join(
+      this.extensionPath,
+      "test-global-storage",
+    );
     this.globalStorageUri = vscode.Uri.file(this.globalStoragePath);
-    this.logPath = path.join(this.extensionPath, 'test-logs');
+    this.logPath = path.join(this.extensionPath, "test-logs");
     this.logUri = vscode.Uri.file(this.logPath);
 
     // Mock memento storage
     this.workspaceState = new MockMemento();
     this.globalState = new MockGlobalMemento();
-    
+
     // Mock other properties
     this.secrets = new MockSecretStorage();
-    this.environmentVariableCollection = new MockEnvironmentVariableCollection();
+    this.environmentVariableCollection =
+      new MockEnvironmentVariableCollection();
     this.extension = {} as vscode.Extension<any>;
-    this.languageModelAccessInformation = {} as vscode.LanguageModelAccessInformation;
+    this.languageModelAccessInformation =
+      {} as vscode.LanguageModelAccessInformation;
   }
 
   asAbsolutePath(relativePath: string): string {
@@ -68,23 +76,37 @@ class MockGlobalMemento extends MockMemento {
   }
 }
 
-class MockEnvironmentVariableCollection implements vscode.GlobalEnvironmentVariableCollection {
+class MockEnvironmentVariableCollection
+  implements vscode.GlobalEnvironmentVariableCollection
+{
   persistent = false;
-  description = 'Mock Environment Variable Collection';
-  
+  description = "Mock Environment Variable Collection";
+
   replace(variable: string, value: string): void {}
   append(variable: string, value: string): void {}
   prepend(variable: string, value: string): void {}
-  get(variable: string): vscode.EnvironmentVariableMutator | undefined { return undefined; }
-  forEach(callback: (variable: string, mutator: vscode.EnvironmentVariableMutator, collection: vscode.EnvironmentVariableCollection) => any): void {}
+  get(variable: string): vscode.EnvironmentVariableMutator | undefined {
+    return undefined;
+  }
+  forEach(
+    callback: (
+      variable: string,
+      mutator: vscode.EnvironmentVariableMutator,
+      collection: vscode.EnvironmentVariableCollection,
+    ) => any,
+  ): void {}
   delete(variable: string): void {}
   clear(): void {}
-  
-  getScoped(scope: vscode.EnvironmentVariableScope): vscode.EnvironmentVariableCollection {
+
+  getScoped(
+    scope: vscode.EnvironmentVariableScope,
+  ): vscode.EnvironmentVariableCollection {
     return {} as vscode.EnvironmentVariableCollection;
   }
-  
-  [Symbol.iterator](): Iterator<[variable: string, mutator: vscode.EnvironmentVariableMutator]> {
+
+  [Symbol.iterator](): Iterator<
+    [variable: string, mutator: vscode.EnvironmentVariableMutator]
+  > {
     return [][Symbol.iterator]();
   }
 }
@@ -115,11 +137,15 @@ export class MockConfiguration implements vscode.WorkspaceConfiguration {
       defaultValue: undefined,
       globalValue: this.config.get(section),
       workspaceValue: undefined,
-      workspaceFolderValue: undefined
+      workspaceFolderValue: undefined,
     };
   }
 
-  async update(section: string, value: any, configurationTarget?: vscode.ConfigurationTarget): Promise<void> {
+  async update(
+    section: string,
+    value: any,
+    configurationTarget?: vscode.ConfigurationTarget,
+  ): Promise<void> {
     this.config.set(section, value);
   }
 
@@ -141,5 +167,10 @@ class MockSecretStorage implements vscode.SecretStorage {
     this.storage.delete(key);
   }
 
-  onDidChange: vscode.Event<vscode.SecretStorageChangeEvent> = new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event;
+  async keys(): Promise<string[]> {
+    return Array.from(this.storage.keys());
+  }
+
+  onDidChange: vscode.Event<vscode.SecretStorageChangeEvent> =
+    new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event;
 }
