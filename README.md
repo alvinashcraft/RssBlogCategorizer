@@ -4,23 +4,23 @@ Streamline your developer link blogging workflow. Fetch RSS feeds, auto-categori
 
 ## Features
 
-- 📡 **RSS Feed Parsing** - Fetches and parses RSS/Atom feeds with robust error handling
-- 🔐 **NewsBlur API Integration** - Optionally use NewsBlur API for authenticated access to get more than 25 items
-- 🏷️ **Smart Categorization** - Automatically categorizes posts by technology (JavaScript, Python, DevOps, etc.)
-- 🌳 **Tree View Integration** - Displays categorized posts in VS Code sidebar with expandable categories
-- 📄 **Export Functionality** - Generates HTML and Markdown files with professional templates
-- 🚀 **WordPress Publishing** - Direct publishing to WordPress blogs via REST API with secure credential storage and duplicate prevention
-- 🏷️ **Automatic Tag Detection** - Intelligent extraction of technology tags from blog post content
-- ⚙️ **Configurable Settings** - Customizable RSS feed URLs, refresh intervals, and date filtering
-- 🔄 **Optional Auto-refresh** - Configurable automatic feed updates (disabled by default for on-demand usage)
-- 📚 **Book Recommendations** - Includes "The Geek Shelf" section with rotating book recommendations
+- **RSS Feed Parsing** - Fetches and parses RSS/Atom feeds with robust error handling
+- **NewsBlur API Integration** - Optionally use NewsBlur API for authenticated access to get more than 25 items
+- **Smart Categorization** - Automatically categorizes posts by technology (JavaScript, Python, DevOps, etc.)
+- **Tree View Integration** - Displays categorized posts in VS Code sidebar with expandable categories
+- **Export Functionality** - Generates HTML and Markdown files with professional templates
+- **WordPress Publishing** - Direct publishing to WordPress blogs via REST API with secure credential storage and duplicate prevention
+- **Automatic Tag Detection** - Intelligent extraction of technology tags from blog post content
+- **Configurable Settings** - Customizable RSS feed URLs, refresh intervals, and date filtering
+- **Optional Auto-refresh** - Configurable automatic feed updates (disabled by default for on-demand usage)
+- **Book Recommendations** - Includes "The Geek Shelf" section with rotating book recommendations
 
 ## What's New in 3.0.0
 
-- 🎨 **New Brand Identity** - Rebranded to "Dev Feed Curator" with a modern, professional icon and clearer messaging
-- ✍️ **New Writing Category** - Added dedicated "Writing" category for content writing, blogging, grammar, and editing posts
-- ⚠️ **Breaking Changes** - Command names updated to reflect new branding (see [release notes](release-notes/RELEASE_NOTES_3.0.0.md))
-- 📝 **Updated Documentation** - Comprehensive documentation refresh throughout the project
+- **New Brand Identity** - Rebranded to "Dev Feed Curator" with a modern, professional icon and clearer messaging
+- **New Writing Category** - Added dedicated "Writing" category for content writing, blogging, grammar, and editing posts
+- **Breaking Changes** - Command names updated to reflect new branding (see [release notes](release-notes/RELEASE_NOTES_3.0.0.md))
+- **Updated Documentation** - Comprehensive documentation refresh throughout the project
 
 ## Screenshots
 
@@ -41,40 +41,40 @@ Streamline your developer link blogging workflow. Fetch RSS feeds, auto-categori
 ### From VS Code Marketplace
 
 1. Open VS Code
-2. Go to Extensions view (`Ctrl+Shift+X`)
-3. Search for "Dev Feed Curator"
-4. Click Install
+1. Go to Extensions view (`Ctrl+Shift+X`)
+1. Search for "Dev Feed Curator"
+1. Click Install
 
 ### From VSIX Package
 
 1. Download the `.vsix` file from the [releases](https://github.com/alvinashcraft/RssBlogCategorizer/releases)
-2. Open VS Code
-3. Go to Extensions view (`Ctrl+Shift+X`)
-4. Click the three dots menu and select "Install from VSIX..."
-5. Select the downloaded `.vsix` file
+1. Open VS Code
+1. Go to Extensions view (`Ctrl+Shift+X`)
+1. Click the three dots menu and select "Install from VSIX..."
+1. Select the downloaded `.vsix` file
 
 ## Usage
 
 ### Getting Started
 
 1. After installation, the "Dev Blog Posts" view will appear in the Explorer panel sidebar
-2. The extension comes pre-configured with a default RSS feed
-3. **Click the refresh button** in the view header to load posts (no automatic refresh on startup)
-4. Posts are automatically categorized and displayed in a tree structure
-5. **Optional**: Enable auto-refresh in settings if you want automatic updates
+1. The extension comes pre-configured with a default RSS feed
+1. **Click the refresh button** in the view header to load posts (no automatic refresh on startup)
+1. Posts are automatically categorized and displayed in a tree structure
+1. **Optional**: Enable auto-refresh in settings if you want automatic updates
 
 ### Setting Up Your RSS Feed
 
 **Via Explorer Panel:**
 
 1. Click the edit icon (pencil) in the "Dev Blog Posts" view header
-2. Enter your RSS feed URL when prompted
+1. Enter your RSS feed URL when prompted
 
 **Via Command Palette:**
 
 1. Open Command Palette (`Ctrl+Shift+P`)
-2. Run "Dev Feed Curator: Set RSS Feed"
-3. Enter your RSS feed URL when prompted
+1. Run "Dev Feed Curator: Set RSS Feed"
+1. Enter your RSS feed URL when prompted
 
 Click the refresh button to load new content after updating the feed URL.
 
@@ -92,8 +92,8 @@ Manual refresh is recommended for most users as it prevents unnecessary network 
 For enhanced functionality, you can configure NewsBlur API access to retrieve more than 25 items:
 
 1. **Enable NewsBlur API**: Set `rssBlogCategorizer.useNewsblurApi` to `true` in settings
-2. **Set Username**: Configure your NewsBlur username in `rssBlogCategorizer.newsblurUsername`
-3. **Set Credentials**: Use Command Palette → "Dev Feed Curator: Set NewsBlur Credentials" to securely store your password
+1. **Set Username**: Configure your NewsBlur username in `rssBlogCategorizer.newsblurUsername`
+1. **Set Credentials**: Use Command Palette → "Dev Feed Curator: Set NewsBlur Credentials" to securely store your password
 
 **Benefits of NewsBlur API:**
 
@@ -111,12 +111,12 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
 **Via Command Palette:**
 
 1. Open Command Palette (`Ctrl+Shift+P`)
-2. Run "Dev Feed Curator: Export as Markdown" or "Dev Feed Curator: Export as HTML"
+1. Run "Dev Feed Curator: Export as Markdown" or "Dev Feed Curator: Export as HTML"
 
 **Export Process:**
 
 1. Choose your save location (filename is auto-generated from the blog post title)
-2. The exported file will include:
+1. The exported file will include:
    - Auto-generated "Dew Drop" title with incremental numbering
    - Categorized posts with author attribution
    - "The Geek Shelf" section with book recommendations
@@ -132,9 +132,9 @@ After exporting to HTML, you can optionally edit your blog post content using th
 
 **Opening the Editor:**
 
-1. **From Export**: After HTML export, click "Open in Editor" when prompted
-2. **From HTML File**: Open any HTML file and click the edit icon (📝) in the toolbar
-3. **Command Palette**: Use "Dev Feed Curator: Open in WYSIWYG Editor"
+- **From Export**: After HTML export, click "Open in Editor" when prompted
+- **From HTML File**: Open any HTML file and click the edit icon (📝) in the toolbar
+- **Command Palette**: Use "Dev Feed Curator: Open in WYSIWYG Editor"
 
 **Editor Features:**
 
@@ -148,9 +148,9 @@ After exporting to HTML, you can optionally edit your blog post content using th
 **Workflow:**
 
 1. Edit your content visually in the WYSIWYG editor
-2. Click "Save" to update the HTML file
-3. Click "Save & Publish" to save and proceed to WordPress publishing
-4. Click "Cancel" to close without saving (with confirmation if changes exist)
+1. Click "Save" to update the HTML file
+1. Click "Save & Publish" to save and proceed to WordPress publishing
+1. Click "Cancel" to close without saving (with confirmation if changes exist)
 
 ### Publishing to WordPress
 
@@ -159,19 +159,19 @@ After exporting to HTML, you can publish directly to your WordPress blog:
 **Prerequisites:**
 
 1. **Configure WordPress Settings**: Set your blog URL and username in settings
-2. **Set Credentials**: Use Command Palette → "Dev Feed Curator: Set WordPress Credentials" to securely store your login
+1. **Set Credentials**: Use Command Palette → "Dev Feed Curator: Set WordPress Credentials" to securely store your login
 
 **Publishing Process:**
 
 1. **Export to HTML** first using the export functionality above
-2. **Open the HTML file** in VS Code editor
-3. **Click the WordPress publish button** in the editor toolbar (cloud upload icon)
+1. **Open the HTML file** in VS Code editor
+1. **Click the WordPress publish button** in the editor toolbar (cloud upload icon)
    - Or use Command Palette → "Dev Feed Curator: Publish to WordPress"
    - Only the content inside `<body>` tags is published (excludes `<html>`, `<head>`, etc.)
-4. **Choose categories**: Use default categories (configurable in settings), customize for this post, or publish without categories
-5. **Review auto-detected tags**: The extension automatically detects technology tags from content - use detected tags, customize them, or skip
-6. **Choose publish status**: Publish immediately or save as draft
-7. **Confirmation**: The extension will confirm successful publication with the post ID, assigned categories, and tag count
+1. **Choose categories**: Use default categories (configurable in settings), customize for this post, or publish without categories
+1. **Review auto-detected tags**: The extension automatically detects technology tags from content - use detected tags, customize them, or skip
+1. **Choose publish status**: Publish immediately or save as draft
+1. **Confirmation**: The extension will confirm successful publication with the post ID, assigned categories, and tag count
 
 **Publication Tracking:**
 
@@ -235,10 +235,10 @@ Access settings via `File > Preferences > Settings` and search for "Dev Feed Cur
 
 The extension uses intelligent date filtering to ensure you get the most relevant recent posts:
 
-1. **Automatic Mode** (default): Uses the publication date of the latest "Dew Drop" post from alvinashcraft.com
-2. **Fallback**: If unavailable, filters to posts from the last 24 hours (UTC)
-3. **Manual Override**: Set a custom UTC datetime in settings
-4. **Buffer Time**: Optional configurable buffer (default 5 minutes) added to avoid edge cases with timing differences
+- **Automatic Mode** (default): Uses the publication date of the latest "Dew Drop" post from alvinashcraft.com
+- **Fallback**: If unavailable, filters to posts from the last 24 hours (UTC)
+- **Manual Override**: Set a custom UTC datetime in settings
+- **Buffer Time**: Optional configurable buffer (default 5 minutes) added to avoid edge cases with timing differences
 
 **Date Filtering Logic:**
 
