@@ -244,10 +244,6 @@
             const theme = '{{theme}}'; // Theme passed from extension
             let isDirty = false;
             
-            // Debug: Check if theme variables are available
-            console.log('Theme from extension:', theme);
-            console.log('Background color:', getComputedStyle(document.body).backgroundColor);
-            console.log('Foreground color:', getComputedStyle(document.body).color);
             
             // Initialize EasyMDE
             const easyMDE = new EasyMDE({
