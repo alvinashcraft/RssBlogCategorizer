@@ -173,7 +173,6 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
 
-
     // Auto-refresh based on configuration
     const getRefreshInterval = () => {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
