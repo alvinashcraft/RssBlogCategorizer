@@ -335,8 +335,6 @@
             
             // Cancel button handler - no confirmation, just close
             document.getElementById('cancel-btn').addEventListener('click', function() {
-                console.log('Cancel button clicked, isDirty:', isDirty);
-                console.log('Posting cancel message');
                 vscode.postMessage({ command: 'cancel' });
             });
             
