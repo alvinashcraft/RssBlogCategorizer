@@ -507,8 +507,8 @@ export class ExportManager {
                 const doc = await vscode.workspace.openTextDocument(uri);
                 await vscode.window.showTextDocument(doc);
                 
-                // For HTML files, offer to open in WYSIWYG editor
-                if (extension === 'html') {
+                // For HTML and Markdown files, offer to open in WYSIWYG editor
+                if (extension === 'html' || extension === 'md') {
                     const choice = await vscode.window.showInformationMessage(
                         'Would you like to edit this post in the WYSIWYG editor?',
                         'Open in Editor',

@@ -71,6 +71,7 @@ export class EditorManager {
         
         this.panel.webview.onDidReceiveMessage(
             async (message) => {
+                console.log('EditorManager received message:', message.command);
                 switch (message.command) {
                     case 'save':
                         // Save without closing, no formatting
@@ -89,11 +90,14 @@ export class EditorManager {
                         break;
                         
                     case 'cancel':
+                        console.log('Handling cancel - disposing panel');
                         if (this.resolvePromise) {
                             this.resolvePromise(undefined);
                             this.resolvePromise = undefined;
                         }
-                        this.panel?.dispose();
+                        if (this.panel) {
+                            this.panel.dispose();
+                        }
                         break;
                 }
             },
@@ -168,6 +172,11 @@ export class EditorManager {
             throw new Error('Panel not initialized');
         }
         
+        // Detect VS Code theme
+        const theme = vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ||
+                     vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast
+                     ? 'dark' : 'light';
+        
         // Load markdown editor HTML template
         const templatePath = path.join(this.context.extensionPath, 'webview', 'markdown-editor.html');
         let html = fs.readFileSync(templatePath, 'utf8');
@@ -175,6 +184,7 @@ export class EditorManager {
         // Replace placeholders
         html = html.replace(/{{cspSource}}/g, this.panel.webview.cspSource);
         html = html.replace('{{initialContent}}', this.escapeHtml(markdownContent));
+        html = html.replace('{{theme}}', theme);
         
         return html;
     }

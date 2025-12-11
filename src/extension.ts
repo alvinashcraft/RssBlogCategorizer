@@ -148,20 +148,24 @@ export function activate(context: vscode.ExtensionContext) {
     const openWysiwygEditorCommand = vscode.commands.registerCommand('rssBlogCategorizer.openWysiwygEditor', async () => {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) {
-            vscode.window.showErrorMessage('No active editor found. Please open an HTML file first.');
+            vscode.window.showErrorMessage('No active editor found. Please open an HTML or Markdown file first.');
             return;
         }
 
         const document = activeEditor.document;
-        if (!document.fileName.endsWith('.html')) {
-            vscode.window.showErrorMessage('Please open an HTML file to edit with the WYSIWYG editor.');
+        const isHtml = document.fileName.endsWith('.html');
+        const isMarkdown = document.fileName.endsWith('.md');
+        
+        if (!isHtml && !isMarkdown) {
+            vscode.window.showErrorMessage('Please open an HTML or Markdown file to edit with the WYSIWYG editor.');
             return;
         }
 
-        const htmlContent = document.getText();
+        const content = document.getText();
         const fileName = document.fileName.split(/[/\\]/).pop() || 'Untitled';
+        const fileType = isMarkdown ? 'markdown' : 'html';
         
-        const editedContent = await editorManager.openEditor(htmlContent, { fileName, fileType: 'html' });
+        const editedContent = await editorManager.openEditor(content, { fileName, fileType });
         
         if (editedContent) {
             vscode.window.showInformationMessage('Content updated successfully!');
