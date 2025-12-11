@@ -154,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         const document = activeEditor.document;
         const isHtml = document.fileName.endsWith('.html');
-        const isMarkdown = document.fileName.endsWith('.md');
+        const isMarkdown = document.fileName.endsWith('.md') || document.fileName.endsWith('.markdown');
         
         if (!isHtml && !isMarkdown) {
             vscode.window.showErrorMessage('Please open an HTML or Markdown file to edit with the WYSIWYG editor.');
