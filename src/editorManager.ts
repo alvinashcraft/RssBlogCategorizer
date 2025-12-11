@@ -71,7 +71,6 @@ export class EditorManager {
         
         this.panel.webview.onDidReceiveMessage(
             async (message) => {
-                console.log('EditorManager received message:', message.command);
                 switch (message.command) {
                     case 'save':
                         // Save without closing, no formatting
