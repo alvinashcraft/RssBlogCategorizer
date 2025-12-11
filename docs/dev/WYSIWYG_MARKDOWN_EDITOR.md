@@ -218,5 +218,3 @@ This implementation successfully extends the Dev Feed Curator extension's WYSIWY
   - CDN: <https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css>
 
 - **Previous**: stackedit-js ^1.0.7 (replaced on December 11, 2025)
-  - Purpose: Provides WYSIWYG Markdown editing via iframe
-  - License: MIT
