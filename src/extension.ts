@@ -161,10 +161,33 @@ export function activate(context: vscode.ExtensionContext) {
         const htmlContent = document.getText();
         const fileName = document.fileName.split(/[/\\]/).pop() || 'Untitled';
         
-        const editedContent = await editorManager.openEditor(htmlContent, { fileName });
+        const editedContent = await editorManager.openEditor(htmlContent, { fileName, fileType: 'html' });
         
         if (editedContent) {
             vscode.window.showInformationMessage('Content updated successfully!');
+        }
+    });
+
+    const openMarkdownEditorCommand = vscode.commands.registerCommand('rssBlogCategorizer.openMarkdownEditor', async () => {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (!activeEditor) {
+            vscode.window.showErrorMessage('No active editor found. Please open a Markdown file first.');
+            return;
+        }
+
+        const document = activeEditor.document;
+        if (!document.fileName.endsWith('.md') && !document.fileName.endsWith('.markdown')) {
+            vscode.window.showErrorMessage('Please open a Markdown file to edit with the StackEdit editor.');
+            return;
+        }
+
+        const markdownContent = document.getText();
+        const fileName = document.fileName.split(/[/\\]/).pop() || 'Untitled';
+        
+        const editedContent = await editorManager.openEditor(markdownContent, { fileName, fileType: 'markdown' });
+        
+        if (editedContent) {
+            vscode.window.showInformationMessage('Markdown content updated successfully!');
         }
     });
 
@@ -220,6 +243,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(
+        openMarkdownEditorCommand,
         refreshCommand,
         exportMarkdownCommand,
         exportHtmlCommand,

@@ -7,12 +7,14 @@ export class EditorManager {
     private context: vscode.ExtensionContext;
     private resolvePromise: ((value: string | undefined) => void) | undefined;
     private originalDocumentUri: vscode.Uri | undefined;
+    private editorType: 'html' | 'markdown' = 'html';
     
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
     
-    public async openEditor(htmlContent: string, metadata?: { fileName?: string }): Promise<string | undefined> {
+    public async openEditor(content: string, metadata?: { fileName?: string; fileType?: 'html' | 'markdown' }): Promise<string | undefined> {
+        this.editorType = metadata?.fileType || 'html';
         // Save reference to the currently active document
         const activeEditor = vscode.window.activeTextEditor;
         if (activeEditor) {
@@ -24,15 +26,16 @@ export class EditorManager {
             
             if (this.panel) {
                 this.panel.reveal(vscode.ViewColumn.One);
-                this.updateContent(htmlContent);
+                this.updateContent(content);
             } else {
-                this.createPanel(htmlContent, metadata);
+                this.createPanel(content, metadata);
             }
         });
     }
     
-    private createPanel(htmlContent: string, metadata?: { fileName?: string }): void {
-        const title = metadata?.fileName ? `Editing: ${metadata.fileName}` : 'Dew Drop Editor';
+    private createPanel(content: string, metadata?: { fileName?: string; fileType?: 'html' | 'markdown' }): void {
+        const editorTypeLabel = this.editorType === 'markdown' ? 'Markdown' : 'HTML';
+        const title = metadata?.fileName ? `Editing: ${metadata.fileName}` : `Dew Drop ${editorTypeLabel} Editor`;
         
         this.panel = vscode.window.createWebviewPanel(
             'dewDropEditor',
@@ -48,7 +51,7 @@ export class EditorManager {
             }
         );
         
-        this.panel.webview.html = this.getWebviewContent(htmlContent);
+        this.panel.webview.html = this.getWebviewContent(content);
         
         // Handle panel visibility changes to restore focus
         this.panel.onDidChangeViewState(
@@ -112,16 +115,28 @@ export class EditorManager {
         );
     }
     
-    private updateContent(htmlContent: string): void {
+    private updateContent(content: string): void {
         if (this.panel) {
             this.panel.webview.postMessage({
                 command: 'updateContent',
-                content: htmlContent
+                content: content
             });
         }
     }
     
-    private getWebviewContent(htmlContent: string): string {
+    private getWebviewContent(content: string): string {
+        if (!this.panel) {
+            throw new Error('Panel not initialized');
+        }
+        
+        if (this.editorType === 'markdown') {
+            return this.getMarkdownWebviewContent(content);
+        } else {
+            return this.getHtmlWebviewContent(content);
+        }
+    }
+    
+    private getHtmlWebviewContent(htmlContent: string): string {
         if (!this.panel) {
             throw new Error('Panel not initialized');
         }
@@ -144,6 +159,22 @@ export class EditorManager {
         html = html.replace(/{{tinyMceUri}}/g, tinyMceUri.toString());
         html = html.replace(/{{baseUrl}}/g, baseUrl);
         html = html.replace('{{initialContent}}', this.escapeHtml(bodyContent));
+        
+        return html;
+    }
+    
+    private getMarkdownWebviewContent(markdownContent: string): string {
+        if (!this.panel) {
+            throw new Error('Panel not initialized');
+        }
+        
+        // Load markdown editor HTML template
+        const templatePath = path.join(this.context.extensionPath, 'webview', 'markdown-editor.html');
+        let html = fs.readFileSync(templatePath, 'utf8');
+        
+        // Replace placeholders
+        html = html.replace(/{{cspSource}}/g, this.panel.webview.cspSource);
+        html = html.replace('{{initialContent}}', this.escapeHtml(markdownContent));
         
         return html;
     }
@@ -174,23 +205,28 @@ export class EditorManager {
             const document = await vscode.workspace.openTextDocument(this.originalDocumentUri);
             const originalContent = document.getText();
             
-            // Find the body tags and replace only the content between them
-            const bodyStartMatch = originalContent.match(/<body[^>]*>/i);
-            const bodyEndMatch = originalContent.match(/<\/body>/i);
-            
             let newContent: string;
             
-            if (bodyStartMatch && bodyEndMatch) {
-                // HTML file with proper structure - replace only body content
-                const bodyStartIndex = bodyStartMatch.index! + bodyStartMatch[0].length;
-                const bodyEndIndex = bodyEndMatch.index!;
-                
-                const beforeBody = originalContent.substring(0, bodyStartIndex);
-                const afterBody = originalContent.substring(bodyEndIndex);
-                newContent = beforeBody + '\n' + content + '\n' + afterBody;
-            } else {
-                // HTML fragment without body tags - replace entire content
+            if (this.editorType === 'markdown') {
+                // For markdown files, replace entire content
                 newContent = content;
+            } else {
+                // For HTML files, find the body tags and replace only the content between them
+                const bodyStartMatch = originalContent.match(/<body[^>]*>/i);
+                const bodyEndMatch = originalContent.match(/<\/body>/i);
+                
+                if (bodyStartMatch && bodyEndMatch) {
+                    // HTML file with proper structure - replace only body content
+                    const bodyStartIndex = bodyStartMatch.index! + bodyStartMatch[0].length;
+                    const bodyEndIndex = bodyEndMatch.index!;
+                    
+                    const beforeBody = originalContent.substring(0, bodyStartIndex);
+                    const afterBody = originalContent.substring(bodyEndIndex);
+                    newContent = beforeBody + '\n' + content + '\n' + afterBody;
+                } else {
+                    // HTML fragment without body tags - replace entire content
+                    newContent = content;
+                }
             }
             
             // Create an edit to replace all content
@@ -226,6 +262,11 @@ export class EditorManager {
     
     private async formatDocument(document: vscode.TextDocument): Promise<void> {
         try {
+            // Skip formatting for markdown files
+            if (this.editorType === 'markdown') {
+                return;
+            }
+            
             // Get HTML formatting settings
             const config = vscode.workspace.getConfiguration('html.format');
             const originalWrapAttributes = config.get('wrapAttributes');

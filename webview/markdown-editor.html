@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'none'; 
+                   script-src {{cspSource}} https://unpkg.com 'unsafe-inline' 'unsafe-eval'; 
+                   style-src {{cspSource}} 'unsafe-inline';
+                   img-src {{cspSource}} https: data:;
+                   font-src {{cspSource}} https:;
+                   frame-src https://stackedit.io;
+                   child-src https://stackedit.io;
+                   connect-src https://stackedit.io https://unpkg.com;">;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dew Drop Markdown Editor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+        }
+        
+        #editor-container {
+            padding: 20px;
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #markdown-textarea {
+            width: 100%;
+            height: 100%;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            padding: 15px;
+            border: 1px solid var(--vscode-panel-border);
+            background-color: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            resize: none;
+            box-sizing: border-box;
+        }
+        
+        #markdown-textarea:focus {
+            outline: 1px solid var(--vscode-focusBorder);
+        }
+        
+        .button-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px 20px;
+            background-color: var(--vscode-editor-background);
+            border-top: 1px solid var(--vscode-panel-border);
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .last-saved {
+            color: var(--vscode-descriptionForeground);
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .button-bar button {
+            padding: 8px 16px;
+            border-radius: 2px;
+            border: 1px solid var(--vscode-button-border);
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        
+        .button-bar button:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+        
+        .button-bar button:active {
+            opacity: 0.8;
+        }
+        
+        #save-publish-btn {
+            background-color: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
+        }
+        
+        #save-publish-btn:hover {
+            background-color: var(--vscode-button-secondaryHoverBackground);
+        }
+        
+        #cancel-btn {
+            background-color: transparent;
+            border-color: var(--vscode-button-border);
+        }
+        
+        #wysiwyg-btn {
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+        }
+        
+        #wysiwyg-btn:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+        
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: var(--vscode-foreground);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading" style="display: none;">Loading StackEdit...</div>
+    
+    <div id="editor-container">
+        <textarea id="markdown-textarea">{{initialContent}}</textarea>
+    </div>
+    
+    <div class="button-bar">
+        <div class="last-saved" id="last-saved"></div>
+        <div class="button-group">
+            <button id="wysiwyg-btn" title="Open in StackEdit WYSIWYG editor">WYSIWYG Edit</button>
+            <button id="cancel-btn" title="Close without saving">Cancel</button>
+            <button id="save-btn" title="Save changes to file (keep editor open)">Save</button>
+            <button id="save-close-btn" title="Save changes and close editor">Save & Close</button>
+            <button id="save-publish-btn" title="Save and prepare for WordPress publishing">Save & Publish</button>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/stackedit-js@1.0.7/docs/lib/stackedit.min.js"></script>
+    <script>
+        (function() {
+            const vscode = acquireVsCodeApi();
+            const textarea = document.getElementById('markdown-textarea');
+            let stackedit = null;
+            let isDirty = false;
+            
+            // Initialize state
+            const previousState = vscode.getState();
+            if (previousState && previousState.content) {
+                textarea.value = previousState.content;
+                isDirty = previousState.isDirty || false;
+            }
+            
+            // Track changes
+            textarea.addEventListener('input', function() {
+                isDirty = true;
+                vscode.setState({ 
+                    content: textarea.value,
+                    isDirty: true 
+                });
+            });
+            
+            // Handle Ctrl+S to save
+            textarea.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    document.getElementById('save-btn').click();
+                }
+            });
+            
+            // Function to update last saved timestamp
+            function updateLastSaved() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true 
+                });
+                document.getElementById('last-saved').textContent = `Last saved: ${timeString}`;
+            }
+            
+            // StackEdit WYSIWYG button handler
+            document.getElementById('wysiwyg-btn').addEventListener('click', function() {
+                if (!stackedit) {
+                    stackedit = new Stackedit();
+                }
+                
+                // Show loading indicator
+                document.getElementById('loading').style.display = 'block';
+                
+                // Open StackEdit with current content
+                stackedit.openFile({
+                    name: 'Markdown Content',
+                    content: {
+                        text: textarea.value
+                    }
+                });
+                
+                // Hide loading after a short delay
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 500);
+                
+                // Listen for changes from StackEdit
+                stackedit.on('fileChange', (file) => {
+                    textarea.value = file.content.text;
+                    isDirty = true;
+                    vscode.setState({ 
+                        content: textarea.value,
+                        isDirty: true 
+                    });
+                });
+                
+                // Handle StackEdit close
+                stackedit.on('close', () => {
+                    // Focus back to textarea when StackEdit closes
+                    setTimeout(() => {
+                        textarea.focus();
+                    }, 100);
+                });
+            });
+            
+            // Save button handler
+            document.getElementById('save-btn').addEventListener('click', function() {
+                const content = textarea.value;
+                vscode.postMessage({
+                    command: 'save',
+                    content: content
+                });
+                isDirty = false;
+                vscode.setState({ content: content, isDirty: false });
+                updateLastSaved();
+            });
+            
+            // Save and close button handler
+            document.getElementById('save-close-btn').addEventListener('click', function() {
+                const content = textarea.value;
+                vscode.postMessage({
+                    command: 'saveAndClose',
+                    content: content
+                });
+            });
+            
+            // Save and publish button handler
+            document.getElementById('save-publish-btn').addEventListener('click', function() {
+                const content = textarea.value;
+                vscode.postMessage({
+                    command: 'saveAndPublish',
+                    content: content
+                });
+                updateLastSaved();
+            });
+            
+            // Cancel button handler
+            document.getElementById('cancel-btn').addEventListener('click', function() {
+                if (isDirty) {
+                    if (confirm('You have unsaved changes. Are you sure you want to close?')) {
+                        vscode.postMessage({ command: 'cancel' });
+                    }
+                } else {
+                    vscode.postMessage({ command: 'cancel' });
+                }
+            });
+            
+            // Handle messages from extension
+            window.addEventListener('message', function(event) {
+                const message = event.data;
+                switch (message.command) {
+                    case 'updateContent':
+                        textarea.value = message.content;
+                        vscode.setState({ content: message.content, isDirty: false });
+                        isDirty = false;
+                        break;
+                        
+                    case 'focusEditor':
+                        textarea.focus();
+                        break;
+                }
+            });
+            
+            // Focus textarea on load
+            textarea.focus();
+        })();
+    </script>
+</body>
+</html>
