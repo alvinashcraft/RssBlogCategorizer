@@ -4,223 +4,21 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" 
           content="default-src 'none'; 
-                   script-src {{cspSource}} https://cdn.jsdelivr.net 'unsafe-inline'; 
-                   style-src {{cspSource}} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline';
+                   script-src {{cspSource}} https://cdn.jsdelivr.net; 
+                   style-src {{cspSource}} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
                    img-src {{cspSource}} https: data:;
                    font-src {{cspSource}} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
                    connect-src https://cdn.jsdelivr.net;">;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dew Drop Markdown Editor</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            padding: 0;
-            margin: 0;
-            background-color: var(--vscode-editor-background);
-            color: var(--vscode-editor-foreground);
-        }
-        
-        #editor-container {
-            padding: 20px;
-            height: calc(100vh - 80px);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .EasyMDEContainer {
-            height: 100%;
-        }
-        
-        .EasyMDEContainer .CodeMirror {
-            height: calc(100% - 50px);
-            border: 1px solid var(--vscode-panel-border);
-            background-color: var(--vscode-editor-background);
-            color: var(--vscode-editor-foreground);
-        }
-        
-        .editor-toolbar {
-            background-color: var(--vscode-editor-background);
-            border: 1px solid var(--vscode-panel-border);
-            border-bottom: none;
-        }
-        
-        .editor-toolbar.fullscreen {
-            background-color: var(--vscode-editor-background) !important;
-        }
-        
-        .editor-toolbar button {
-            color: var(--vscode-foreground) !important;
-        }
-        
-        .editor-toolbar button:hover,
-        .editor-toolbar button.active {
-            background-color: var(--vscode-list-hoverBackground) !important;
-            border-color: var(--vscode-panel-border) !important;
-        }
-        
-        .editor-toolbar.disabled-for-preview button:not(.no-disable) {
-            opacity: 0.4;
-        }
-        
-        .editor-toolbar i {
-            color: var(--vscode-foreground) !important;
-        }
-        
-        .editor-toolbar a {
-            color: var(--vscode-foreground) !important;
-        }
-        
-        .CodeMirror-cursor {
-            border-color: var(--vscode-editor-foreground);
-        }
-        
-        .cm-header {
-            color: var(--vscode-symbolIcon-classForeground);
-        }
-        
-        .cm-strong {
-            font-weight: bold;
-        }
-        
-        .cm-em {
-            font-style: italic;
-        }
-        
-        /* Preview pane styling */
-        .editor-preview,
-        .editor-preview-side {
-            background-color: var(--vscode-editor-background) !important;
-            color: var(--vscode-editor-foreground) !important;
-            border: 1px solid var(--vscode-panel-border) !important;
-        }
-        
-        .editor-preview h1,
-        .editor-preview h2,
-        .editor-preview h3,
-        .editor-preview h4,
-        .editor-preview h5,
-        .editor-preview h6,
-        .editor-preview-side h1,
-        .editor-preview-side h2,
-        .editor-preview-side h3,
-        .editor-preview-side h4,
-        .editor-preview-side h5,
-        .editor-preview-side h6 {
-            color: var(--vscode-editor-foreground);
-        }
-        
-        .editor-preview a,
-        .editor-preview-side a {
-            color: var(--vscode-textLink-foreground);
-        }
-        
-        .editor-preview code,
-        .editor-preview-side code {
-            background-color: var(--vscode-textCodeBlock-background);
-            color: var(--vscode-editor-foreground);
-        }
-        
-        .editor-preview pre,
-        .editor-preview-side pre {
-            background-color: var(--vscode-textCodeBlock-background);
-            border: 1px solid var(--vscode-panel-border);
-        }
-        
-        .editor-preview blockquote,
-        .editor-preview-side blockquote {
-            border-left-color: var(--vscode-panel-border);
-            color: var(--vscode-descriptionForeground);
-        }
-        
-        .editor-preview table,
-        .editor-preview-side table {
-            border-color: var(--vscode-panel-border);
-        }
-        
-        .editor-preview th,
-        .editor-preview td,
-        .editor-preview-side th,
-        .editor-preview-side td {
-            border-color: var(--vscode-panel-border);
-        }
-        
-        .button-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 15px 20px;
-            background-color: var(--vscode-editor-background);
-            border-top: 1px solid var(--vscode-panel-border);
-            display: flex;
-            gap: 10px;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .last-saved {
-            color: var(--vscode-descriptionForeground);
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .button-bar button {
-            padding: 8px 16px;
-            border-radius: 2px;
-            border: 1px solid var(--vscode-button-border);
-            background-color: var(--vscode-button-background);
-            color: var(--vscode-button-foreground);
-            cursor: pointer;
-            font-size: 13px;
-            font-family: inherit;
-        }
-        
-        .button-bar button:hover {
-            background-color: var(--vscode-button-hoverBackground);
-        }
-        
-        .button-bar button:active {
-            opacity: 0.8;
-        }
-        
-        #save-publish-btn {
-            background-color: var(--vscode-button-secondaryBackground);
-            color: var(--vscode-button-secondaryForeground);
-        }
-        
-        #save-publish-btn:hover {
-            background-color: var(--vscode-button-secondaryHoverBackground);
-        }
-        
-        #cancel-btn {
-            background-color: transparent;
-            border-color: var(--vscode-button-border);
-        }
-        
-        #wysiwyg-btn {
-            display: none; /* Hide WYSIWYG button since EasyMDE is always WYSIWYG */
-        }
-        
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 18px;
-            color: var(--vscode-foreground);
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          onerror="handleResourceError('Font Awesome', 'style')">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css"
+          onerror="handleResourceError('EasyMDE CSS', 'style')">
+    <link rel="stylesheet" href="{{editorCssPath}}">
 </head>
-<body>
-    <div id="loading" class="loading" style="display: none;">Loading Editor...</div>
+<body data-theme="{{theme}}">
+    <div id="loading" class="loading">Loading Editor...</div>
     
     <div id="editor-container">
         <textarea id="markdown-textarea">{{initialContent}}</textarea>
@@ -236,127 +34,32 @@
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
     <script>
-        (function() {
-            const vscode = acquireVsCodeApi();
-            const textarea = document.getElementById('markdown-textarea');
-            const theme = '{{theme}}'; // Theme passed from extension
-            let isDirty = false;
-            
-            
-            // Initialize EasyMDE
-            const easyMDE = new EasyMDE({
-                element: textarea,
-                autofocus: true,
-                autosave: {
-                    enabled: false
-                },
-                spellChecker: false,
-                status: ['lines', 'words', 'cursor'],
-                toolbar: [
-                    'bold', 'italic', 'heading', '|',
-                    'quote', 'unordered-list', 'ordered-list', '|',
-                    'link', 'image', 'code', '|',
-                    'preview', 'side-by-side', 'fullscreen', '|',
-                    'guide'
-                ],
-                shortcuts: {
-                    toggleFullScreen: null // Disable F11
-                }
-            });
-            
-            // Initialize state
-            const previousState = vscode.getState();
-            if (previousState && previousState.content) {
-                easyMDE.value(previousState.content);
-                isDirty = previousState.isDirty || false;
-            }
-            
-            // Track changes
-            easyMDE.codemirror.on('change', function() {
-                isDirty = true;
-                vscode.setState({ 
-                    content: easyMDE.value(),
-                    isDirty: true 
-                });
-            });
-            
-            // Handle Ctrl+S to save
-            easyMDE.codemirror.on('keydown', function(cm, event) {
-                if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-                    event.preventDefault();
-                    document.getElementById('save-btn').click();
-                }
-            });
-            
-            // Function to update last saved timestamp
-            function updateLastSaved() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true 
-                });
-                document.getElementById('last-saved').textContent = `Last saved: ${timeString}`;
-            }
-            
-            // Save button handler
-            document.getElementById('save-btn').addEventListener('click', function() {
-                const content = easyMDE.value();
-                vscode.postMessage({
-                    command: 'save',
-                    content: content
-                });
-                isDirty = false;
-                vscode.setState({ content: content, isDirty: false });
-                updateLastSaved();
-            });
-            
-            // Save and close button handler
-            document.getElementById('save-close-btn').addEventListener('click', function() {
-                const content = easyMDE.value();
-                vscode.postMessage({
-                    command: 'saveAndClose',
-                    content: content
-                });
-            });
-            
-            // Save and publish button handler
-            document.getElementById('save-publish-btn').addEventListener('click', function() {
-                const content = easyMDE.value();
-                vscode.postMessage({
-                    command: 'saveAndPublish',
-                    content: content
-                });
-                updateLastSaved();
-            });
-            
-            // Cancel button handler - no confirmation, just close
-            document.getElementById('cancel-btn').addEventListener('click', function() {
-                vscode.postMessage({ command: 'cancel' });
-            });
-            
-            // Handle messages from extension
-            window.addEventListener('message', function(event) {
-                const message = event.data;
-                switch (message.command) {
-                    case 'updateContent':
-                        easyMDE.value(message.content);
-                        vscode.setState({ content: message.content, isDirty: false });
-                        isDirty = false;
-                        break;
-                        
-                    case 'focusEditor':
-                        easyMDE.codemirror.focus();
-                        break;
-                }
-            });
-            
-            // Focus editor on load
-            easyMDE.codemirror.focus();
-        })();
+        // Error handling for CDN resource loading failures
+        let resourceErrors = [];
+        
+        function handleResourceError(resourceName, type) {
+            resourceErrors.push(resourceName);
+            showError('Failed to load ' + resourceName + '. Please check your internet connection and try again.');
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = 
+                '<div class="error-icon">⚠️</div>' +
+                '<div class="error-text">' +
+                '<strong>Editor Loading Error</strong>' +
+                '<p>' + message + '</p>' +
+                '<button onclick="window.location.reload()">Retry</button>' +
+                '</div>';
+            document.body.innerHTML = '';
+            document.body.appendChild(errorDiv);
+        }
     </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"
+            onerror="handleResourceError('EasyMDE', 'script')"></script>
+    <script src="{{editorJsPath}}"></script>
 </body>
 </html>

@@ -179,10 +179,20 @@ export class EditorManager {
         const templatePath = path.join(this.context.extensionPath, 'webview', 'markdown-editor.html');
         let html = fs.readFileSync(templatePath, 'utf8');
         
+        // Get URIs for external resources
+        const editorCssUri = this.panel.webview.asWebviewUri(
+            vscode.Uri.file(path.join(this.context.extensionPath, 'webview', 'markdown-editor.css'))
+        );
+        const editorJsUri = this.panel.webview.asWebviewUri(
+            vscode.Uri.file(path.join(this.context.extensionPath, 'webview', 'markdown-editor.js'))
+        );
+        
         // Replace placeholders
         html = html.replace(/{{cspSource}}/g, this.panel.webview.cspSource);
         html = html.replace('{{initialContent}}', this.escapeHtml(markdownContent));
         html = html.replace('{{theme}}', theme);
+        html = html.replace('{{editorCssPath}}', editorCssUri.toString());
+        html = html.replace('{{editorJsPath}}', editorJsUri.toString());
         
         return html;
     }

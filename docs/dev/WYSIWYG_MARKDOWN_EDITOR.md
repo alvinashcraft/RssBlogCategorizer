@@ -23,12 +23,32 @@ This document describes the implementation of the EasyMDE-based WYSIWYG editor f
 
 A new webview HTML file that provides:
 
-- A textarea for direct Markdown editing
-- Integration with StackEdit.js for WYSIWYG editing via iframe
-- Button controls: WYSIWYG Edit, Save, Save & Close, Save & Publish, and Cancel
+- Minimal HTML structure with placeholders for dynamic content
+- Links to external CSS and JavaScript files (no inline code for CSP compliance)
+- Error handling for CDN resource loading failures
+- Button controls: Save, Save & Close, Save & Publish, and Cancel
+- VS Code theme integration via data attribute
+
+#### `/webview/markdown-editor.css`
+
+External stylesheet containing:
+
+- Complete editor styling using VS Code CSS variables
+- Dark mode and light mode support
+- Toolbar, preview pane, and button bar styling
+- Error message styling for CDN failures
+- Responsive layout adjustments
+
+#### `/webview/markdown-editor.js`
+
+External JavaScript file containing:
+
+- EasyMDE initialization and configuration
 - State management for content and dirty tracking
-- Last saved timestamp display
-- VS Code theme integration
+- Event handlers for save operations and keyboard shortcuts
+- VS Code API message passing
+- Error handling for initialization failures
+- Last saved timestamp management
 
 **Key Features:**
 
@@ -113,10 +133,14 @@ A new webview HTML file that provides:
    - CSS variables (--vscode-*) applied throughout for consistent theming
    - Custom CSS ensures dark mode for editor, toolbar, and preview pane
 5. **Content Security Policy**: Configured to allow:
-   - Script loading from cdn.jsdelivr.net (EasyMDE)
-   - Style loading from cdnjs.cloudflare.com (Font Awesome)
-   - VS Code webview resources
-6. **Save Handling**:
+   - Script loading from cdn.jsdelivr.net (EasyMDE) and webview resources
+   - Style loading from cdnjs.cloudflare.com (Font Awesome) and webview resources
+   - **No 'unsafe-inline'**: All scripts and styles are external files for enhanced security
+6. **Error Handling**:
+   - CDN resource loading failures are detected via onerror handlers
+   - User-friendly error messages displayed if EasyMDE or Font Awesome fail to load
+   - Retry button allows users to reload after network issues
+7. **Save Handling**:
    - Markdown files: Full content replacement
    - HTML files: Preserves document structure, replaces body content only
 
@@ -130,6 +154,8 @@ A new webview HTML file that provides:
 6. **Theme Consistency**: Uses VS Code CSS variables throughout for perfect integration
 7. **Professional Grade**: EasyMDE is a mature, actively maintained Markdown editor
 8. **Rich Toolbar**: Font Awesome icons provide clear, scalable toolbar buttons
+9. **Enhanced Security**: No 'unsafe-inline' CSP directives, all scripts/styles are external
+10. **Robust Error Handling**: Graceful handling of CDN failures with user-friendly error messages
 
 ## Testing
 
@@ -147,6 +173,7 @@ A new webview HTML file that provides:
 10. Verify content updates in original file
 11. Test Save & Close and Save & Publish
 12. Test Cancel button
+13. (Optional) Test error handling by blocking CDN domains in network settings
 
 ### Test File
 
@@ -177,9 +204,12 @@ Potential improvements for future versions:
 - EasyMDE loads from `https://cdn.jsdelivr.net` (trusted CDN)
 - Font Awesome loads from `https://cdnjs.cloudflare.com` (trusted CDN)
 - Content Security Policy restricts allowed domains
+- **No 'unsafe-inline' directives**: All scripts and styles are external files served through webview
+- CSP only allows specific CDN sources, preventing XSS attacks
 - No user credentials or sensitive data sent externally
 - Content remains local to VS Code webview
 - No cross-origin iframes (unlike previous StackEdit implementation)
+- Error handling prevents silent failures from compromising user experience
 
 ## Compatibility
 
