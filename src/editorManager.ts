@@ -89,7 +89,6 @@ export class EditorManager {
                         break;
                         
                     case 'cancel':
-                        console.log('Handling cancel - disposing panel');
                         if (this.resolvePromise) {
                             this.resolvePromise(undefined);
                             this.resolvePromise = undefined;
