@@ -149,7 +149,7 @@ After exporting to HTML, you can optionally edit your blog post content using th
 
 **Note on Spellcheck**: Advanced spellcheck features (red underlines, suggestions) are not currently available as TinyMCE removed the free spellcheck plugin in version 6.0. The editor relies on your browser's native spellcheck functionality. Enhanced spellcheck is not on the roadmap due to this limitation.
 
-#### Markdown Editor (StackEdit)
+#### Markdown Editor (EasyMDE)
 
 For Markdown files, the extension provides a dual-mode editor with both text-based and WYSIWYG editing:
 
@@ -161,7 +161,7 @@ For Markdown files, the extension provides a dual-mode editor with both text-bas
 **Editor Features:**
 
 - **Dual Editing Modes**: Switch between direct Markdown editing and WYSIWYG
-- **StackEdit Integration**: Professional-grade Markdown editor with live preview
+- **EasyMDE Integration**: Professional-grade Markdown editor with live preview and dark mode support
 - **Rich Formatting**: Supports tables, code blocks, lists, links, and more
 - **Keyboard Shortcuts**: Ctrl+S (Cmd+S on Mac) to save
 - **Theme Consistency**: Inherits VS Code theme colors
@@ -169,7 +169,7 @@ For Markdown files, the extension provides a dual-mode editor with both text-bas
 **Workflow:**
 
 1. Open the editor for your HTML or Markdown file
-1. Edit your content visually in the WYSIWYG editor (for Markdown, click "WYSIWYG Edit" to open StackEdit)
+1. Edit your content visually in the WYSIWYG editor (for Markdown, EasyMDE provides live preview side-by-side)
 1. Click "Save" to update the file
 1. Click "Save & Publish" to save and proceed to WordPress publishing
 1. Click "Cancel" to close without saving (with confirmation if changes exist)
@@ -291,14 +291,14 @@ See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 | `Dev Feed Curator: Set WordPress Credentials` | Securely configure WordPress publishing credentials |
 | `Dev Feed Curator: Publish to WordPress` | Publish HTML file to WordPress blog |
 | `Dev Feed Curator: Open HTML in WYSIWYG Editor` | Open HTML file in TinyMCE WYSIWYG editor |
-| `Dev Feed Curator: Open Markdown in WYSIWYG Editor` | Open Markdown file in StackEdit-based WYSIWYG editor |
+| `Dev Feed Curator: Open Markdown in WYSIWYG Editor` | Open Markdown file in EasyMDE-based WYSIWYG editor |
 
 All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.
 
 ## Documentation
 
 - **[Publication Tracking](docs/PUBLICATION_TRACKING.md)** - Detailed guide to publication metadata and duplicate prevention
-- **[WYSIWYG Markdown Editor](docs/dev/WYSIWYG_MARKDOWN_EDITOR.md)** - Technical implementation details of the StackEdit-based Markdown editor
+- **[WYSIWYG Markdown Editor](docs/dev/WYSIWYG_MARKDOWN_EDITOR.md)** - Technical implementation details of the EasyMDE-based Markdown editor
 - **[Development Roadmap](docs/ROADMAP.md)** - Planned features and upcoming enhancements
 - **[Development Guide](docs/dev/DEVELOPMENT.md)** - Development setup, building, and contribution information
 

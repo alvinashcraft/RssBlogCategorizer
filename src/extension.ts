@@ -181,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         const document = activeEditor.document;
         if (!document.fileName.endsWith('.md') && !document.fileName.endsWith('.markdown')) {
-            vscode.window.showErrorMessage('Please open a Markdown file to edit with the StackEdit editor.');
+            vscode.window.showErrorMessage('Please open a Markdown file to edit with the WYSIWYG editor.');
             return;
         }
 

@@ -2,17 +2,20 @@
 
 ## Overview
 
-This document describes the implementation of the StackEdit-based WYSIWYG editor for Markdown files in the Dev Feed Curator extension, added in version 3.x.
+This document describes the implementation of the EasyMDE-based WYSIWYG editor for Markdown files in the Dev Feed Curator extension, added in version 3.x.
 
-## Implementation Date
+## Implementation History
 
-December 9, 2025
+- **Initial Implementation**: December 9, 2025 (StackEdit-based)
+- **Updated to EasyMDE**: December 11, 2025 (replaced StackEdit for better theme control and dark mode support)
 
 ## Changes Made
 
 ### 1. Dependencies
 
-- **Added**: `stackedit-js@1.0.7` npm package for Markdown WYSIWYG editing
+- **Current**: EasyMDE 2.18.0 (loaded from CDN) for Markdown WYSIWYG editing
+- **Current**: Font Awesome 6.4.0 (loaded from CDN) for toolbar icons
+- **Previous**: stackedit-js@1.0.7 (replaced due to dark mode limitations)
 
 ### 2. New Files Created
 
@@ -29,12 +32,13 @@ A new webview HTML file that provides:
 
 **Key Features:**
 
-- Direct textarea editing for quick text-based Markdown editing
-- "WYSIWYG Edit" button opens StackEdit editor in an iframe overlay
-- StackEdit provides rich WYSIWYG editing with live preview
-- Changes from StackEdit automatically sync back to textarea
+- EasyMDE editor with live preview (side-by-side, preview-only, or fullscreen modes)
+- Rich formatting toolbar with Font Awesome icons
+- Dark mode support that matches VS Code theme
+- Auto-focus on editor for immediate typing
 - Ctrl+S / Cmd+S keyboard shortcut for saving
-- Unsaved changes warning on cancel
+- Status bar with line count, word count, and cursor position
+- Automatic list continuation and keyboard shortcuts
 
 ### 3. Modified Files
 
@@ -81,15 +85,14 @@ A new webview HTML file that provides:
 
 1. **Open a Markdown file** (`.md` or `.markdown` extension)
 2. **Click the editor icon** in the VS Code toolbar (or use Command Palette: "Dev Feed Curator: Open Markdown in WYSIWYG Editor")
-3. **Edit directly** in the textarea for quick text changes, OR
-4. **Click "WYSIWYG Edit"** button to open StackEdit's rich editor
-5. **StackEdit provides:**
-   - Live preview alongside editor
-   - Rich formatting toolbar
-   - Table editor
-   - Code block syntax highlighting
-   - And more Markdown editing features
-6. **Changes sync automatically** from StackEdit back to the textarea
+3. **EasyMDE editor opens** with the content ready to edit
+4. **Use the toolbar** for rich formatting:
+   - Bold, italic, heading levels
+   - Links, images, code blocks
+   - Lists (ordered and unordered)
+   - Preview, side-by-side, and fullscreen modes
+5. **Live preview** updates as you type (when enabled)
+6. **Editor automatically matches** your VS Code theme (dark/light)
 7. **Save options:**
    - **Save**: Keep editor open
    - **Save & Close**: Save and close the editor
@@ -100,27 +103,33 @@ A new webview HTML file that provides:
 
 1. **File Detection**: Extension detects `.md` and `.markdown` files
 2. **WebView Creation**: Opens custom webview with markdown-editor.html
-3. **StackEdit Integration**: 
-   - Loads StackEdit.js from CDN (unpkg.com)
-   - Creates Stackedit instance on "WYSIWYG Edit" button click
-   - Opens StackEdit iframe with current content
-   - Listens for `fileChange` events to sync content back
-4. **Content Security Policy**: Configured to allow:
-   - Script loading from unpkg.com CDN
-   - StackEdit iframe from stackedit.io domain
+3. **EasyMDE Integration**:
+   - Loads EasyMDE 2.18.0 from CDN (cdn.jsdelivr.net)
+   - Loads Font Awesome 6.4.0 from CDN (cdnjs.cloudflare.com)
+   - Initializes EasyMDE editor with toolbar, status bar, and preview options
+   - Auto-focuses editor for immediate typing
+4. **Theme Detection**:
+   - VS Code ColorThemeKind API detects dark/light theme
+   - CSS variables (--vscode-*) applied throughout for consistent theming
+   - Custom CSS ensures dark mode for editor, toolbar, and preview pane
+5. **Content Security Policy**: Configured to allow:
+   - Script loading from cdn.jsdelivr.net (EasyMDE)
+   - Style loading from cdnjs.cloudflare.com (Font Awesome)
    - VS Code webview resources
-5. **Save Handling**:
+6. **Save Handling**:
    - Markdown files: Full content replacement
    - HTML files: Preserves document structure, replaces body content only
 
 ## Benefits
 
-1. **Dual Editing Modes**: Users can choose between direct Markdown editing and WYSIWYG
-2. **Familiar Workflow**: Same button pattern as HTML editor
-3. **WordPress Integration**: Save & Publish workflow works for Markdown files
-4. **No Additional Downloads**: Uses CDN-hosted StackEdit for zero bundle size impact
-5. **Theme Consistency**: Inherits VS Code theme colors and styling
-6. **Professional Grade**: StackEdit is a mature, feature-rich Markdown editor
+1. **Live Preview**: Side-by-side editing with real-time preview
+2. **Dark Mode Support**: Fully themed to match VS Code dark/light mode
+3. **Familiar Workflow**: Same save/publish pattern as HTML editor
+4. **WordPress Integration**: Save & Publish workflow works for Markdown files
+5. **No Additional Downloads**: Uses CDN-hosted EasyMDE for zero bundle size impact
+6. **Theme Consistency**: Uses VS Code CSS variables throughout for perfect integration
+7. **Professional Grade**: EasyMDE is a mature, actively maintained Markdown editor
+8. **Rich Toolbar**: Font Awesome icons provide clear, scalable toolbar buttons
 
 ## Testing
 
@@ -129,15 +138,15 @@ A new webview HTML file that provides:
 1. Create or open a Markdown file
 2. Verify editor icon appears in toolbar
 3. Click icon to open editor
-4. Test direct textarea editing
-5. Click "WYSIWYG Edit" button
-6. Verify StackEdit loads and displays content
-7. Make changes in StackEdit
-8. Verify changes sync back to textarea
+4. Verify EasyMDE loads with content
+5. Test editing in the main editor area
+6. Click toolbar buttons to test formatting
+7. Click preview button to test side-by-side mode
+8. Verify dark mode matches VS Code theme
 9. Test Save functionality
 10. Verify content updates in original file
-11. Test Cancel with unsaved changes
-12. Verify confirmation dialog appears
+11. Test Save & Close and Save & Publish
+12. Test Cancel button
 
 ### Test File
 
@@ -154,49 +163,60 @@ Created `test-markdown-editor.md` (excluded from git) with:
 
 Potential improvements for future versions:
 
-1. Support for custom StackEdit configuration
-2. Offline mode with bundled StackEdit
+1. Support for custom EasyMDE configuration (custom toolbar buttons, shortcuts)
+2. Offline mode with bundled EasyMDE instead of CDN
 3. Markdown-to-HTML conversion for WordPress
-4. Image upload integration
-5. Custom CSS styling for preview
+4. Image upload integration with drag-and-drop
+5. Custom CSS styling for preview pane
 6. Markdown linting integration
 7. Auto-save functionality
+8. Spell check support
 
 ## Security Considerations
 
-- StackEdit loads from `https://stackedit.io` (official domain)
+- EasyMDE loads from `https://cdn.jsdelivr.net` (trusted CDN)
+- Font Awesome loads from `https://cdnjs.cloudflare.com` (trusted CDN)
 - Content Security Policy restricts allowed domains
-- No user credentials or sensitive data sent to StackEdit
+- No user credentials or sensitive data sent externally
 - Content remains local to VS Code webview
-- StackEdit.js loaded from trusted CDN (unpkg.com)
+- No cross-origin iframes (unlike previous StackEdit implementation)
 
 ## Compatibility
 
 - **VS Code Version**: 1.75.0 or higher (extension requirement)
-- **StackEdit Version**: 1.0.7
-- **Browser Requirements**: Modern browsers supporting iframe messaging
-- **Operating Systems**: All platforms supported by VS Code
+- **EasyMDE Version**: 2.18.0
+- **Font Awesome Version**: 6.4.0
+- **Browser Requirements**: Modern browsers (Chrome, Firefox, Safari, Edge)
+- **Operating Systems**: All platforms supported by VS Code (Windows, macOS, Linux)
 
 ## Known Limitations
 
-1. Requires internet connection for StackEdit (CDN-hosted)
-2. StackEdit iframe may have slight loading delay
-3. Some advanced StackEdit features may not be exposed
-4. Markdown formatting preferences are StackEdit's defaults
+1. Requires internet connection for EasyMDE and Font Awesome (CDN-hosted)
+2. First load may have slight delay while downloading libraries
+3. Some advanced EasyMDE features may not be configured
+4. Markdown formatting preferences are EasyMDE's defaults
 
 ## References
 
-- [StackEdit.js Documentation](https://benweet.github.io/stackedit.js/)
-- [StackEdit.js GitHub Repository](https://github.com/benweet/stackedit.js)
-- [StackEdit Main Project](https://github.com/benweet/stackedit)
+- [EasyMDE GitHub Repository](https://github.com/Ionaru/easy-markdown-editor)
+- [EasyMDE Documentation](https://github.com/Ionaru/easy-markdown-editor#configuration)
+- [Font Awesome Icons](https://fontawesome.com/)
+- [VS Code Webview API](https://code.visualstudio.com/api/extension-guides/webview)
 
 ## Summary
 
-This implementation successfully extends the Dev Feed Curator extension's WYSIWYG editing capabilities to Markdown files using the StackEdit.js library. The integration provides a seamless editing experience that matches the existing HTML editor workflow while leveraging StackEdit's powerful Markdown editing features.
+This implementation successfully extends the Dev Feed Curator extension's WYSIWYG editing capabilities to Markdown files using the EasyMDE library. The integration provides a seamless editing experience that matches the existing HTML editor workflow while leveraging EasyMDE's powerful Markdown editing features. The switch from StackEdit to EasyMDE was made to support proper dark mode theming and provide better control over the editor's appearance to match VS Code's theme.
 
 ## Dependencies
 
-- **stackedit-js**: ^1.0.7
-  - Repository: https://github.com/benweet/stackedit.js
+- **EasyMDE**: 2.18.0 (CDN)
+  - Repository: <https://github.com/Ionaru/easy-markdown-editor>
+  - CDN: <https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js>
+
+- **Font Awesome**: 6.4.0 (CDN)
+  - Website: <https://fontawesome.com/>
+  - CDN: <https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css>
+
+- **Previous**: stackedit-js ^1.0.7 (replaced on December 11, 2025)
   - Purpose: Provides WYSIWYG Markdown editing via iframe
   - License: MIT
