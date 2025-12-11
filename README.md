@@ -172,7 +172,7 @@ For Markdown files, the extension provides a dual-mode editor with both text-bas
 1. Edit your content visually in the WYSIWYG editor (for Markdown, EasyMDE provides live preview side-by-side)
 1. Click "Save" to update the file
 1. Click "Save & Publish" to save and proceed to WordPress publishing
-1. Click "Cancel" to close without saving (with confirmation if changes exist)
+1. Click "Cancel" to close without saving (no confirmation)
 
 ### Publishing to WordPress
 
