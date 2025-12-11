@@ -2,7 +2,6 @@
 (function() {
     const vscode = acquireVsCodeApi();
     const textarea = document.getElementById('markdown-textarea');
-    const theme = document.body.dataset.theme; // Theme passed from extension
     let isDirty = false;
     
     // Function to display error messages
