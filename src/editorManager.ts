@@ -189,6 +189,10 @@ export class EditorManager {
         
         // Replace placeholders
         html = html.replace(/{{cspSource}}/g, this.panel.webview.cspSource);
+        // Escape HTML for textarea content - this is correct and necessary because the content
+        // is inserted into HTML source between <textarea> tags. The browser automatically unescapes
+        // it when JavaScript reads textarea.value, preserving all markdown syntax including
+        // angle brackets in code blocks, HTML entities, etc.
         html = html.replace('{{initialContent}}', this.escapeHtml(markdownContent));
         html = html.replace('{{theme}}', theme);
         html = html.replace('{{editorCssPath}}', editorCssUri.toString());
