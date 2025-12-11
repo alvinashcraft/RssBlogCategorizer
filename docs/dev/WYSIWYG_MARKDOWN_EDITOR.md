@@ -79,19 +79,20 @@ External JavaScript file containing:
 
 **Changes:**
 
-- Added `openMarkdownEditorCommand` command registration
-- Added command to `context.subscriptions`
-- New command checks for `.md` and `.markdown` file extensions
-- Updated `openWysiwygEditorCommand` to explicitly pass `fileType: 'html'`
+- Updated `openWysiwygEditorCommand` to handle both HTML and Markdown files
+- Command now detects file type based on extension (`.html`, `.md`, `.markdown`)
+- Passes appropriate `fileType` parameter to `editorManager.openEditor()`
+- Provides unified command for all WYSIWYG editing needs
+- Single command reduces maintenance burden and code duplication
 
 #### `/package.json`
 
 **Changes:**
 
-- Added `rssBlogCategorizer.openMarkdownEditor` command definition
-- Updated HTML editor command title for clarity: "Open HTML in WYSIWYG Editor"
-- Added editor toolbar button for Markdown files (`.md` and `.markdown` extensions)
-- Button appears in navigation group when Markdown file is active
+- Updated command title to "Open in WYSIWYG Editor" (handles both HTML and Markdown)
+- Updated editor toolbar button to appear for both HTML and Markdown files
+- Button uses `when` clause: `resourceExtname == .html || resourceExtname == .md || resourceExtname == .markdown`
+- Button appears in navigation group when any supported file type is active
 
 #### `/.gitignore`
 

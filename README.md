@@ -160,7 +160,7 @@ For Markdown files, the extension provides a dual-mode editor with both text-bas
 
 **Editor Features:**
 
-- **Dual Editing Modes**: Switch between direct Markdown editing and WYSIWYG
+- **Live Preview**: Markdown editor with side-by-side live preview
 - **EasyMDE Integration**: Professional-grade Markdown editor with live preview and dark mode support
 - **Rich Formatting**: Supports tables, code blocks, lists, links, and more
 - **Keyboard Shortcuts**: Ctrl+S (Cmd+S on Mac) to save
@@ -169,7 +169,7 @@ For Markdown files, the extension provides a dual-mode editor with both text-bas
 **Workflow:**
 
 1. Open the editor for your HTML or Markdown file
-1. Edit your content visually in the WYSIWYG editor (for Markdown, EasyMDE provides live preview side-by-side)
+1. Edit your content (HTML uses TinyMCE WYSIWYG editor; Markdown uses EasyMDE with live preview)
 1. Click "Save" to update the file
 1. Click "Save & Publish" to save and proceed to WordPress publishing
 1. Click "Cancel" to close without saving (no confirmation)

@@ -8,18 +8,36 @@
     function showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
-        errorDiv.innerHTML = 
-            '<div class="error-icon">⚠️</div>' +
-            '<div class="error-text">' +
-            '<strong>Editor Loading Error</strong>' +
-            '<p>' + message + '</p>' +
-            '<button id="retry-btn">Retry</button>' +
-            '</div>';
+        
+        const errorIcon = document.createElement('div');
+        errorIcon.className = 'error-icon';
+        errorIcon.textContent = '⚠️';
+        
+        const errorText = document.createElement('div');
+        errorText.className = 'error-text';
+        
+        const errorTitle = document.createElement('strong');
+        errorTitle.textContent = 'Editor Loading Error';
+        
+        const errorMessage = document.createElement('p');
+        errorMessage.textContent = message; // Use textContent to prevent XSS
+        
+        const retryButton = document.createElement('button');
+        retryButton.id = 'retry-btn';
+        retryButton.textContent = 'Retry';
+        
+        errorText.appendChild(errorTitle);
+        errorText.appendChild(errorMessage);
+        errorText.appendChild(retryButton);
+        
+        errorDiv.appendChild(errorIcon);
+        errorDiv.appendChild(errorText);
+        
         document.body.innerHTML = '';
         document.body.appendChild(errorDiv);
         
         // Add click handler for retry button
-        document.getElementById('retry-btn').addEventListener('click', function() {
+        retryButton.addEventListener('click', function() {
             window.location.reload();
         });
     }
