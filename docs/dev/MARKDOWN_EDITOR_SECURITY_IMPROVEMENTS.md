@@ -49,12 +49,13 @@ Implemented security and reliability improvements to the markdown editor based o
 ### Modified Files
 
 1. **`webview/markdown-editor.html`**
-   - Removed all inline styles and scripts
-   - Added `onerror` handlers for CDN resources
-   - Updated CSP to remove `'unsafe-inline'`
-   - Added small inline error handling script (necessary for early-stage error detection)
+   - Removed all inline styles and scripts completely
+   - Removed `onerror` handlers (error detection handled in external JS)
+   - Updated CSP to remove `'unsafe-inline'` entirely
+   - Added HTML comment explaining script loading order
    - Added `data-theme` attribute to body for theme detection
    - Linked external CSS and JS files via placeholders
+   - **Result**: Completely clean HTML with no inline code whatsoever
 
 2. **`src/editorManager.ts`**
    - Updated `getMarkdownWebviewContent()` method
@@ -88,12 +89,12 @@ style-src {{cspSource}} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
 ### Error Handling Implementation
 
 1. **CDN Resource Loading**:
-   ```html
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-         onerror="handleResourceError('Font Awesome', 'style')">
-   ```
+   - Error detection occurs in external JS when it executes
+   - Checks if `EasyMDE` is defined before attempting initialization
+   - No `onerror` handlers needed in HTML
 
 2. **EasyMDE Initialization**:
+
    ```javascript
    if (typeof EasyMDE === 'undefined') {
        showError('Failed to load the markdown editor...');
@@ -104,7 +105,7 @@ style-src {{cspSource}} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
 3. **User-Friendly Error Display**:
    - Large, visible error message with icon
    - Clear explanation of the problem
-   - Retry button to reload the editor
+   - Retry button to reload the editor (using event listener, not onclick)
    - Styled using VS Code theme variables
 
 ### External Resource Loading
@@ -150,7 +151,7 @@ The editor now loads three external files through the webview system:
 
 ## Known Limitations
 
-1. **Minimal Inline Script**: A small inline `<script>` block is necessary for early-stage error handling (detecting CDN failures). This is minimal and only contains error display logic.
+1. **CSS Loading Failures**: If Font Awesome or EasyMDE CSS fails to load, the editor will still initialize but may look incorrect. The JS only checks for EasyMDE JavaScript availability, not CSS.
 2. **CDN Dependency**: Still requires internet connection for EasyMDE and Font Awesome (future enhancement could bundle these)
 
 ## Future Enhancements

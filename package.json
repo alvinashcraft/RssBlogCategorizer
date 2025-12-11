@@ -77,13 +77,8 @@
       },
       {
         "command": "rssBlogCategorizer.openWysiwygEditor",
-        "title": "Dev Feed Curator: Open HTML in WYSIWYG Editor",
+        "title": "Dev Feed Curator: Open in WYSIWYG Editor",
         "icon": "$(edit)"
-      },
-      {
-        "command": "rssBlogCategorizer.openMarkdownEditor",
-        "title": "Dev Feed Curator: Open Markdown in WYSIWYG Editor",
-        "icon": "$(markdown)"
       }
     ],
     "menus": {
@@ -122,12 +117,7 @@
       "editor/title": [
         {
           "command": "rssBlogCategorizer.openWysiwygEditor",
-          "when": "resourceExtname == .html",
-          "group": "navigation"
-        },
-        {
-          "command": "rssBlogCategorizer.openMarkdownEditor",
-          "when": "resourceExtname == .md || resourceExtname == .markdown",
+          "when": "resourceExtname == .html || resourceExtname == .md || resourceExtname == .markdown",
           "group": "navigation"
         },
         {

@@ -24,10 +24,10 @@ This document describes the implementation of the EasyMDE-based WYSIWYG editor f
 A new webview HTML file that provides:
 
 - Minimal HTML structure with placeholders for dynamic content
-- Links to external CSS and JavaScript files (no inline code for CSP compliance)
-- Error handling for CDN resource loading failures
+- Links to external CSS and JavaScript files (zero inline code for strict CSP compliance)
 - Button controls: Save, Save & Close, Save & Publish, and Cancel
 - VS Code theme integration via data attribute
+- **Completely clean HTML**: No inline scripts, styles, or event handlers
 
 #### `/webview/markdown-editor.css`
 
@@ -135,11 +135,13 @@ External JavaScript file containing:
 5. **Content Security Policy**: Configured to allow:
    - Script loading from cdn.jsdelivr.net (EasyMDE) and webview resources
    - Style loading from cdnjs.cloudflare.com (Font Awesome) and webview resources
-   - **No 'unsafe-inline'**: All scripts and styles are external files for enhanced security
+   - **No 'unsafe-inline'**: All scripts and styles are in external files for maximum security
+   - **Zero inline code**: HTML file contains no inline scripts or styles whatsoever
 6. **Error Handling**:
-   - CDN resource loading failures are detected via onerror handlers
-   - User-friendly error messages displayed if EasyMDE or Font Awesome fail to load
-   - Retry button allows users to reload after network issues
+   - External JS checks if EasyMDE loaded successfully on initialization
+   - User-friendly error messages displayed if required resources fail to load
+   - Retry button (with event listener) allows users to reload after network issues
+   - Error detection happens in external JS, not inline handlers
 7. **Save Handling**:
    - Markdown files: Full content replacement
    - HTML files: Preserves document structure, replaces body content only

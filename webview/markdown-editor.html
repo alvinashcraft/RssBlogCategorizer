@@ -11,10 +11,8 @@
                    connect-src https://cdn.jsdelivr.net;">;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dew Drop Markdown Editor</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-          onerror="handleResourceError('Font Awesome', 'style')">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css"
-          onerror="handleResourceError('EasyMDE CSS', 'style')">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
     <link rel="stylesheet" href="{{editorCssPath}}">
 </head>
 <body data-theme="{{theme}}">
@@ -34,32 +32,8 @@
         </div>
     </div>
     
-    <script>
-        // Error handling for CDN resource loading failures
-        let resourceErrors = [];
-        
-        function handleResourceError(resourceName, type) {
-            resourceErrors.push(resourceName);
-            showError('Failed to load ' + resourceName + '. Please check your internet connection and try again.');
-        }
-        
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.innerHTML = 
-                '<div class="error-icon">⚠️</div>' +
-                '<div class="error-text">' +
-                '<strong>Editor Loading Error</strong>' +
-                '<p>' + message + '</p>' +
-                '<button onclick="window.location.reload()">Retry</button>' +
-                '</div>';
-            document.body.innerHTML = '';
-            document.body.appendChild(errorDiv);
-        }
-    </script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"
-            onerror="handleResourceError('EasyMDE', 'script')"></script>
+    <!-- Load EasyMDE from CDN, then our editor script which handles initialization and errors -->
+    <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
     <script src="{{editorJsPath}}"></script>
 </body>
 </html>

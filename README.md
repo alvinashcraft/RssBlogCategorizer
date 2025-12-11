@@ -156,7 +156,7 @@ For Markdown files, the extension provides a dual-mode editor with both text-bas
 **Opening the Editor:**
 
 - **From Markdown File**: Open any `.md` or `.markdown` file and click the edit icon (📝) in the toolbar
-- **Command Palette**: Use "Dev Feed Curator: Open Markdown in WYSIWYG Editor"
+- **Command Palette**: Search for WYSIWYG editor commands
 
 **Editor Features:**
 
@@ -290,8 +290,7 @@ See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 | `Dev Feed Curator: Set NewsBlur Credentials` | Securely configure NewsBlur API credentials |
 | `Dev Feed Curator: Set WordPress Credentials` | Securely configure WordPress publishing credentials |
 | `Dev Feed Curator: Publish to WordPress` | Publish HTML file to WordPress blog |
-| `Dev Feed Curator: Open HTML in WYSIWYG Editor` | Open HTML file in TinyMCE WYSIWYG editor |
-| `Dev Feed Curator: Open Markdown in WYSIWYG Editor` | Open Markdown file in EasyMDE-based WYSIWYG editor |
+| `Dev Feed Curator: Open in WYSIWYG Editor` | Open HTML or Markdown file in WYSIWYG editor |
 
 All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.
 

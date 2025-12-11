@@ -5,25 +5,30 @@
     const theme = document.body.dataset.theme; // Theme passed from extension
     let isDirty = false;
     
+    // Function to display error messages
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.innerHTML = 
+            '<div class="error-icon">⚠️</div>' +
+            '<div class="error-text">' +
+            '<strong>Editor Loading Error</strong>' +
+            '<p>' + message + '</p>' +
+            '<button id="retry-btn">Retry</button>' +
+            '</div>';
+        document.body.innerHTML = '';
+        document.body.appendChild(errorDiv);
+        
+        // Add click handler for retry button
+        document.getElementById('retry-btn').addEventListener('click', function() {
+            window.location.reload();
+        });
+    }
+    
     // Check if EasyMDE loaded successfully
     if (typeof EasyMDE === 'undefined') {
         showError('Failed to load the markdown editor. Please check your internet connection and try again.');
         return;
-    }
-    
-    function showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.innerHTML = `
-            <div class="error-icon">⚠️</div>
-            <div class="error-text">
-                <strong>Editor Loading Error</strong>
-                <p>${message}</p>
-                <button onclick="window.location.reload()">Retry</button>
-            </div>
-        `;
-        document.body.innerHTML = '';
-        document.body.appendChild(errorDiv);
     }
     
     // Initialize EasyMDE
@@ -58,13 +63,22 @@
             isDirty = previousState.isDirty || false;
         }
         
-        // Track changes
+        // Track changes with debounced state saving
+        let stateTimeout;
         easyMDE.codemirror.on('change', function() {
             isDirty = true;
-            vscode.setState({ 
-                content: easyMDE.value(),
-                isDirty: true 
-            });
+            
+            // Debounce state saving to avoid performance issues on every keystroke
+            if (stateTimeout) {
+                clearTimeout(stateTimeout);
+            }
+            
+            stateTimeout = setTimeout(function() {
+                vscode.setState({ 
+                    content: easyMDE.value(),
+                    isDirty: true 
+                });
+            }, 500);
         });
         
         // Handle Ctrl+S to save
