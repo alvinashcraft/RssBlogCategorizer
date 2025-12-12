@@ -1,0 +1,269 @@
+/* Markdown Editor Styles - Extracted from inline for CSP compliance */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    padding: 0;
+    margin: 0;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+}
+
+#editor-container {
+    padding: 20px;
+    height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+.EasyMDEContainer {
+    height: 100%;
+}
+
+.EasyMDEContainer .CodeMirror {
+    height: calc(100% - 50px);
+    border: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+}
+
+.editor-toolbar {
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-bottom: none;
+}
+
+.editor-toolbar.fullscreen {
+    background-color: var(--vscode-editor-background) !important;
+}
+
+.editor-toolbar button {
+    color: var(--vscode-foreground) !important;
+}
+
+.editor-toolbar button:hover,
+.editor-toolbar button.active {
+    background-color: var(--vscode-list-hoverBackground) !important;
+    border-color: var(--vscode-panel-border) !important;
+}
+
+.editor-toolbar.disabled-for-preview button:not(.no-disable) {
+    opacity: 0.4;
+}
+
+.editor-toolbar i {
+    color: var(--vscode-foreground) !important;
+}
+
+.editor-toolbar a {
+    color: var(--vscode-foreground) !important;
+}
+
+.CodeMirror-cursor {
+    border-color: var(--vscode-editor-foreground);
+}
+
+.cm-header {
+    color: var(--vscode-symbolIcon-classForeground);
+}
+
+.cm-link {
+    color: var(--vscode-textLink-foreground);
+}
+
+.cm-url {
+    color: var(--vscode-textLink-foreground);
+}
+
+.cm-quote {
+    color: var(--vscode-textPreformat-foreground);
+    font-style: italic;
+}
+
+.cm-comment {
+    color: var(--vscode-descriptionForeground);
+}
+
+.CodeMirror-selected {
+    background-color: var(--vscode-editor-selectionBackground);
+}
+
+.CodeMirror-focused .CodeMirror-selected {
+    background-color: var(--vscode-editor-selectionBackground);
+}
+
+.editor-preview,
+.editor-preview-side {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+}
+
+.editor-preview h1,
+.editor-preview h2,
+.editor-preview h3,
+.editor-preview h4,
+.editor-preview h5,
+.editor-preview h6,
+.editor-preview-side h1,
+.editor-preview-side h2,
+.editor-preview-side h3,
+.editor-preview-side h4,
+.editor-preview-side h5,
+.editor-preview-side h6 {
+    color: var(--vscode-symbolIcon-classForeground);
+}
+
+.editor-preview a,
+.editor-preview-side a {
+    color: var(--vscode-textLink-foreground);
+}
+
+.editor-preview code,
+.editor-preview pre,
+.editor-preview-side code,
+.editor-preview-side pre {
+    background-color: var(--vscode-textCodeBlock-background);
+    color: var(--vscode-editor-foreground);
+}
+
+.editor-preview blockquote,
+.editor-preview-side blockquote {
+    color: var(--vscode-textPreformat-foreground);
+    border-left-color: var(--vscode-panel-border);
+}
+
+.editor-preview table,
+.editor-preview-side table {
+    border-color: var(--vscode-panel-border);
+}
+
+.editor-preview th,
+.editor-preview td,
+.editor-preview-side th,
+.editor-preview-side td {
+    border-color: var(--vscode-panel-border);
+}
+
+.editor-statusbar {
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-statusBar-background);
+    border-top: 1px solid var(--vscode-panel-border);
+}
+
+.button-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: var(--vscode-editor-background);
+    border-top: 1px solid var(--vscode-panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 1000;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.last-saved {
+    color: var(--vscode-descriptionForeground);
+    font-size: 12px;
+}
+
+.button-bar button {
+    padding: 8px 16px;
+    border: 1px solid var(--vscode-button-border);
+    border-radius: 2px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.button-bar button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.button-bar button:active {
+    opacity: 0.8;
+}
+
+#save-publish-btn {
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+}
+
+#save-publish-btn:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+#cancel-btn {
+    background-color: transparent;
+    border-color: var(--vscode-button-border);
+}
+
+#wysiwyg-btn {
+    display: none;
+}
+
+.loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    color: var(--vscode-foreground);
+}
+
+.error-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--vscode-inputValidation-errorBackground);
+    border: 2px solid var(--vscode-inputValidation-errorBorder);
+    border-radius: 6px;
+    padding: 30px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.error-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.error-text {
+    color: var(--vscode-foreground);
+}
+
+.error-text strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.error-text p {
+    margin: 10px 0 20px 0;
+    color: var(--vscode-descriptionForeground);
+}
+
+.error-text button {
+    padding: 8px 24px;
+    border: 1px solid var(--vscode-button-border);
+    border-radius: 2px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.error-text button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}

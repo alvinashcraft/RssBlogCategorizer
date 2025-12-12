@@ -48,6 +48,9 @@ pids
 coverage/
 *.lcov
 
+# Test files
+test-markdown-editor.md
+
 # nyc test coverage
 .nyc_output
 

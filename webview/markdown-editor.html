@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'none'; 
+                   script-src {{cspSource}} https://cdn.jsdelivr.net; 
+                   style-src {{cspSource}} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+                   img-src {{cspSource}} https: data:;
+                   font-src {{cspSource}} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+                   connect-src https://cdn.jsdelivr.net;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dew Drop Markdown Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
+    <link rel="stylesheet" href="{{editorCssPath}}">
+</head>
+<body data-theme="{{theme}}">
+    <div id="loading" class="loading">Loading Editor...</div>
+    
+    <div id="editor-container">
+        <textarea id="markdown-textarea">{{initialContent}}</textarea>
+    </div>
+    
+    <div class="button-bar">
+        <div class="last-saved" id="last-saved"></div>
+        <div class="button-group">
+            <button id="cancel-btn" title="Close without saving">Cancel</button>
+            <button id="save-btn" title="Save changes to file (keep editor open)">Save</button>
+            <button id="save-close-btn" title="Save changes and close editor">Save & Close</button>
+            <button id="save-publish-btn" title="Save and prepare for WordPress publishing">Save & Publish</button>
+        </div>
+    </div>
+    
+    <!-- Load EasyMDE from CDN, then our editor script which handles initialization and errors -->
+    <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
+    <script src="{{editorJsPath}}"></script>
+</body>
+</html>

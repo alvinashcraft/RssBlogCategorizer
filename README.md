@@ -128,13 +128,17 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
 
 ### WYSIWYG Editor
 
+The extension provides built-in WYSIWYG editors for both HTML and Markdown files:
+
+#### HTML Editor (TinyMCE)
+
 After exporting to HTML, you can optionally edit your blog post content using the built-in WYSIWYG editor:
 
 **Opening the Editor:**
 
 - **From Export**: After HTML export, click "Open in Editor" when prompted
 - **From HTML File**: Open any HTML file and click the edit icon (📝) in the toolbar
-- **Command Palette**: Use "Dev Feed Curator: Open in WYSIWYG Editor"
+- **Command Palette**: Use "Dev Feed Curator: Open HTML in WYSIWYG Editor"
 
 **Editor Features:**
 
@@ -145,12 +149,30 @@ After exporting to HTML, you can optionally edit your blog post content using th
 
 **Note on Spellcheck**: Advanced spellcheck features (red underlines, suggestions) are not currently available as TinyMCE removed the free spellcheck plugin in version 6.0. The editor relies on your browser's native spellcheck functionality. Enhanced spellcheck is not on the roadmap due to this limitation.
 
+#### Markdown Editor (EasyMDE)
+
+For Markdown files, the extension provides a dual-mode editor with both text-based and WYSIWYG editing:
+
+**Opening the Editor:**
+
+- **From Markdown File**: Open any `.md` or `.markdown` file and click the edit icon (📝) in the toolbar
+- **Command Palette**: Search for WYSIWYG editor commands
+
+**Editor Features:**
+
+- **Live Preview**: Markdown editor with side-by-side live preview
+- **EasyMDE Integration**: Professional-grade Markdown editor with live preview and dark mode support
+- **Rich Formatting**: Supports tables, code blocks, lists, links, and more
+- **Keyboard Shortcuts**: Ctrl+S (Cmd+S on Mac) to save
+- **Theme Consistency**: Inherits VS Code theme colors
+
 **Workflow:**
 
-1. Edit your content visually in the WYSIWYG editor
-1. Click "Save" to update the HTML file
+1. Open the editor for your HTML or Markdown file
+1. Edit your content (HTML uses TinyMCE WYSIWYG editor; Markdown uses EasyMDE with live preview)
+1. Click "Save" to update the file
 1. Click "Save & Publish" to save and proceed to WordPress publishing
-1. Click "Cancel" to close without saving (with confirmation if changes exist)
+1. Click "Cancel" to close without saving (no confirmation)
 
 ### Publishing to WordPress
 
@@ -268,14 +290,16 @@ See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 | `Dev Feed Curator: Set NewsBlur Credentials` | Securely configure NewsBlur API credentials |
 | `Dev Feed Curator: Set WordPress Credentials` | Securely configure WordPress publishing credentials |
 | `Dev Feed Curator: Publish to WordPress` | Publish HTML file to WordPress blog |
+| `Dev Feed Curator: Open in WYSIWYG Editor` | Open HTML or Markdown file in WYSIWYG editor |
 
 All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.
 
 ## Documentation
 
 - **[Publication Tracking](docs/PUBLICATION_TRACKING.md)** - Detailed guide to publication metadata and duplicate prevention
+- **[WYSIWYG Markdown Editor](docs/dev/WYSIWYG_MARKDOWN_EDITOR.md)** - Technical implementation details of the EasyMDE-based Markdown editor
 - **[Development Roadmap](docs/ROADMAP.md)** - Planned features and upcoming enhancements
-- **[Development Guide](docs/DEVELOPMENT.md)** - Development setup, building, and contribution information
+- **[Development Guide](docs/dev/DEVELOPMENT.md)** - Development setup, building, and contribution information
 
 ## Development
 
