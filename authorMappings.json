@@ -202,6 +202,10 @@
     { "keyword": "patrickbrosset.com", "author": "Patrick Brosset" },
     { "keyword": "blazorhelpwebsite.com", "author": "Michael Washington" },
     { "keyword": "julieyack.com", "author": "Julie Yack" },
+    { "keyword": "jimmynilsson.com", "author": "Jimmy Nilsson" },
+    { "keyword": "peterkellner.net", "author": "Peter Kellner" },
+    { "keyword": "devopsjounal.io", "author": "Rob Bos" },
+    { "keyword": "fsharpforfunandprofit.com", "author": "Scott Wlaschin" },
     { "keyword": "thecsspodcast", "author": "Una Kravets & Bramus Van Damme" }
   ],
   "authorContains": [
