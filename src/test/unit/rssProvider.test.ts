@@ -1,7 +1,7 @@
 import { expect, use } from 'chai';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
-import * as chaiAsPromised from 'chai-as-promised';
+import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
 
 use(sinonChai);
 use(chaiAsPromised);
@@ -580,7 +580,8 @@ describe('RSSBlogProvider', () => {
       expect(children).to.be.an('array');
       expect(children.length).to.equal(1); // Only summary node when no posts
       expect(children[0]).to.have.property('isSummary', true);
-      expect(children[0].label).to.equal('No posts loaded - click refresh to load feeds');
+      const summaryNode = children[0] as any;
+      expect(summaryNode.label).to.equal('No posts loaded - click refresh to load feeds');
     });
 
     it('should return posts as category children', async () => {
@@ -690,7 +691,8 @@ describe('RSSBlogProvider', () => {
       // Should show loading indicator
       expect(childrenDuringLoad).to.have.length(1);
       expect(childrenDuringLoad[0]).to.have.property('isLoadingIndicator', true);
-      expect(childrenDuringLoad[0].label).to.equal('Loading feed data...');
+      const loadingNode = childrenDuringLoad[0] as any;
+      expect(loadingNode.label).to.equal('Loading feed data...');
       
       // Complete the response
       resolveResponse();
@@ -776,14 +778,13 @@ describe('RSSBlogProvider', () => {
       // After error, loading state should be cleared
       const children = await provider.getChildren();
       // Should return empty or default categories, not loading indicator
-      expect(children.every(c => !c.isLoadingIndicator)).to.be.true;
+      expect(children.every((c: any) => !c.isLoadingIndicator)).to.be.true;
     });
 
     it('should create tree item with loading icon for loading indicator', () => {
-      const loadingElement = {
+      const loadingElement: any = {
         label: 'Loading feed data...',
-        isLoadingIndicator: true,
-        collapsibleState: vscode.TreeItemCollapsibleState.None
+        isLoadingIndicator: true
       };
 
       const treeItem = provider.getTreeItem(loadingElement);
@@ -874,7 +875,7 @@ describe('RSSBlogProvider', () => {
       
       // After all refreshes complete, should not be in loading state
       const children = await provider.getChildren();
-      expect(children.every(c => !c.isLoadingIndicator)).to.be.true;
+      expect(children.every((c: any) => !c.isLoadingIndicator)).to.be.true;
     });
   });
 });

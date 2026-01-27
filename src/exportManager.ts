@@ -33,13 +33,27 @@ export class ExportManager {
     private static readonly MORE_LINKS_CATEGORY = "More Link Collections";
     
     async exportAsMarkdown(posts: BlogPost[]): Promise<void> {
-        const content = await this.generateMarkdownContent(posts);
-        await this.saveExport(content, 'markdown', 'md');
+        try {
+            const content = await this.generateMarkdownContent(posts);
+            await this.saveExport(content, 'markdown', 'md');
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Failed to export as Markdown:', error);
+            vscode.window.showErrorMessage(`Failed to export Markdown: ${errorMessage}`);
+            throw error; // Re-throw to let caller handle if needed
+        }
     }
 
     async exportAsHtml(posts: BlogPost[]): Promise<void> {
-        const content = await this.generateHtmlContent(posts);
-        await this.saveExport(content, 'html', 'html');
+        try {
+            const content = await this.generateHtmlContent(posts);
+            await this.saveExport(content, 'html', 'html');
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Failed to export as HTML:', error);
+            vscode.window.showErrorMessage(`Failed to export HTML: ${errorMessage}`);
+            throw error; // Re-throw to let caller handle if needed
+        }
     }
 
     /**
@@ -124,6 +138,10 @@ export class ExportManager {
      */
     async markAsPublished(filePath: string, wordpressPostId: number): Promise<void> {
         try {
+            if (!wordpressPostId || wordpressPostId <= 0) {
+                throw new Error('Invalid WordPress post ID');
+            }
+            
             const content = fs.readFileSync(filePath, 'utf8');
             const updatedContent = this.updatePublicationMetadata(content, {
                 status: 'published',
@@ -132,9 +150,11 @@ export class ExportManager {
             });
             
             fs.writeFileSync(filePath, updatedContent, 'utf8');
-            console.log(`Updated publication metadata for ${filePath} with WordPress post ID: ${wordpressPostId}`);
+            console.log(`✅ Updated publication metadata for ${filePath} with WordPress post ID: ${wordpressPostId}`);
         } catch (error) {
-            console.error(`Failed to update publication metadata for ${filePath}:`, error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error(`❌ Failed to update publication metadata for ${filePath}:`, errorMessage);
+            throw new Error(`Failed to mark as published: ${errorMessage}`);
         }
     }
 

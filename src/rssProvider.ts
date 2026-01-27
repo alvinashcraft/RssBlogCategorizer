@@ -35,6 +35,18 @@ export interface CategoryNode {
     collapsibleState: vscode.TreeItemCollapsibleState;
 }
 
+interface LoadingIndicatorNode {
+    isLoadingIndicator: boolean;
+    label: string;
+}
+
+interface SummaryNode {
+    isSummary: boolean;
+    label: string;
+}
+
+type TreeElement = CategoryNode | BlogPost | LoadingIndicatorNode | SummaryNode;
+
 interface CategoryDefinition {
     urlKeywords?: string[];
     titleKeywords?: string[];
@@ -76,6 +88,19 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private static readonly MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
     constructor(private context: vscode.ExtensionContext) {}
+
+    // Type guards for TreeElement discrimination
+    private isLoadingIndicator(element: TreeElement): element is LoadingIndicatorNode {
+        return 'isLoadingIndicator' in element && (element as LoadingIndicatorNode).isLoadingIndicator === true;
+    }
+
+    private isSummaryNode(element: TreeElement): element is SummaryNode {
+        return 'isSummary' in element && (element as SummaryNode).isSummary === true;
+    }
+
+    private isCategoryNode(element: TreeElement): element is CategoryNode {
+        return 'posts' in element && Array.isArray((element as CategoryNode).posts);
+    }
 
     private async getLastDewDropDate(): Promise<Date | null> {
         try {
@@ -237,20 +262,20 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         }
     }
 
-    getTreeItem(element: any): vscode.TreeItem {
-        if (element.isLoadingIndicator) {
+    getTreeItem(element: TreeElement): vscode.TreeItem {
+        if (this.isLoadingIndicator(element)) {
             // Loading indicator node
             const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.None);
             item.iconPath = new vscode.ThemeIcon('loading~spin');
             item.contextValue = 'loading';
             return item;
-        } else if (element.isSummary) {
+        } else if (this.isSummaryNode(element)) {
             // Summary node
             const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.None);
             item.iconPath = new vscode.ThemeIcon('info');
             item.contextValue = 'summary';
             return item;
-        } else if (element.posts) {
+        } else if (this.isCategoryNode(element)) {
             // Category node
             const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.Expanded);
             item.tooltip = `${element.posts.length} posts`;
@@ -258,8 +283,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             return item;
         } else {
             // Blog post node
-            const item = new vscode.TreeItem(element.title, vscode.TreeItemCollapsibleState.None);
-            item.tooltip = element.description;
+            const post = element as BlogPost;
+            const item = new vscode.TreeItem(post.title, vscode.TreeItemCollapsibleState.None);
+            item.tooltip = post.description;
             
             // Display shared date for NewsBlur posts, otherwise fall back to source
             if (element.source === 'NewsBlur Shared Stories' && element.pubDate) {
@@ -304,15 +330,15 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         }
     }
 
-    getChildren(element?: any): Thenable<any[]> {
+    getChildren(element?: TreeElement): Thenable<TreeElement[]> {
         if (!element) {
             // Show loading indicator if currently loading
             if (this.isLoading) {
-                return Promise.resolve([{
+                const loadingNode: LoadingIndicatorNode = {
                     label: 'Loading feed data...',
-                    isLoadingIndicator: true,
-                    collapsibleState: vscode.TreeItemCollapsibleState.None
-                }]);
+                    isLoadingIndicator: true
+                };
+                return Promise.resolve([loadingNode]);
             }
             
             // Create summary node
@@ -320,10 +346,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const summaryLabel = totalPosts === 0 
                 ? 'No posts loaded - click refresh to load feeds'
                 : `Total: ${totalPosts} post${totalPosts !== 1 ? 's' : ''} fetched and categorized`;
-            const summaryNode = {
+            const summaryNode: SummaryNode = {
                 label: summaryLabel,
-                isSummary: true,
-                collapsibleState: vscode.TreeItemCollapsibleState.None
+                isSummary: true
             };
             
             // Return categories
@@ -338,7 +363,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             
             // Return summary node first, then categories
             return Promise.resolve([summaryNode, ...categoryNodes]);
-        } else if (element.posts) {
+        } else if (this.isCategoryNode(element)) {
             // Return posts in category
             return Promise.resolve(element.posts);
         }
@@ -351,15 +376,33 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     async setFeedUrl(feedUrl: string): Promise<void> {
         // Validate URL before saving
-        try {
-            new URL(feedUrl);
-        } catch (error) {
-            throw new Error('Invalid URL format');
-        }
+        this.validateUrl(feedUrl);
         
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         await config.update('feedUrl', feedUrl, vscode.ConfigurationTarget.Global);
         // Refresh will be called by the command handler
+    }
+
+    /**
+     * Validates that a string is a properly formatted URL
+     * @param url The URL string to validate
+     * @throws Error if the URL is invalid
+     */
+    private validateUrl(url: string): void {
+        if (!url || typeof url !== 'string') {
+            throw new Error('URL must be a non-empty string');
+        }
+        try {
+            const parsedUrl = new URL(url);
+            if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+                throw new Error('URL must use HTTP or HTTPS protocol');
+            }
+        } catch (error) {
+            if (error instanceof Error && error.message.includes('protocol')) {
+                throw error;
+            }
+            throw new Error('Invalid URL format. Please provide a valid URL (e.g., https://example.com/feed.xml)');
+        }
     }
 
     private async getNewsblurPassword(): Promise<string | undefined> {
@@ -475,7 +518,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             this.posts.push(...filteredPosts);
             console.log(`Total posts after loading: ${this.posts.length}`);
         } catch (error) {
-            console.error('Error loading feed:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Error loading feed:', errorMessage, error);
+            vscode.window.showErrorMessage(`Failed to load RSS feed: ${errorMessage}`);
+            // Don't throw - allow the tree view to show the error state
         }
 
         this.categorizePosts();
@@ -491,7 +537,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             return [];
         }
         
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const options = {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -502,7 +548,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 // Handle redirects
                 if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
                     console.log(`Redirect ${redirectCount + 1}/${MAX_REDIRECTS}: ${feedUrl} -> ${response.headers.location}`);
-                    return this.fetchFeed(response.headers.location, redirectCount + 1).then(resolve).catch(() => resolve([]));
+                    this.fetchFeed(response.headers.location, redirectCount + 1).then(resolve).catch(() => resolve([]));
+                    return;
                 }
 
                 // Check for successful response
@@ -588,7 +635,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     const redirectUrl = response.headers.location;
                     if (redirectUrl.match(RSSBlogProvider.NEWSBLUR_API_PATTERN)) {
                         // Use the redirect URL directly without conversion round-trip
-                        return this.fetchNewsBlurApiUrl(redirectUrl, originalFeedUrl, recordCount, username, password, redirectCount + 1, retryCount).then(resolve).catch(() => resolve([]));
+                        this.fetchNewsBlurApiUrl(redirectUrl, originalFeedUrl, recordCount, username, password, redirectCount + 1, retryCount).then(resolve).catch(() => resolve([]));
+                        return;
                     } else {
                         console.error(`Redirected to non-NewsBlur API URL: ${redirectUrl}`);
                         resolve([]);
@@ -599,7 +647,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 // Check for 502 Bad Gateway and retry once
                 if (response.statusCode === 502 && retryCount < MAX_RETRIES) {
                     console.log(`Received 502 Bad Gateway from NewsBlur API, retrying (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
-                    return this.fetchNewsBlurApiUrl(apiUrl, originalFeedUrl, recordCount, username, password, redirectCount, retryCount + 1).then(resolve).catch(() => resolve([]));
+                    this.fetchNewsBlurApiUrl(apiUrl, originalFeedUrl, recordCount, username, password, redirectCount, retryCount + 1).then(resolve).catch(() => resolve([]));
+                    return;
                 }
 
                 // Check for successful response
@@ -634,7 +683,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     }
 
 
-    private parseNewsBlurApiResponse(apiResponse: NewsBlurApiResponse, feedUrl: string): BlogPost[] {
+    private parseNewsBlurApiResponse(apiResponse: NewsBlurApiResponse, _feedUrl: string): BlogPost[] {
         const posts: BlogPost[] = [];
         const seenLinks = new Set<string>(); // Track duplicate links
         
@@ -866,11 +915,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
      * "Web Development" keywords and "Web Development" appears first in the configuration.
      * 
      * @param title - The title of the blog post.
-     * @param description - The description of the blog post (currently unused).
+     * @param _description - The description of the blog post (currently unused, prefixed with underscore).
      * @param url - The URL of the blog post (optional, defaults to empty string for backwards compatibility).
      * @returns The matched category name, or the default category if no match is found.
      */
-    private categorizePost(title: string, description: string, url: string = ''): string {
+    private categorizePost(title: string, _description: string, url: string = ''): string {
         const titleContent = title.toLowerCase();
         const urlLower = url.toLowerCase();
         

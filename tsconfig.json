@@ -8,7 +8,11 @@
     ],
     "sourceMap": true,
     "rootDir": "src",
-    "strict": true
+    "strict": true,
+    /* Additional type checking for source code only */
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
