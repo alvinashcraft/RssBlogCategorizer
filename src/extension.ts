@@ -22,17 +22,43 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Register commands
     const refreshCommand = vscode.commands.registerCommand('rssBlogCategorizer.refresh', async () => {
-        await provider.refresh();
+        try {
+            await provider.refresh();
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            vscode.window.showErrorMessage(`Failed to refresh feeds: ${errorMessage}`);
+            console.error('Refresh command failed:', error);
+        }
     });
 
     const exportMarkdownCommand = vscode.commands.registerCommand('rssBlogCategorizer.exportMarkdown', async () => {
-        const posts = await provider.getAllPosts();
-        await exportManager.exportAsMarkdown(posts);
+        try {
+            const posts = await provider.getAllPosts();
+            if (posts.length === 0) {
+                vscode.window.showWarningMessage('No posts available to export. Please refresh the feed first.');
+                return;
+            }
+            await exportManager.exportAsMarkdown(posts);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            vscode.window.showErrorMessage(`Failed to export Markdown: ${errorMessage}`);
+            console.error('Markdown export failed:', error);
+        }
     });
 
     const exportHtmlCommand = vscode.commands.registerCommand('rssBlogCategorizer.exportHtml', async () => {
-        const posts = await provider.getAllPosts();
-        await exportManager.exportAsHtml(posts);
+        try {
+            const posts = await provider.getAllPosts();
+            if (posts.length === 0) {
+                vscode.window.showWarningMessage('No posts available to export. Please refresh the feed first.');
+                return;
+            }
+            await exportManager.exportAsHtml(posts);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            vscode.window.showErrorMessage(`Failed to export HTML: ${errorMessage}`);
+            console.error('HTML export failed:', error);
+        }
     });
 
     const openPostCommand = vscode.commands.registerCommand('rssBlogCategorizer.openPost', (post: any) => {
@@ -42,23 +68,36 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const setFeedCommand = vscode.commands.registerCommand('rssBlogCategorizer.addFeed', async () => {
-        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
-        const currentFeedUrl = config.get<string>('feedUrl') || 'https://dev.to/feed';
-        
-        const feedUrl = await vscode.window.showInputBox({
-            prompt: 'Set RSS feed URL',
-            placeHolder: 'https://example.com/feed.xml',
-            value: currentFeedUrl
-        });
-        
-        if (feedUrl && feedUrl !== currentFeedUrl) {
-            try {
+        try {
+            const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+            const currentFeedUrl = config.get<string>('feedUrl') || 'https://dev.to/feed';
+            
+            const feedUrl = await vscode.window.showInputBox({
+                prompt: 'Set RSS feed URL',
+                placeHolder: 'https://example.com/feed.xml',
+                value: currentFeedUrl,
+                validateInput: (value) => {
+                    if (!value) {
+                        return 'URL cannot be empty';
+                    }
+                    try {
+                        new URL(value);
+                        return null; // Valid URL
+                    } catch {
+                        return 'Please enter a valid URL (e.g., https://example.com/feed.xml)';
+                    }
+                }
+            });
+            
+            if (feedUrl && feedUrl !== currentFeedUrl) {
                 await provider.setFeedUrl(feedUrl);
                 await provider.refresh();
                 vscode.window.showInformationMessage(`RSS feed updated to: ${feedUrl}`);
-            } catch (error) {
-                vscode.window.showErrorMessage(`Invalid URL format: ${feedUrl}`);
             }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            vscode.window.showErrorMessage(`Failed to update feed URL: ${errorMessage}`);
+            console.error('Set feed URL failed:', error);
         }
     });
 
@@ -224,6 +263,17 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // Create proper disposable for refresh interval cleanup
+    const refreshIntervalDisposable: vscode.Disposable = {
+        dispose: () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = undefined;
+                console.log('Auto-refresh interval cleared on extension deactivation');
+            }
+        }
+    };
+
     context.subscriptions.push(
         refreshCommand,
         exportMarkdownCommand,
@@ -237,7 +287,7 @@ export function activate(context: vscode.ExtensionContext) {
         openWysiwygEditorCommand,
         treeView,
         configChangeHandler,
-        { dispose: () => { if (refreshInterval) clearInterval(refreshInterval); } }
+        refreshIntervalDisposable
     );
 
     // No initial refresh - manual only unless auto-refresh is enabled

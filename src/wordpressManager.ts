@@ -279,7 +279,14 @@ Would you like to open your WordPress admin panel now?
     /**
      * Make REST API request to WordPress
      */
-    private async makeRestApiRequest(blogUrl: string, endpoint: string, method: string = 'GET', data?: any, username?: string, password?: string): Promise<any> {
+    private async makeRestApiRequest(
+        blogUrl: string, 
+        endpoint: string, 
+        method: string = 'GET', 
+        data?: Record<string, any>, 
+        username?: string, 
+        password?: string
+    ): Promise<any> {
         return new Promise((resolve, reject) => {
             const url = new URL(`/wp-json/wp/v2/${endpoint}`, blogUrl);
             
@@ -610,6 +617,14 @@ Would you like to open your WordPress admin panel now?
      * Publish post to WordPress using REST API
      */
     async publishPost(post: WordPressPost): Promise<{ success: boolean; postId?: number }> {
+        // Validate input
+        if (!post || !post.title || !post.content) {
+            const error = 'Invalid post data: title and content are required';
+            console.error(error);
+            vscode.window.showErrorMessage(error);
+            return { success: false };
+        }
+
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const blogUrl = config.get<string>('wordpressBlogUrl');
         const username = config.get<string>('wordpressUsername');
@@ -621,7 +636,7 @@ Would you like to open your WordPress admin panel now?
         }
 
         try {
-            const postData: any = {
+            const postData: Record<string, any> = {
                 title: post.title,
                 content: post.content,
                 status: post.status || 'draft'
@@ -688,7 +703,9 @@ Would you like to open your WordPress admin panel now?
                 return { success: false };
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to publish post: ${error}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Failed to publish post:', errorMessage, error);
+            vscode.window.showErrorMessage(`Failed to publish post: ${errorMessage}`);
             return { success: false };
         }
     }
@@ -920,6 +937,23 @@ Would you like to open your WordPress admin panel now?
                 } catch (error) {
                     console.error('Failed to update publication metadata:', error);
                     // Don't fail the overall publish operation for this
+                }
+                
+                // Open blog in browser if setting is enabled (only for published posts, not drafts)
+                const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+                const openBlogAfterPublish = config.get<boolean>('openBlogAfterPublish', true);
+                
+                if (openBlogAfterPublish) {
+                    const blogUrl = config.get<string>('wordpressBlogUrl');
+                    if (blogUrl) {
+                        try {
+                            await vscode.env.openExternal(vscode.Uri.parse(blogUrl));
+                            console.log(`Opened blog in browser: ${blogUrl}`);
+                        } catch (error) {
+                            console.error('Failed to open blog URL:', error);
+                            // Don't show error to user - this is not critical
+                        }
+                    }
                 }
             }
         }

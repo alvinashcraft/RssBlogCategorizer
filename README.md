@@ -247,6 +247,7 @@ Access settings via `File > Preferences > Settings` and search for "Dev Feed Cur
 - **WordPress Blog URL**: Your WordPress blog URL (e.g., `https://yourblog.com`)
 - **WordPress Username**: Your WordPress account username (password stored securely)
 - **WordPress Categories**: Default categories to assign to published posts (e.g., "Daily Links", "Development")
+- **Open Blog After Publish**: Automatically open the blog's base URL in the default browser after successfully publishing a post (enabled by default, only for published posts, not drafts)
 - **Open Links in New Tab**: Control whether exported links open in a new browser tab (disabled by default)
 - **Enable Post Filtering Buffer**: Enable buffer time when filtering posts by date (enabled by default)
 - **Post Filtering Buffer Minutes**: Number of minutes to add as buffer when filtering posts (default: 5 minutes, range: 0-60)

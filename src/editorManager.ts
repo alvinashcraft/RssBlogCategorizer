@@ -218,7 +218,9 @@ export class EditorManager {
     
     private async saveContent(content: string, closeAfterSave: boolean = false, formatAfterSave: boolean = false): Promise<void> {
         if (!this.originalDocumentUri) {
-            vscode.window.showErrorMessage('No document to save to.');
+            const error = 'No document to save to.';
+            console.error(error);
+            vscode.window.showErrorMessage(error);
             return;
         }
         
@@ -275,10 +277,13 @@ export class EditorManager {
                     this.panel?.dispose();
                 }
             } else {
-                vscode.window.showErrorMessage('Failed to apply changes.');
+                throw new Error('Failed to apply changes');
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to save changes: ${error}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Failed to save changes:', errorMessage, error);
+            vscode.window.showErrorMessage(`Failed to save changes: ${errorMessage}`);
+            throw error; // Re-throw to let caller handle if needed
         }
     }
     
