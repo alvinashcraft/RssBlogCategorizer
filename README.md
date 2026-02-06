@@ -298,13 +298,13 @@ All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the 
 ## Documentation
 
 - **[Publication Tracking](docs/PUBLICATION_TRACKING.md)** - Detailed guide to publication metadata and duplicate prevention
-- **[WYSIWYG Markdown Editor](docs/dev/WYSIWYG_MARKDOWN_EDITOR.md)** - Technical implementation details of the EasyMDE-based Markdown editor
+- **[WYSIWYG Markdown Editor](https://github.com/alvinashcraft/RssBlogCategorizer/blob/main/docs/dev/WYSIWYG_MARKDOWN_EDITOR.md)** - Technical implementation details of the EasyMDE-based Markdown editor
 - **[Development Roadmap](docs/ROADMAP.md)** - Planned features and upcoming enhancements
-- **[Development Guide](docs/dev/DEVELOPMENT.md)** - Development setup, building, and contribution information
+- **[Development Guide](https://github.com/alvinashcraft/RssBlogCategorizer/blob/main/docs/dev/DEVELOPMENT.md)** - Development setup, building, and contribution information
 
 ## Development
 
-Interested in contributing or building from source? See [DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.
+Interested in contributing or building from source? See [DEVELOPMENT.md](https://github.com/alvinashcraft/RssBlogCategorizer/blob/main/docs/dev/DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.
 
 ## License
 
