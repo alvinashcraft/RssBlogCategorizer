@@ -13,7 +13,7 @@ dist/media/**
 dist/webview/**
 **/*.map
 test-*.js
-docs/**
+docs/dev/**
 release-notes/**
 .github/**
 !media/**
