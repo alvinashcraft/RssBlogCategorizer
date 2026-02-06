@@ -5,13 +5,15 @@ src/**
 .replit
 replit.md
 tsconfig.json
-webpack.config.js
+webpack.config.js\n.mocharc.json
 node_modules/**
 *.vsix
 out/**
+dist/media/**
+dist/webview/**
 **/*.map
 test-*.js
-docs/dev/**
+docs/**
 release-notes/**
 .github/**
 !media/**
