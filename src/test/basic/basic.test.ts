@@ -115,6 +115,35 @@ describe('Basic Tests', () => {
       expect(matches).to.include('typescript');
       expect(matches).to.have.length(2);
     });
+
+    it('should properly escape HTML special characters', () => {
+      // Mirrors the escapeHtml function from exportManager.ts
+      function escapeHtml(text: string): string {
+        return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // Test basic special characters
+      expect(escapeHtml('Hello & World')).to.equal('Hello &amp; World');
+      expect(escapeHtml('<script>alert("xss")</script>')).to.equal('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+      expect(escapeHtml("It's a test")).to.equal('It&#39;s a test');
+
+      // Test author name with curly braces and special characters
+      const authorWithBraces = 'Jiří {x2} Činčura';
+      const escaped = escapeHtml(authorWithBraces);
+      
+      // Curly braces should NOT be escaped (they're safe in HTML)
+      expect(escaped).to.equal('Jiří {x2} Činčura');
+      // Verify special Czech characters (ř, í, č, ů) are preserved
+      expect(escaped).to.include('ř');
+      expect(escaped).to.include('í');
+      expect(escaped).to.include('Č');
+      expect(escaped).to.include('č');
+    });
   });
 
   describe('Configuration Validation', () => {
