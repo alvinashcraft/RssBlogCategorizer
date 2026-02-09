@@ -84,8 +84,18 @@ export class EditorManager {
                         
                     case 'saveAndPublish':
                         // Save with formatting, then publish
-                        await this.saveContent(message.content, false, true);
-                        await this.saveAndPublishContent(message.content);
+                        try {
+                            await this.saveContent(message.content, false, true);
+                            await this.saveAndPublishContent(message.content);
+                        } catch (error) {
+                            // saveContent may throw on failure - ensure panel still cleans up
+                            console.error('Save and publish failed during save step:', error);
+                            if (this.resolvePromise) {
+                                this.resolvePromise(undefined);
+                                this.resolvePromise = undefined;
+                            }
+                            this.panel?.dispose();
+                        }
                         break;
                         
                     case 'cancel':
@@ -353,8 +363,10 @@ export class EditorManager {
         }
         
         // Close the editor after the publish workflow is complete (or cancelled)
+        // Resolve with undefined to suppress the generic 'Content updated successfully!' message
+        // in the caller - the publish workflow already provides its own feedback
         if (this.resolvePromise) {
-            this.resolvePromise(content);
+            this.resolvePromise(undefined);
             this.resolvePromise = undefined;
         }
         this.panel?.dispose();

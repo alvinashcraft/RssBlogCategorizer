@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { BlogPost } from '../../rssProvider';
+import type { WordPressPost } from '../../wordpressManager';
 
 describe('Basic Tests', () => {
   describe('BlogPost Interface', () => {
@@ -114,6 +115,35 @@ describe('Basic Tests', () => {
       expect(matches).to.include('typescript');
       expect(matches).to.have.length(2);
     });
+
+    it('should properly escape HTML special characters', () => {
+      // Mirrors the escapeHtml function from exportManager.ts
+      function escapeHtml(text: string): string {
+        return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // Test basic special characters
+      expect(escapeHtml('Hello & World')).to.equal('Hello &amp; World');
+      expect(escapeHtml('<script>alert("xss")</script>')).to.equal('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+      expect(escapeHtml("It's a test")).to.equal('It&#39;s a test');
+
+      // Test author name with curly braces and special characters
+      const authorWithBraces = 'Jiří {x2} Činčura';
+      const escaped = escapeHtml(authorWithBraces);
+      
+      // Curly braces should NOT be escaped (they're safe in HTML)
+      expect(escaped).to.equal('Jiří {x2} Činčura');
+      // Verify special Czech characters (ř, í, č, ů) are preserved
+      expect(escaped).to.include('ř');
+      expect(escaped).to.include('í');
+      expect(escaped).to.include('Č');
+      expect(escaped).to.include('č');
+    });
   });
 
   describe('Configuration Validation', () => {
@@ -132,6 +162,163 @@ describe('Basic Tests', () => {
       
       expect(defaultInterval).to.be.a('number');
       expect(testInterval).to.be.greaterThan(0);
+    });
+  });
+
+  describe('WordPress URL Normalization', () => {
+    // Test the normalization logic that WordPressManager.normalizeBlogUrl applies
+    function normalizeBlogUrl(blogUrl: string): string {
+      let normalized = blogUrl.trim();
+      if (!normalized.match(/^https?:\/\//i)) {
+        normalized = `https://${normalized}`;
+      }
+      normalized = normalized.replace(/\/+$/, '');
+      return normalized;
+    }
+
+    it('should add https:// when no protocol is present', () => {
+      expect(normalizeBlogUrl('www.example.com')).to.equal('https://www.example.com');
+      expect(normalizeBlogUrl('example.com')).to.equal('https://example.com');
+    });
+
+    it('should preserve existing https:// protocol', () => {
+      expect(normalizeBlogUrl('https://www.example.com')).to.equal('https://www.example.com');
+    });
+
+    it('should preserve existing http:// protocol', () => {
+      expect(normalizeBlogUrl('http://www.example.com')).to.equal('http://www.example.com');
+    });
+
+    it('should remove trailing slashes', () => {
+      expect(normalizeBlogUrl('https://www.example.com/')).to.equal('https://www.example.com');
+      expect(normalizeBlogUrl('https://www.example.com///')).to.equal('https://www.example.com');
+    });
+
+    it('should trim whitespace', () => {
+      expect(normalizeBlogUrl('  https://www.example.com  ')).to.equal('https://www.example.com');
+    });
+
+    it('should produce a valid URL for URL constructor', () => {
+      const normalized = normalizeBlogUrl('www.alvinashcraft.com');
+      expect(() => new URL('/wp-json/wp/v2/posts', normalized)).to.not.throw();
+      
+      const url = new URL('/wp-json/wp/v2/posts', normalized);
+      expect(url.hostname).to.equal('www.alvinashcraft.com');
+      expect(url.pathname).to.equal('/wp-json/wp/v2/posts');
+    });
+
+    it('should handle bare domain without www', () => {
+      const normalized = normalizeBlogUrl('alvinashcraft.com');
+      const url = new URL('/wp-json/wp/v2/posts', normalized);
+      expect(url.hostname).to.equal('alvinashcraft.com');
+    });
+  });
+
+  describe('WordPress Post Interface', () => {
+    it('should create a valid WordPress post object', () => {
+      const post: WordPressPost = {
+        title: 'Test Post',
+        content: '<p>Hello world</p>',
+        status: 'publish',
+        dateCreated: new Date(),
+        categories: ['Development'],
+        tags: ['.net', 'typescript']
+      };
+
+      expect(post.title).to.equal('Test Post');
+      expect(post.content).to.include('Hello world');
+      expect(post.status).to.equal('publish');
+      expect(post.categories).to.have.length(1);
+      expect(post.tags).to.have.length(2);
+    });
+
+    it('should allow draft status', () => {
+      const post: WordPressPost = {
+        title: 'Draft Post',
+        content: '<p>Draft content</p>',
+        status: 'draft'
+      };
+
+      expect(post.status).to.equal('draft');
+      expect(post.categories).to.be.undefined;
+      expect(post.tags).to.be.undefined;
+    });
+  });
+
+  describe('Redirect Same-Origin Credential Check', () => {
+    /**
+     * Helper that mirrors the same-origin logic used in makeHttpRequest
+     * to decide whether credentials should be forwarded on redirect.
+     */
+    function shouldForwardCredentials(originalUrlStr: string, redirectUrlStr: string): boolean {
+      const url = new URL(originalUrlStr);
+      const redirectUrl = new URL(redirectUrlStr);
+
+      const originalPort = url.port || (url.protocol === 'https:' ? '443' : '80');
+      const redirectPort = redirectUrl.port || (redirectUrl.protocol === 'https:' ? '443' : '80');
+
+      return (
+        url.protocol === redirectUrl.protocol &&
+        url.hostname === redirectUrl.hostname &&
+        originalPort === redirectPort
+      );
+    }
+
+    it('should forward credentials for same-origin redirect (same host, same protocol)', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/wp-json/wp/v2/posts',
+        'https://myblog.com/wp-json/wp/v2/posts?id=1'
+      )).to.be.true;
+    });
+
+    it('should forward credentials when default ports match implicitly', () => {
+      // Both HTTPS with no explicit port → both default to 443
+      expect(shouldForwardCredentials(
+        'https://myblog.com/path',
+        'https://myblog.com/other-path'
+      )).to.be.true;
+
+      // Both HTTP with no explicit port → both default to 80
+      expect(shouldForwardCredentials(
+        'http://myblog.com/path',
+        'http://myblog.com/other-path'
+      )).to.be.true;
+    });
+
+    it('should NOT forward credentials when hostname differs', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/wp-json/wp/v2/posts',
+        'https://evil.com/steal-creds'
+      )).to.be.false;
+    });
+
+    it('should NOT forward credentials when protocol changes (https → http)', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/wp-json/wp/v2/posts',
+        'http://myblog.com/wp-json/wp/v2/posts'
+      )).to.be.false;
+    });
+
+    it('should NOT forward credentials when port differs', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/wp-json/wp/v2/posts',
+        'https://myblog.com:8443/wp-json/wp/v2/posts'
+      )).to.be.false;
+    });
+
+    it('should forward credentials when explicit port matches default port', () => {
+      // Explicit :443 on the redirect should still match implicit HTTPS default
+      expect(shouldForwardCredentials(
+        'https://myblog.com/path',
+        'https://myblog.com:443/path'
+      )).to.be.true;
+    });
+
+    it('should NOT forward credentials for subdomain redirect', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/path',
+        'https://www.myblog.com/path'
+      )).to.be.false;
     });
   });
 });
