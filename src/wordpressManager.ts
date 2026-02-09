@@ -359,6 +359,9 @@ Would you like to open your WordPress admin panel now?
             const req = protocol.request(options, (res: any) => {
                 // Handle redirects (301, 302, 307, 308)
                 if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location) {
+                    // Drain the redirect response to free the socket for reuse
+                    res.resume();
+
                     const redirectUrl = new URL(res.headers.location, url.toString());
                     console.log(`Following redirect (${res.statusCode}) to: ${redirectUrl.toString()}`);
                     
