@@ -223,9 +223,10 @@ Would you like to open your WordPress admin panel now?
             return false; // User cancelled
         }
 
-        // Validate URL format
+        // Normalize and validate URL format
+        const normalizedUrl = this.normalizeBlogUrl(blogUrl);
         try {
-            new URL(blogUrl);
+            new URL(normalizedUrl);
         } catch {
             vscode.window.showErrorMessage('Invalid blog URL format. Please enter a valid URL (e.g., https://yourblog.com)');
             return false;
@@ -254,8 +255,8 @@ Would you like to open your WordPress admin panel now?
         }
 
         try {
-            // Save settings
-            await config.update('wordpressBlogUrl', blogUrl, vscode.ConfigurationTarget.Global);
+            // Save normalized URL
+            await config.update('wordpressBlogUrl', normalizedUrl, vscode.ConfigurationTarget.Global);
             await config.update('wordpressUsername', username, vscode.ConfigurationTarget.Global);
             await this.setWordpressPassword(appPassword);
             
@@ -277,7 +278,24 @@ Would you like to open your WordPress admin panel now?
     }
 
     /**
-     * Make REST API request to WordPress
+     * Normalize a blog URL to ensure it has a protocol and no trailing slash
+     */
+    private normalizeBlogUrl(blogUrl: string): string {
+        let normalized = blogUrl.trim();
+        
+        // Ensure protocol is present
+        if (!normalized.match(/^https?:\/\//i)) {
+            normalized = `https://${normalized}`;
+        }
+        
+        // Remove trailing slash
+        normalized = normalized.replace(/\/+$/, '');
+        
+        return normalized;
+    }
+
+    /**
+     * Make REST API request to WordPress with automatic redirect following
      */
     private async makeRestApiRequest(
         blogUrl: string, 
@@ -287,13 +305,33 @@ Would you like to open your WordPress admin panel now?
         username?: string, 
         password?: string
     ): Promise<any> {
+        const normalizedBlogUrl = this.normalizeBlogUrl(blogUrl);
+        const url = new URL(`/wp-json/wp/v2/${endpoint}`, normalizedBlogUrl);
+        const requestBody = data ? JSON.stringify(data) : '';
+
+        return this.makeHttpRequest(url, method, requestBody, username, password);
+    }
+
+    /**
+     * Execute an HTTP/HTTPS request with redirect following (up to 5 redirects)
+     */
+    private async makeHttpRequest(
+        url: URL,
+        method: string,
+        requestBody: string,
+        username?: string,
+        password?: string,
+        redirectCount: number = 0
+    ): Promise<any> {
+        const MAX_REDIRECTS = 5;
+
+        if (redirectCount > MAX_REDIRECTS) {
+            throw new Error(`Too many redirects (>${MAX_REDIRECTS}) when requesting ${url.toString()}`);
+        }
+
         return new Promise((resolve, reject) => {
-            const url = new URL(`/wp-json/wp/v2/${endpoint}`, blogUrl);
-            
-            console.log(`Making REST API request to: ${url.toString()}`);
+            console.log(`Making REST API request to: ${url.toString()}${redirectCount > 0 ? ` (redirect #${redirectCount})` : ''}`);
             console.log(`Method: ${method}, Host: ${url.hostname}, Port: ${url.port || (url.protocol === 'https:' ? 443 : 80)}, Path: ${url.pathname}`);
-            
-            const requestBody = data ? JSON.stringify(data) : '';
             
             const options = {
                 hostname: url.hostname,
@@ -319,6 +357,22 @@ Would you like to open your WordPress admin panel now?
 
             const protocol = url.protocol === 'https:' ? https : require('http');
             const req = protocol.request(options, (res: any) => {
+                // Handle redirects (301, 302, 307, 308)
+                if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location) {
+                    const redirectUrl = new URL(res.headers.location, url.toString());
+                    console.log(`Following redirect (${res.statusCode}) to: ${redirectUrl.toString()}`);
+                    
+                    // For 301/302 redirects, POST requests may be converted to GET by some servers
+                    // For 307/308, the method must be preserved
+                    const redirectMethod = [307, 308].includes(res.statusCode) ? method : 
+                        (method === 'POST' && [301, 302].includes(res.statusCode) ? method : method);
+                    
+                    this.makeHttpRequest(redirectUrl, redirectMethod, requestBody, username, password, redirectCount + 1)
+                        .then(resolve)
+                        .catch(reject);
+                    return;
+                }
+
                 let responseData = '';
                 res.on('data', (chunk: any) => { responseData += chunk; });
                 res.on('end', () => {
@@ -705,7 +759,22 @@ Would you like to open your WordPress admin panel now?
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error('Failed to publish post:', errorMessage, error);
-            vscode.window.showErrorMessage(`Failed to publish post: ${errorMessage}`);
+            
+            // Provide more helpful error messages for common network issues
+            if (errorMessage.includes('ENOTFOUND')) {
+                const hostnameMatch = errorMessage.match(/ENOTFOUND\s+(\S+)/);
+                const hostname = hostnameMatch ? hostnameMatch[1] : 'the configured host';
+                vscode.window.showErrorMessage(
+                    `Failed to publish post: Could not resolve hostname '${hostname}'. ` +
+                    'Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.'
+                );
+            } else if (errorMessage.includes('ECONNREFUSED')) {
+                vscode.window.showErrorMessage(
+                    `Failed to publish post: Connection refused. Please verify your WordPress Blog URL and that the site is accessible.`
+                );
+            } else {
+                vscode.window.showErrorMessage(`Failed to publish post: ${errorMessage}`);
+            }
             return { success: false };
         }
     }

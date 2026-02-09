@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { BlogPost } from '../../rssProvider';
+import { WordPressPost } from '../../wordpressManager';
 
 describe('Basic Tests', () => {
   describe('BlogPost Interface', () => {
@@ -132,6 +133,86 @@ describe('Basic Tests', () => {
       
       expect(defaultInterval).to.be.a('number');
       expect(testInterval).to.be.greaterThan(0);
+    });
+  });
+
+  describe('WordPress URL Normalization', () => {
+    // Test the normalization logic that WordPressManager.normalizeBlogUrl applies
+    function normalizeBlogUrl(blogUrl: string): string {
+      let normalized = blogUrl.trim();
+      if (!normalized.match(/^https?:\/\//i)) {
+        normalized = `https://${normalized}`;
+      }
+      normalized = normalized.replace(/\/+$/, '');
+      return normalized;
+    }
+
+    it('should add https:// when no protocol is present', () => {
+      expect(normalizeBlogUrl('www.example.com')).to.equal('https://www.example.com');
+      expect(normalizeBlogUrl('example.com')).to.equal('https://example.com');
+    });
+
+    it('should preserve existing https:// protocol', () => {
+      expect(normalizeBlogUrl('https://www.example.com')).to.equal('https://www.example.com');
+    });
+
+    it('should preserve existing http:// protocol', () => {
+      expect(normalizeBlogUrl('http://www.example.com')).to.equal('http://www.example.com');
+    });
+
+    it('should remove trailing slashes', () => {
+      expect(normalizeBlogUrl('https://www.example.com/')).to.equal('https://www.example.com');
+      expect(normalizeBlogUrl('https://www.example.com///')).to.equal('https://www.example.com');
+    });
+
+    it('should trim whitespace', () => {
+      expect(normalizeBlogUrl('  https://www.example.com  ')).to.equal('https://www.example.com');
+    });
+
+    it('should produce a valid URL for URL constructor', () => {
+      const normalized = normalizeBlogUrl('www.alvinashcraft.com');
+      expect(() => new URL('/wp-json/wp/v2/posts', normalized)).to.not.throw();
+      
+      const url = new URL('/wp-json/wp/v2/posts', normalized);
+      expect(url.hostname).to.equal('www.alvinashcraft.com');
+      expect(url.pathname).to.equal('/wp-json/wp/v2/posts');
+    });
+
+    it('should handle bare domain without www', () => {
+      const normalized = normalizeBlogUrl('alvinashcraft.com');
+      const url = new URL('/wp-json/wp/v2/posts', normalized);
+      expect(url.hostname).to.equal('alvinashcraft.com');
+    });
+  });
+
+  describe('WordPress Post Interface', () => {
+    it('should create a valid WordPress post object', () => {
+      const post: WordPressPost = {
+        title: 'Test Post',
+        content: '<p>Hello world</p>',
+        status: 'publish',
+        dateCreated: new Date(),
+        categories: ['Development'],
+        tags: ['.net', 'typescript']
+      };
+
+      expect(post.title).to.equal('Test Post');
+      expect(post.content).to.include('Hello world');
+      expect(post.status).to.equal('publish');
+      expect(post.categories).to.have.length(1);
+      expect(post.tags).to.have.length(2);
+    });
+
+    it('should allow draft status', () => {
+      const post: WordPressPost = {
+        title: 'Draft Post',
+        content: '<p>Draft content</p>',
+        status: 'draft'
+      };
+
+      expect(post.status).to.equal('draft');
+      expect(post.categories).to.be.undefined;
+      expect(post.tags).to.be.undefined;
     });
   });
 });
