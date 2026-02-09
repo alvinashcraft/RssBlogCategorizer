@@ -215,4 +215,81 @@ describe('Basic Tests', () => {
       expect(post.tags).to.be.undefined;
     });
   });
+
+  describe('Redirect Same-Origin Credential Check', () => {
+    /**
+     * Helper that mirrors the same-origin logic used in makeHttpRequest
+     * to decide whether credentials should be forwarded on redirect.
+     */
+    function shouldForwardCredentials(originalUrlStr: string, redirectUrlStr: string): boolean {
+      const url = new URL(originalUrlStr);
+      const redirectUrl = new URL(redirectUrlStr);
+
+      const originalPort = url.port || (url.protocol === 'https:' ? '443' : '80');
+      const redirectPort = redirectUrl.port || (redirectUrl.protocol === 'https:' ? '443' : '80');
+
+      return (
+        url.protocol === redirectUrl.protocol &&
+        url.hostname === redirectUrl.hostname &&
+        originalPort === redirectPort
+      );
+    }
+
+    it('should forward credentials for same-origin redirect (same host, same protocol)', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/wp-json/wp/v2/posts',
+        'https://myblog.com/wp-json/wp/v2/posts?id=1'
+      )).to.be.true;
+    });
+
+    it('should forward credentials when default ports match implicitly', () => {
+      // Both HTTPS with no explicit port → both default to 443
+      expect(shouldForwardCredentials(
+        'https://myblog.com/path',
+        'https://myblog.com/other-path'
+      )).to.be.true;
+
+      // Both HTTP with no explicit port → both default to 80
+      expect(shouldForwardCredentials(
+        'http://myblog.com/path',
+        'http://myblog.com/other-path'
+      )).to.be.true;
+    });
+
+    it('should NOT forward credentials when hostname differs', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/wp-json/wp/v2/posts',
+        'https://evil.com/steal-creds'
+      )).to.be.false;
+    });
+
+    it('should NOT forward credentials when protocol changes (https → http)', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/wp-json/wp/v2/posts',
+        'http://myblog.com/wp-json/wp/v2/posts'
+      )).to.be.false;
+    });
+
+    it('should NOT forward credentials when port differs', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/wp-json/wp/v2/posts',
+        'https://myblog.com:8443/wp-json/wp/v2/posts'
+      )).to.be.false;
+    });
+
+    it('should forward credentials when explicit port matches default port', () => {
+      // Explicit :443 on the redirect should still match implicit HTTPS default
+      expect(shouldForwardCredentials(
+        'https://myblog.com/path',
+        'https://myblog.com:443/path'
+      )).to.be.true;
+    });
+
+    it('should NOT forward credentials for subdomain redirect', () => {
+      expect(shouldForwardCredentials(
+        'https://myblog.com/path',
+        'https://www.myblog.com/path'
+      )).to.be.false;
+    });
+  });
 });

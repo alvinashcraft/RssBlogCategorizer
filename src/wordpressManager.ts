@@ -367,7 +367,18 @@ Would you like to open your WordPress admin panel now?
                     const redirectMethod = [307, 308].includes(res.statusCode) ? method : 
                         (method === 'POST' && [301, 302].includes(res.statusCode) ? method : method);
                     
-                    this.makeHttpRequest(redirectUrl, redirectMethod, requestBody, username, password, redirectCount + 1)
+                    // Only forward authentication on same-origin redirects (protocol, host, and port)
+                    const originalPort = url.port || (url.protocol === 'https:' ? '443' : '80');
+                    const redirectPort = redirectUrl.port || (redirectUrl.protocol === 'https:' ? '443' : '80');
+                    const isSameOrigin =
+                        url.protocol === redirectUrl.protocol &&
+                        url.hostname === redirectUrl.hostname &&
+                        originalPort === redirectPort;
+
+                    const nextUsername = isSameOrigin ? username : undefined;
+                    const nextPassword = isSameOrigin ? password : undefined;
+
+                    this.makeHttpRequest(redirectUrl, redirectMethod, requestBody, nextUsername, nextPassword, redirectCount + 1)
                         .then(resolve)
                         .catch(reject);
                     return;
