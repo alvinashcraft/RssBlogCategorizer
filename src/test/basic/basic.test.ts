@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { BlogPost } from '../../rssProvider';
-import { WordPressPost } from '../../wordpressManager';
+import type { WordPressPost } from '../../wordpressManager';
 
 describe('Basic Tests', () => {
   describe('BlogPost Interface', () => {
