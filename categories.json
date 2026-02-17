@@ -288,6 +288,7 @@
         "developertea.com",
         "se-radio.net",
         "boagworld.com/season",
+        "sqldownunder.com",
         "talkpython.fm",
         "lennysnewsletter.com/p",
         "runasradio.com",
@@ -430,7 +431,8 @@
     },
     "Tools": {
       "urlKeywords": [
-        "files.community"
+        "files.community",
+        "linqpad.net"
       ],
       "titleKeywords": [
         "git",
@@ -443,11 +445,14 @@
         "procdump",
         "zoomit",
         "paint.net",
+        "gitbutler",
         "rdcman",
         "command palette",
+        "beyond compare",
         "fancy zones",
         "advanced paste",
         "sysinternals",
+        "linqpad",
         "vivaldi",
         "duckduckgo",
         "productivity",
