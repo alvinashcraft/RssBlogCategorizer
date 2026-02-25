@@ -22,7 +22,7 @@
   "config.refreshInterval.description": "Intervalo de actualización en minutos (solo aplica cuando la actualización automática está habilitada)",
   "config.newsblurUsername.description": "Nombre de usuario de NewsBlur para acceso a la API (permite obtener más de 25 elementos). La contraseña se almacena de forma segura y se solicitará cuando sea necesario.",
   "config.useNewsblurApi.description": "Usar la API de NewsBlur en lugar de la fuente RSS (permite más de 25 elementos con autenticación)",
-  "config.wordpressBlogUrl.description": "URL del blog de WordPress (p. ej., https://sublog.com)",
+  "config.wordpressBlogUrl.description": "URL del blog de WordPress (p. ej., https://tublog.com)",
   "config.wordpressUsername.description": "Nombre de usuario de WordPress para publicación. La contraseña se almacena de forma segura y se solicitará cuando sea necesario.",
   "config.wordpressCategories.description": "Categorías predeterminadas de WordPress para asignar a las publicaciones",
   "config.openLinksInNewTab.description": "Abrir enlaces de publicaciones del blog en una nueva pestaña del navegador al hacer clic (agrega target=\"_blank\" a las exportaciones HTML)",
