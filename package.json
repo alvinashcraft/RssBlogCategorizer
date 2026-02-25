@@ -1,9 +1,9 @@
 {
   "name": "rss-blog-categorizer",
-  "displayName": "Dev Feed Curator",
-  "description": "Streamline your developer link blogging workflow. Fetch RSS feeds, auto-categorize posts by technology, and publish directly to WordPress—all from VS Code.",
+  "displayName": "%displayName%",
+  "description": "%description%",
   "icon": "images/rssBlogIcon.png",
-  "version": "3.6.6",
+  "version": "3.7.0",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -37,12 +37,13 @@
     "onView:rssBlogCategorizerView"
   ],
   "main": "./dist/extension.js",
+  "l10n": "./l10n",
   "contributes": {
     "views": {
       "explorer": [
         {
           "id": "rssBlogCategorizerView",
-          "name": "Dev Blog Posts",
+          "name": "%viewName%",
           "icon": "images/rssBlogIcon.png",
           "when": "true"
         }
@@ -51,51 +52,51 @@
     "commands": [
       {
         "command": "rssBlogCategorizer.refresh",
-        "title": "Refresh",
+        "title": "%command.refresh%",
         "icon": "$(refresh)"
       },
       {
         "command": "rssBlogCategorizer.exportMarkdown",
-        "title": "Export as Markdown",
+        "title": "%command.exportMarkdown%",
         "icon": "$(markdown)"
       },
       {
         "command": "rssBlogCategorizer.exportHtml",
-        "title": "Export as HTML",
+        "title": "%command.exportHtml%",
         "icon": "$(globe)"
       },
       {
         "command": "rssBlogCategorizer.openPost",
-        "title": "Open Post"
+        "title": "%command.openPost%"
       },
       {
         "command": "rssBlogCategorizer.addFeed",
-        "title": "Set RSS Feed",
+        "title": "%command.addFeed%",
         "icon": "$(edit)"
       },
       {
         "command": "rssBlogCategorizer.setNewsblurCredentials",
-        "title": "Set NewsBlur Credentials",
+        "title": "%command.setNewsblurCredentials%",
         "icon": "$(key)"
       },
       {
         "command": "rssBlogCategorizer.setWordpressCredentials",
-        "title": "Set WordPress Credentials",
+        "title": "%command.setWordpressCredentials%",
         "icon": "$(key)"
       },
       {
         "command": "rssBlogCategorizer.testWordpressConnection",
-        "title": "Test WordPress Connection",
+        "title": "%command.testWordpressConnection%",
         "icon": "$(plug)"
       },
       {
         "command": "rssBlogCategorizer.publishToWordpress",
-        "title": "Publish to WordPress",
+        "title": "%command.publishToWordpress%",
         "icon": "$(cloud-upload)"
       },
       {
         "command": "rssBlogCategorizer.openWysiwygEditor",
-        "title": "Dev Feed Curator: Open in WYSIWYG Editor",
+        "title": "%command.openWysiwygEditor%",
         "icon": "$(edit)"
       }
     ],
@@ -146,66 +147,66 @@
       ]
     },
     "configuration": {
-      "title": "Dev Feed Curator",
+      "title": "%config.title%",
       "properties": {
         "rssBlogCategorizer.feedUrl": {
           "type": "string",
           "default": "https://dev.to/feed",
-          "description": "Single RSS feed URL to monitor"
+          "description": "%config.feedUrl.description%"
         },
         "rssBlogCategorizer.recordCount": {
           "type": "number",
           "default": 100,
           "minimum": 10,
           "maximum": 500,
-          "description": "Number of records to retrieve from RSS feed (appended as ?n=X parameter)"
+          "description": "%config.recordCount.description%"
         },
         "rssBlogCategorizer.minimumDateTime": {
           "type": "string",
           "default": "",
-          "description": "Minimum datetime for blog posts in UTC (ISO format, e.g., 2025-01-01T00:00:00Z or 2025-01-01T00:00:00.000Z). Leave empty to automatically use the date of the latest 'Dew Drop' post from alvinashcraft.com, or fall back to last 24 hours (UTC) if unavailable. All date comparisons use UTC timezone."
+          "description": "%config.minimumDateTime.description%"
         },
         "rssBlogCategorizer.enablePostFilteringBuffer": {
           "type": "boolean",
           "default": true,
-          "description": "Enable buffer time when filtering posts by date to avoid edge cases where posts might be missed due to timing differences"
+          "description": "%config.enablePostFilteringBuffer.description%"
         },
         "rssBlogCategorizer.postFilteringBufferMinutes": {
           "type": "number",
           "default": 5,
           "minimum": 0,
           "maximum": 60,
-          "description": "Number of minutes to add as buffer when filtering posts (only applies when buffer is enabled)"
+          "description": "%config.postFilteringBufferMinutes.description%"
         },
         "rssBlogCategorizer.enableAutoRefresh": {
           "type": "boolean",
           "default": false,
-          "description": "Enable automatic refresh of RSS feed data. When disabled, refresh is manual only."
+          "description": "%config.enableAutoRefresh.description%"
         },
         "rssBlogCategorizer.refreshInterval": {
           "type": "number",
           "default": 30,
-          "description": "Refresh interval in minutes (only applies when auto-refresh is enabled)"
+          "description": "%config.refreshInterval.description%"
         },
         "rssBlogCategorizer.newsblurUsername": {
           "type": "string",
           "default": "",
-          "description": "NewsBlur username for API access (enables fetching more than 25 items). Password is stored securely and will be prompted when needed."
+          "description": "%config.newsblurUsername.description%"
         },
         "rssBlogCategorizer.useNewsblurApi": {
           "type": "boolean",
           "default": false,
-          "description": "Use NewsBlur API instead of RSS feed (allows more than 25 items with authentication)"
+          "description": "%config.useNewsblurApi.description%"
         },
         "rssBlogCategorizer.wordpressBlogUrl": {
           "type": "string",
           "default": "",
-          "description": "WordPress blog URL (e.g., https://yourblog.com)"
+          "description": "%config.wordpressBlogUrl.description%"
         },
         "rssBlogCategorizer.wordpressUsername": {
           "type": "string",
           "default": "",
-          "description": "WordPress username for publishing. Password is stored securely and will be prompted when needed."
+          "description": "%config.wordpressUsername.description%"
         },
         "rssBlogCategorizer.wordpressCategories": {
           "type": "array",
@@ -216,27 +217,27 @@
             "Daily Links",
             "Development"
           ],
-          "description": "Default WordPress categories to assign to published posts"
+          "description": "%config.wordpressCategories.description%"
         },
         "rssBlogCategorizer.openLinksInNewTab": {
           "type": "boolean",
           "default": false,
-          "description": "Open blog post links in a new browser tab when clicked (adds target=\"_blank\" to HTML exports)"
+          "description": "%config.openLinksInNewTab.description%"
         },
         "rssBlogCategorizer.enableDometrainSection": {
           "type": "boolean",
           "default": false,
-          "description": "Enable Dometrain Course section in exports (highlights a different video training course from Dometrain every day)"
+          "description": "%config.enableDometrainSection.description%"
         },
         "rssBlogCategorizer.dometrainLastCourseId": {
           "type": "string",
           "default": "",
-          "description": "Last Dometrain course ID shown (used for cycling through courses). Syncs across computers if VS Code settings sync is enabled."
+          "description": "%config.dometrainLastCourseId.description%"
         },
         "rssBlogCategorizer.openBlogAfterPublish": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically open the blog's base URL in the default browser after successfully publishing a post"
+          "description": "%config.openBlogAfterPublish.description%"
         }
       }
     }
@@ -280,6 +281,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@vscode/l10n": "^0.0.18",
     "fast-xml-parser": "^4.3.2",
     "tinymce": "^8.1.2"
   }

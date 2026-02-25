@@ -48,10 +48,36 @@ src/
 ├── rssProvider.ts     # RSS parsing and tree data provider
 ├── exportManager.ts   # HTML/Markdown export functionality
 └── wordpressManager.ts # WordPress REST API publishing
+l10n/
+├── bundle.l10n.json    # Runtime default (English) localization bundle
+└── bundle.l10n.es.json # Runtime Spanish localization bundle
+package.nls.json        # Extension manifest default (English) localization
+package.nls.es.json     # Extension manifest Spanish localization
 categories.json        # Category configuration
 books.json            # Book recommendations for exports
 package.json          # Extension manifest
 ```
+
+## Localization
+
+Version 3.7.0 introduces localized UI support for English and Spanish.
+
+### Localization Surfaces
+
+- `package.json` contribution strings use `%key%` and resolve via `package.nls*.json`
+- TypeScript runtime strings use `vscode.l10n.t()` and resolve via `l10n/bundle.l10n*.json`
+- Webview editor controls use template placeholders injected from `editorManager.ts`
+
+### Adding or Updating Localized Strings
+
+1. Add or update the English source string in code (`vscode.l10n.t(...)`) or `package.json` key references
+2. Add corresponding entries in:
+  - `l10n/bundle.l10n.json` and `l10n/bundle.l10n.es.json` for runtime strings
+  - `package.nls.json` and `package.nls.es.json` for contribution metadata
+3. For webview text, update placeholders in:
+  - `webview/editor.html` and/or `webview/markdown-editor.html`
+  - Replacement logic in `src/editorManager.ts`
+4. Run `npm run compile` and verify UI in both display languages
 
 ## Testing
 

@@ -278,7 +278,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         } else if (this.isCategoryNode(element)) {
             // Category node
             const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.Expanded);
-            item.tooltip = `${element.posts.length} posts`;
+            item.tooltip = vscode.l10n.t('{0} posts', String(element.posts.length));
             item.contextValue = 'category';
             return item;
         } else {
@@ -335,7 +335,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // Show loading indicator if currently loading
             if (this.isLoading) {
                 const loadingNode: LoadingIndicatorNode = {
-                    label: 'Loading feed data...',
+                    label: vscode.l10n.t('Loading feed data...'),
                     isLoadingIndicator: true
                 };
                 return Promise.resolve([loadingNode]);
@@ -344,8 +344,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // Create summary node
             const totalPosts = this.posts.length;
             const summaryLabel = totalPosts === 0 
-                ? 'No posts loaded - click refresh to load feeds'
-                : `Total: ${totalPosts} post${totalPosts !== 1 ? 's' : ''} fetched and categorized`;
+                ? vscode.l10n.t('No posts loaded - click refresh to load feeds')
+                : vscode.l10n.t('Total: {0} post(s) fetched and categorized', String(totalPosts));
             const summaryNode: SummaryNode = {
                 label: summaryLabel,
                 isSummary: true
@@ -390,18 +390,18 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
      */
     private validateUrl(url: string): void {
         if (!url || typeof url !== 'string') {
-            throw new Error('URL must be a non-empty string');
+            throw new Error(vscode.l10n.t('URL must be a non-empty string'));
         }
         try {
             const parsedUrl = new URL(url);
             if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-                throw new Error('URL must use HTTP or HTTPS protocol');
+                throw new Error(vscode.l10n.t('URL must use HTTP or HTTPS protocol'));
             }
         } catch (error) {
             if (error instanceof Error && error.message.includes('protocol')) {
                 throw error;
             }
-            throw new Error('Invalid URL format. Please provide a valid URL (e.g., https://example.com/feed.xml)');
+            throw new Error(vscode.l10n.t('Invalid URL format. Please provide a valid URL (e.g., https://example.com/feed.xml)'));
         }
     }
 
@@ -415,9 +415,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     private async promptForNewsblurPassword(username: string): Promise<string | undefined> {
         const password = await vscode.window.showInputBox({
-            prompt: `Enter NewsBlur password for user: ${username}`,
+            prompt: vscode.l10n.t('Enter NewsBlur password for user: {0}', username),
             password: true,
-            placeHolder: 'Enter your NewsBlur password'
+            placeHolder: vscode.l10n.t('Enter your NewsBlur password')
         });
 
         if (password) {
@@ -493,7 +493,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     }
                 } else {
                     console.log('NewsBlur API enabled but no password provided, using RSS feed');
-                    vscode.window.showInformationMessage('NewsBlur API cancelled. Using RSS feed (limited to ~25 items).');
+                    vscode.window.showInformationMessage(vscode.l10n.t('NewsBlur API cancelled. Using RSS feed (limited to ~25 items).'));
                     
                     const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
                     posts = await this.fetchFeed(urlWithParams);
@@ -503,7 +503,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 // Use traditional RSS approach
                 if (useNewsblurApi && !newsblurUsername) {
                     console.warn('NewsBlur API enabled but username not configured, using RSS feed');
-                    vscode.window.showWarningMessage('NewsBlur API is enabled but username not configured. Using RSS feed (limited to ~25 items).');
+                    vscode.window.showWarningMessage(vscode.l10n.t('NewsBlur API is enabled but username not configured. Using RSS feed (limited to ~25 items).'));
                 }
                 
                 const urlWithParams = this.appendRecordCount(feedUrl, recordCount);
@@ -520,7 +520,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error('Error loading feed:', errorMessage, error);
-            vscode.window.showErrorMessage(`Failed to load RSS feed: ${errorMessage}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to load RSS feed: {0}', errorMessage));
             // Don't throw - allow the tree view to show the error state
         }
 

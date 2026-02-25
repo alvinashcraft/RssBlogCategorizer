@@ -2,6 +2,14 @@
 (function() {
     const vscode = acquireVsCodeApi();
     const textarea = document.getElementById('markdown-textarea');
+    const i18nEl = document.getElementById('i18n-data');
+    const i18n = {
+        editorLoadingError: i18nEl?.dataset.editorLoadingError || 'Editor Loading Error',
+        retry: i18nEl?.dataset.retry || 'Retry',
+        failedToLoad: i18nEl?.dataset.failedToLoad || 'Failed to load the markdown editor. Please check your internet connection and try again.',
+        failedToInit: i18nEl?.dataset.failedToInit || 'Failed to initialize the markdown editor: {error}',
+        lastSavedFormat: i18nEl?.dataset.lastSavedFormat || 'Last saved: {time}'
+    };
     let isDirty = false;
     
     // Function to display error messages
@@ -17,14 +25,14 @@
         errorText.className = 'error-text';
         
         const errorTitle = document.createElement('strong');
-        errorTitle.textContent = 'Editor Loading Error';
+        errorTitle.textContent = i18n.editorLoadingError;
         
         const errorMessage = document.createElement('p');
         errorMessage.textContent = message; // Use textContent to prevent XSS
         
         const retryButton = document.createElement('button');
         retryButton.id = 'retry-btn';
-        retryButton.textContent = 'Retry';
+        retryButton.textContent = i18n.retry;
         
         errorText.appendChild(errorTitle);
         errorText.appendChild(errorMessage);
@@ -44,7 +52,7 @@
     
     // Check if EasyMDE loaded successfully
     if (typeof EasyMDE === 'undefined') {
-        showError('Failed to load the markdown editor. Please check your internet connection and try again.');
+        showError(i18n.failedToLoad);
         return;
     }
     
@@ -115,7 +123,7 @@
                 second: '2-digit',
                 hour12: true 
             });
-            document.getElementById('last-saved').textContent = `Last saved: ${timeString}`;
+            document.getElementById('last-saved').textContent = i18n.lastSavedFormat.replace('{time}', timeString);
         }
         
         // Save button handler
@@ -173,6 +181,6 @@
         // Focus editor on load
         easyMDE.codemirror.focus();
     } catch (error) {
-        showError('Failed to initialize the markdown editor: ' + error.message);
+        showError(i18n.failedToInit.replace('{error}', error.message));
     }
 })();

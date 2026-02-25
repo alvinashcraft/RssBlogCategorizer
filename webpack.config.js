@@ -45,7 +45,8 @@ const extensionConfig = {
     new CopyPlugin({
       patterns: [
         { from: 'media', to: 'media' },
-        { from: 'webview', to: 'webview' }
+        { from: 'webview', to: 'webview' },
+        { from: 'l10n', to: 'l10n' }
       ]
     })
   ],
