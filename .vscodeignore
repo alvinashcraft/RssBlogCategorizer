@@ -12,6 +12,7 @@ node_modules/**
 out/**
 dist/media/**
 dist/webview/**
+dist/l10n/**
 **/*.map
 test-*.js
 docs/dev/**
