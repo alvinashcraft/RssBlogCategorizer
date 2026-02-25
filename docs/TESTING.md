@@ -50,6 +50,28 @@ npm run compile-tests
 npm test
 ```
 
+## Localization Validation (3.7.0+)
+
+Use this quick checklist when changing user-facing text:
+
+1. Set VS Code display language to English and verify:
+  - Command titles and settings descriptions
+  - Tree view labels, prompts, and notifications
+  - HTML and Markdown WYSIWYG editor button labels/tooltips
+2. Switch display language to Spanish and repeat the same checks
+3. Confirm no raw placeholder keys (`%...%` or `{{...}}`) appear in UI
+4. Run compile and basic tests:
+
+```bash
+npm run compile
+npm run test:basic
+```
+
+If a string does not localize, verify matching keys exist in both English and Spanish files:
+
+- `package.nls.json` and `package.nls.es.json`
+- `l10n/bundle.l10n.json` and `l10n/bundle.l10n.es.json`
+
 ## Test Coverage Summary
 
 ### ✅ Currently Working (basic.test.ts)

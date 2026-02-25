@@ -155,27 +155,27 @@ Would you like to open your WordPress admin panel now?
         `;
 
         const choice = await vscode.window.showInformationMessage(
-            'Application Password setup instructions are ready.',
-            'View Instructions',
-            'Open WordPress Admin',
-            'Continue with Setup'
+            vscode.l10n.t('Application Password setup instructions are ready.'),
+            vscode.l10n.t('View Instructions'),
+            vscode.l10n.t('Open WordPress Admin'),
+            vscode.l10n.t('Continue with Setup')
         );
 
-        if (choice === 'View Instructions') {
+        if (choice === vscode.l10n.t('View Instructions')) {
             // Create a new untitled document with the instructions
             const doc = await vscode.workspace.openTextDocument({
                 content: instructions,
                 language: 'markdown'
             });
             await vscode.window.showTextDocument(doc);
-        } else if (choice === 'Open WordPress Admin') {
+        } else if (choice === vscode.l10n.t('Open WordPress Admin')) {
             const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
             const blogUrl = config.get<string>('wordpressBlogUrl');
             if (blogUrl) {
                 const adminUrl = `${blogUrl.replace(/\/$/, '')}/wp-admin/profile.php`;
                 vscode.env.openExternal(vscode.Uri.parse(adminUrl));
             } else {
-                vscode.window.showErrorMessage('Please set your blog URL first');
+                vscode.window.showErrorMessage(vscode.l10n.t('Please set your blog URL first'));
             }
         }
     }
@@ -190,31 +190,31 @@ Would you like to open your WordPress admin panel now?
         
         // Show instructions first
         const showInstructions = await vscode.window.showInformationMessage(
-            'WordPress REST API requires an Application Password for secure authentication. Would you like to see setup instructions first?',
-            'Show Instructions',
-            'I have my credentials ready',
-            'Cancel'
+            vscode.l10n.t('WordPress REST API requires an Application Password for secure authentication. Would you like to see setup instructions first?'),
+            vscode.l10n.t('Show Instructions'),
+            vscode.l10n.t('I have my credentials ready'),
+            vscode.l10n.t('Cancel')
         );
 
-        if (showInstructions === 'Show Instructions') {
+        if (showInstructions === vscode.l10n.t('Show Instructions')) {
             await this.showApplicationPasswordInstructions();
             
             const continueSetup = await vscode.window.showInformationMessage(
-                'Ready to enter your credentials?',
-                'Yes, continue',
-                'Cancel'
+                vscode.l10n.t('Ready to enter your credentials?'),
+                vscode.l10n.t('Yes, continue'),
+                vscode.l10n.t('Cancel')
             );
             
-            if (continueSetup !== 'Yes, continue') {
+            if (continueSetup !== vscode.l10n.t('Yes, continue')) {
                 return false;
             }
-        } else if (showInstructions === 'Cancel') {
+        } else if (showInstructions === vscode.l10n.t('Cancel')) {
             return false;
         }
         
         // Get blog URL
         const blogUrl = await vscode.window.showInputBox({
-            prompt: 'Enter WordPress blog URL (e.g., https://yourblog.com)',
+            prompt: vscode.l10n.t('Enter WordPress blog URL (e.g., https://yourblog.com)'),
             placeHolder: 'https://yourblog.com',
             value: currentBlogUrl
         });
@@ -228,13 +228,13 @@ Would you like to open your WordPress admin panel now?
         try {
             new URL(normalizedUrl);
         } catch {
-            vscode.window.showErrorMessage('Invalid blog URL format. Please enter a valid URL (e.g., https://yourblog.com)');
+            vscode.window.showErrorMessage(vscode.l10n.t('Invalid blog URL format. Please enter a valid URL (e.g., https://yourblog.com)'));
             return false;
         }
         
         // Get username
         const username = await vscode.window.showInputBox({
-            prompt: 'Enter WordPress username (same as your login username)',
+            prompt: vscode.l10n.t('Enter WordPress username (same as your login username)'),
             placeHolder: 'username',
             value: currentUsername
         });
@@ -245,9 +245,9 @@ Would you like to open your WordPress admin panel now?
         
         // Get application password
         const appPassword = await vscode.window.showInputBox({
-            prompt: `Enter WordPress Application Password for user: ${username}`,
+            prompt: vscode.l10n.t('Enter WordPress Application Password for user: {0}', username),
             password: true,
-            placeHolder: 'xxxx xxxx xxxx xxxx xxxx xxxx (Application Password with spaces)'
+            placeHolder: 'xxxx xxxx xxxx xxxx xxxx xxxx'
         });
         
         if (!appPassword) {
@@ -260,10 +260,10 @@ Would you like to open your WordPress admin panel now?
             await config.update('wordpressUsername', username, vscode.ConfigurationTarget.Global);
             await this.setWordpressPassword(appPassword);
             
-            vscode.window.showInformationMessage('WordPress credentials saved successfully! Use "Test WordPress Connection" to verify.');
+            vscode.window.showInformationMessage(vscode.l10n.t('WordPress credentials saved successfully! Use "Test WordPress Connection" to verify.'));
             return true;
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to save WordPress credentials: ${error}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to save WordPress credentials: {0}', String(error)));
             return false;
         }
     }
@@ -541,7 +541,7 @@ Would you like to open your WordPress admin panel now?
         const password = await this.getWordpressPassword();
 
         if (!blogUrl || !username || !password) {
-            vscode.window.showErrorMessage('WordPress credentials not configured. Please set them first.');
+            vscode.window.showErrorMessage(vscode.l10n.t('WordPress credentials not configured. Please set them first.'));
             return false;
         }
 
@@ -552,11 +552,7 @@ Would you like to open your WordPress admin panel now?
         const endpointAccessible = await this.testRestApiEndpoint(blogUrl);
         if (!endpointAccessible) {
             vscode.window.showErrorMessage(
-                `WordPress REST API endpoint not accessible at ${blogUrl}/wp-json/wp/v2/. ` +
-                'Please check:\n' +
-                '1. WordPress REST API is enabled\n' +
-                '2. Your blog URL is correct\n' +
-                '3. No security plugins are blocking REST API'
+                vscode.l10n.t('WordPress REST API endpoint not accessible at {0}/wp-json/wp/v2/. Please check:\n1. WordPress REST API is enabled\n2. Your blog URL is correct\n3. No security plugins are blocking REST API', blogUrl)
             );
             return false;
         }
@@ -566,7 +562,7 @@ Would you like to open your WordPress admin panel now?
         
         if (workingMethods.length > 0) {
             vscode.window.showInformationMessage(
-                `WordPress REST API connection successful!\nWorking authentication methods: ${workingMethods.join(', ')}`
+                vscode.l10n.t('WordPress REST API connection successful!\nWorking authentication methods: {0}', workingMethods.join(', '))
             );
             return true;
         } else {
@@ -574,13 +570,7 @@ Would you like to open your WordPress admin panel now?
             const troubleshootingInfo = await this.gatherTroubleshootingInfo(blogUrl);
             
             vscode.window.showErrorMessage(
-                `WordPress connection failed. All authentication methods failed.\n\n` +
-                `Troubleshooting info:\n${troubleshootingInfo}\n\n` +
-                `Common solutions:\n` +
-                `1. Create an Application Password in WordPress Admin → Users → Profile\n` +
-                `2. Check if security plugins are blocking REST API\n` +
-                `3. Verify username is correct and user has 'publish_posts' capability\n` +
-                `4. Try temporarily disabling security plugins`
+                vscode.l10n.t('WordPress connection failed. All authentication methods failed.\n\nTroubleshooting info:\n{0}\n\nCommon solutions:\n1. Create an Application Password in WordPress Admin → Users → Profile\n2. Check if security plugins are blocking REST API\n3. Verify username is correct and user has \'publish_posts\' capability\n4. Try temporarily disabling security plugins', troubleshootingInfo)
             );
             return false;
         }
@@ -687,7 +677,7 @@ Would you like to open your WordPress admin panel now?
     async publishPost(post: WordPressPost): Promise<{ success: boolean; postId?: number }> {
         // Validate input
         if (!post || !post.title || !post.content) {
-            const error = 'Invalid post data: title and content are required';
+            const error = vscode.l10n.t('Invalid post data: title and content are required');
             console.error(error);
             vscode.window.showErrorMessage(error);
             return { success: false };
@@ -699,7 +689,7 @@ Would you like to open your WordPress admin panel now?
         const password = await this.getWordpressPassword();
 
         if (!blogUrl || !username || !password) {
-            vscode.window.showErrorMessage('WordPress credentials not configured. Please set them first.');
+            vscode.window.showErrorMessage(vscode.l10n.t('WordPress credentials not configured. Please set them first.'));
             return { success: false };
         }
 
@@ -753,21 +743,21 @@ Would you like to open your WordPress admin panel now?
             const result = await this.makeRestApiRequest(blogUrl, 'posts', 'POST', postData, username, password);
             
             if (result && result.id) {
-                const status = post.status === 'publish' ? 'published' : 'saved as draft';
-                let message = `Post ${status} successfully! Post ID: ${result.id}`;
+                const status = post.status === 'publish' ? vscode.l10n.t('published') : vscode.l10n.t('saved as draft');
+                let message = vscode.l10n.t('Post {0} successfully! Post ID: {1}', status, String(result.id));
                 
                 if (post.categories && post.categories.length > 0) {
-                    message += ` Categories: ${post.categories.join(', ')}`;
+                    message += ` ${vscode.l10n.t('Categories: {0}', post.categories.join(', '))}`;
                 }
                 
                 if (post.tags && post.tags.length > 0) {
-                    message += ` Tags: ${post.tags.length} detected`;
+                    message += ` ${vscode.l10n.t('Tags: {0} detected', String(post.tags.length))}`;
                 }
                 
                 vscode.window.showInformationMessage(message);
                 return { success: true, postId: result.id };
             } else {
-                vscode.window.showErrorMessage('Failed to create post: No post ID returned');
+                vscode.window.showErrorMessage(vscode.l10n.t('Failed to create post: No post ID returned'));
                 return { success: false };
             }
         } catch (error) {
@@ -779,15 +769,14 @@ Would you like to open your WordPress admin panel now?
                 const hostnameMatch = errorMessage.match(/ENOTFOUND\s+(\S+)/);
                 const hostname = hostnameMatch ? hostnameMatch[1] : 'the configured host';
                 vscode.window.showErrorMessage(
-                    `Failed to publish post: Could not resolve hostname '${hostname}'. ` +
-                    'Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.'
+                    vscode.l10n.t('Failed to publish post: Could not resolve hostname \'{0}\'. Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.', hostname)
                 );
             } else if (errorMessage.includes('ECONNREFUSED')) {
                 vscode.window.showErrorMessage(
-                    `Failed to publish post: Connection refused. Please verify your WordPress Blog URL and that the site is accessible.`
+                    vscode.l10n.t('Failed to publish post: Connection refused. Please verify your WordPress Blog URL and that the site is accessible.')
                 );
             } else {
-                vscode.window.showErrorMessage(`Failed to publish post: ${errorMessage}`);
+                vscode.window.showErrorMessage(vscode.l10n.t('Failed to publish post: {0}', errorMessage));
             }
             return { success: false };
         }
@@ -857,12 +846,12 @@ Would you like to open your WordPress admin panel now?
             if (exportManager.isContentPublished(html)) {
                 const metadata = exportManager.parsePublicationMetadata(html);
                 const choice = await vscode.window.showWarningMessage(
-                    `This content appears to have already been published to WordPress (Post ID: ${metadata?.wordpressPostId}). Do you want to continue anyway?`,
-                    'Continue Publishing',
-                    'Cancel'
+                    vscode.l10n.t('This content appears to have already been published to WordPress (Post ID: {0}). Do you want to continue anyway?', String(metadata?.wordpressPostId)),
+                    vscode.l10n.t('Continue Publishing'),
+                    vscode.l10n.t('Cancel')
                 );
                 
-                if (choice !== 'Continue Publishing') {
+                if (choice !== vscode.l10n.t('Continue Publishing')) {
                     return false;
                 }
             }
@@ -882,23 +871,23 @@ Would you like to open your WordPress admin panel now?
         const categoryChoice = await vscode.window.showQuickPick(
             [
                 { 
-                    label: `Use default categories: ${defaultCategories.join(', ')}`, 
+                    label: vscode.l10n.t('Use default categories: {0}', defaultCategories.join(', ')), 
                     value: 'default',
-                    description: 'Use the categories configured in settings'
+                    description: vscode.l10n.t('Use the categories configured in settings')
                 },
                 { 
-                    label: 'Customize categories for this post', 
+                    label: vscode.l10n.t('Customize categories for this post'), 
                     value: 'custom',
-                    description: 'Enter custom categories for this specific post'
+                    description: vscode.l10n.t('Enter custom categories for this specific post')
                 },
                 { 
-                    label: 'No categories', 
+                    label: vscode.l10n.t('No categories'), 
                     value: 'none',
-                    description: 'Publish without assigning any categories'
+                    description: vscode.l10n.t('Publish without assigning any categories')
                 }
             ],
             {
-                placeHolder: 'Which categories would you like to assign to this post?'
+                placeHolder: vscode.l10n.t('Which categories would you like to assign to this post?')
             }
         );
 
@@ -911,7 +900,7 @@ Would you like to open your WordPress admin panel now?
             categories = defaultCategories;
         } else if (categoryChoice.value === 'custom') {
             const customCategoriesInput = await vscode.window.showInputBox({
-                prompt: 'Enter categories separated by commas',
+                prompt: vscode.l10n.t('Enter categories separated by commas'),
                 placeHolder: 'e.g., Daily Links, Development, Tech News',
                 value: defaultCategories.join(', ')
             });
@@ -930,11 +919,11 @@ Would you like to open your WordPress admin panel now?
         // Ask user for post status
         const status = await vscode.window.showQuickPick(
             [
-                { label: 'Publish immediately', value: 'publish' },
-                { label: 'Save as draft', value: 'draft' }
+                { label: vscode.l10n.t('Publish immediately'), value: 'publish' },
+                { label: vscode.l10n.t('Save as draft'), value: 'draft' }
             ],
             {
-                placeHolder: 'How would you like to publish this post?'
+                placeHolder: vscode.l10n.t('How would you like to publish this post?')
             }
         );
 
@@ -951,23 +940,23 @@ Would you like to open your WordPress admin panel now?
             const tagChoice = await vscode.window.showQuickPick(
                 [
                     { 
-                        label: `Use ${detectedTags.length} auto-detected tags`, 
+                        label: vscode.l10n.t('Use {0} auto-detected tags', String(detectedTags.length)), 
                         value: 'auto',
                         description: detectedTags.slice(0, 5).join(', ') + (detectedTags.length > 5 ? '...' : '')
                     },
                     { 
-                        label: 'Customize tags', 
+                        label: vscode.l10n.t('Customize tags'), 
                         value: 'custom',
-                        description: 'Edit the detected tags'
+                        description: vscode.l10n.t('Edit the detected tags')
                     },
                     { 
-                        label: 'No tags', 
+                        label: vscode.l10n.t('No tags'), 
                         value: 'none',
-                        description: 'Publish without tags'
+                        description: vscode.l10n.t('Publish without tags')
                     }
                 ],
                 {
-                    placeHolder: 'Tags detected automatically from content. How would you like to proceed?'
+                    placeHolder: vscode.l10n.t('Tags detected automatically from content. How would you like to proceed?')
                 }
             );
 
@@ -977,7 +966,7 @@ Would you like to open your WordPress admin panel now?
 
             if (tagChoice.value === 'custom') {
                 const customTagsInput = await vscode.window.showInputBox({
-                    prompt: 'Enter tags separated by commas',
+                    prompt: vscode.l10n.t('Enter tags separated by commas'),
                     placeHolder: 'e.g., .net, c#, azure, javascript',
                     value: detectedTags.join(', ')
                 });

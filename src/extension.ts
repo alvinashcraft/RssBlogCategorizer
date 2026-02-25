@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
             await provider.refresh();
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            vscode.window.showErrorMessage(`Failed to refresh feeds: ${errorMessage}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to refresh feeds: {0}', errorMessage));
             console.error('Refresh command failed:', error);
         }
     });
@@ -35,13 +35,13 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             const posts = await provider.getAllPosts();
             if (posts.length === 0) {
-                vscode.window.showWarningMessage('No posts available to export. Please refresh the feed first.');
+                vscode.window.showWarningMessage(vscode.l10n.t('No posts available to export. Please refresh the feed first.'));
                 return;
             }
             await exportManager.exportAsMarkdown(posts);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            vscode.window.showErrorMessage(`Failed to export Markdown: ${errorMessage}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to export Markdown: {0}', errorMessage));
             console.error('Markdown export failed:', error);
         }
     });
@@ -50,13 +50,13 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             const posts = await provider.getAllPosts();
             if (posts.length === 0) {
-                vscode.window.showWarningMessage('No posts available to export. Please refresh the feed first.');
+                vscode.window.showWarningMessage(vscode.l10n.t('No posts available to export. Please refresh the feed first.'));
                 return;
             }
             await exportManager.exportAsHtml(posts);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            vscode.window.showErrorMessage(`Failed to export HTML: ${errorMessage}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to export HTML: {0}', errorMessage));
             console.error('HTML export failed:', error);
         }
     });
@@ -73,18 +73,18 @@ export function activate(context: vscode.ExtensionContext) {
             const currentFeedUrl = config.get<string>('feedUrl') || 'https://dev.to/feed';
             
             const feedUrl = await vscode.window.showInputBox({
-                prompt: 'Set RSS feed URL',
+                prompt: vscode.l10n.t('Set RSS feed URL'),
                 placeHolder: 'https://example.com/feed.xml',
                 value: currentFeedUrl,
                 validateInput: (value) => {
                     if (!value) {
-                        return 'URL cannot be empty';
+                        return vscode.l10n.t('URL cannot be empty');
                     }
                     try {
                         new URL(value);
                         return null; // Valid URL
                     } catch {
-                        return 'Please enter a valid URL (e.g., https://example.com/feed.xml)';
+                        return vscode.l10n.t('Please enter a valid URL (e.g., https://example.com/feed.xml)');
                     }
                 }
             });
@@ -92,11 +92,11 @@ export function activate(context: vscode.ExtensionContext) {
             if (feedUrl && feedUrl !== currentFeedUrl) {
                 await provider.setFeedUrl(feedUrl);
                 await provider.refresh();
-                vscode.window.showInformationMessage(`RSS feed updated to: ${feedUrl}`);
+                vscode.window.showInformationMessage(vscode.l10n.t('RSS feed updated to: {0}', feedUrl));
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            vscode.window.showErrorMessage(`Failed to update feed URL: ${errorMessage}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to update feed URL: {0}', errorMessage));
             console.error('Set feed URL failed:', error);
         }
     });
@@ -107,7 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
         
         // Get username
         const username = await vscode.window.showInputBox({
-            prompt: 'Enter NewsBlur username',
+            prompt: vscode.l10n.t('Enter NewsBlur username'),
             placeHolder: 'username',
             value: currentUsername
         });
@@ -118,9 +118,9 @@ export function activate(context: vscode.ExtensionContext) {
         
         // Get password securely
         const password = await vscode.window.showInputBox({
-            prompt: `Enter NewsBlur password for user: ${username}`,
+            prompt: vscode.l10n.t('Enter NewsBlur password for user: {0}', username),
             password: true,
-            placeHolder: 'Enter your NewsBlur password'
+            placeHolder: vscode.l10n.t('Enter your NewsBlur password')
         });
         
         if (!password) {
@@ -137,12 +137,12 @@ export function activate(context: vscode.ExtensionContext) {
             // Enable API usage
             await config.update('useNewsblurApi', true, vscode.ConfigurationTarget.Global);
             
-            vscode.window.showInformationMessage('NewsBlur credentials saved successfully! API mode enabled.');
+            vscode.window.showInformationMessage(vscode.l10n.t('NewsBlur credentials saved successfully! API mode enabled.'));
             
             // Refresh to use new credentials
             await provider.refresh();
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to save NewsBlur credentials: ${error}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to save NewsBlur credentials: {0}', String(error)));
         }
     });
 
@@ -157,13 +157,13 @@ export function activate(context: vscode.ExtensionContext) {
     const publishToWordpressCommand = vscode.commands.registerCommand('rssBlogCategorizer.publishToWordpress', async () => {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) {
-            vscode.window.showErrorMessage('No active editor found. Please open an HTML file to publish.');
+            vscode.window.showErrorMessage(vscode.l10n.t('No active editor found. Please open an HTML file to publish.'));
             return;
         }
 
         const document = activeEditor.document;
         if (!document.fileName.endsWith('.html')) {
-            vscode.window.showErrorMessage('Please open an HTML file to publish to WordPress.');
+            vscode.window.showErrorMessage(vscode.l10n.t('Please open an HTML file to publish to WordPress.'));
             return;
         }
 
@@ -173,10 +173,10 @@ export function activate(context: vscode.ExtensionContext) {
         
         if (!isDewDrop) {
             const proceed = await vscode.window.showWarningMessage(
-                'This doesn\'t appear to be a Dew Drop post. Do you want to publish it anyway?',
-                'Yes', 'No'
+                vscode.l10n.t('This doesn\'t appear to be a Dew Drop post. Do you want to publish it anyway?'),
+                vscode.l10n.t('Yes'), vscode.l10n.t('No')
             );
-            if (proceed !== 'Yes') {
+            if (proceed !== vscode.l10n.t('Yes')) {
                 return;
             }
         }
@@ -187,7 +187,7 @@ export function activate(context: vscode.ExtensionContext) {
     const openWysiwygEditorCommand = vscode.commands.registerCommand('rssBlogCategorizer.openWysiwygEditor', async () => {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) {
-            vscode.window.showErrorMessage('No active editor found. Please open an HTML or Markdown file first.');
+            vscode.window.showErrorMessage(vscode.l10n.t('No active editor found. Please open an HTML or Markdown file first.'));
             return;
         }
 
@@ -196,7 +196,7 @@ export function activate(context: vscode.ExtensionContext) {
         const isMarkdown = document.fileName.endsWith('.md') || document.fileName.endsWith('.markdown');
         
         if (!isHtml && !isMarkdown) {
-            vscode.window.showErrorMessage('Please open an HTML or Markdown file to edit with the WYSIWYG editor.');
+            vscode.window.showErrorMessage(vscode.l10n.t('Please open an HTML or Markdown file to edit with the WYSIWYG editor.'));
             return;
         }
 
@@ -207,7 +207,7 @@ export function activate(context: vscode.ExtensionContext) {
         const editedContent = await editorManager.openEditor(content, { fileName, fileType });
         
         if (editedContent) {
-            vscode.window.showInformationMessage('Content updated successfully!');
+            vscode.window.showInformationMessage(vscode.l10n.t('Content updated successfully!'));
         }
     });
 

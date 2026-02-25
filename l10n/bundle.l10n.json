@@ -1,0 +1,208 @@
+{
+  "Failed to refresh feeds: {0}": {
+    "message": "Failed to refresh feeds: {0}",
+    "comment": ["The error message from the refresh operation"]
+  },
+  "No posts available to export. Please refresh the feed first.": "Warning shown when trying to export with no posts loaded",
+  "Failed to export Markdown: {0}": {
+    "message": "Failed to export Markdown: {0}",
+    "comment": ["The error message from the export operation"]
+  },
+  "Failed to export HTML: {0}": {
+    "message": "Failed to export HTML: {0}",
+    "comment": ["The error message from the export operation"]
+  },
+  "Set RSS feed URL": "Prompt text for the RSS feed URL input box",
+  "URL cannot be empty": "Validation error when empty URL is entered",
+  "Please enter a valid URL (e.g., https://example.com/feed.xml)": "Validation error for invalid URL format",
+  "RSS feed updated to: {0}": {
+    "message": "RSS feed updated to: {0}",
+    "comment": ["The new feed URL"]
+  },
+  "Failed to update feed URL: {0}": {
+    "message": "Failed to update feed URL: {0}",
+    "comment": ["The error message"]
+  },
+  "Enter NewsBlur username": "Prompt for NewsBlur username input",
+  "Enter NewsBlur password for user: {0}": {
+    "message": "Enter NewsBlur password for user: {0}",
+    "comment": ["The NewsBlur username"]
+  },
+  "Enter your NewsBlur password": "Placeholder text for NewsBlur password input",
+  "NewsBlur credentials saved successfully! API mode enabled.": "Info message after saving NewsBlur credentials",
+  "Failed to save NewsBlur credentials: {0}": {
+    "message": "Failed to save NewsBlur credentials: {0}",
+    "comment": ["The error message"]
+  },
+  "No active editor found. Please open an HTML file to publish.": "Error when no editor is open for WordPress publishing",
+  "Please open an HTML file to publish to WordPress.": "Error when non-HTML file is open for WordPress publishing",
+  "This doesn't appear to be a Dew Drop post. Do you want to publish it anyway?": "Warning prompt for non-Dew Drop posts",
+  "Yes": "Affirmative button label",
+  "No": "Negative button label",
+  "No active editor found. Please open an HTML or Markdown file first.": "Error when no editor is open for WYSIWYG",
+  "Please open an HTML or Markdown file to edit with the WYSIWYG editor.": "Error when unsupported file type is open",
+  "Content updated successfully!": "Info message after WYSIWYG content update",
+  "{0} posts": {
+    "message": "{0} posts",
+    "comment": ["The number of posts in a category"]
+  },
+  "Loading feed data...": "Loading indicator in tree view",
+  "No posts loaded - click refresh to load feeds": "Summary when no posts are loaded",
+  "Total: {0} post(s) fetched and categorized": {
+    "message": "Total: {0} post(s) fetched and categorized",
+    "comment": ["The total number of posts"]
+  },
+  "URL must be a non-empty string": "Validation error for empty URL",
+  "URL must use HTTP or HTTPS protocol": "Validation error for invalid URL protocol",
+  "Invalid URL format. Please provide a valid URL (e.g., https://example.com/feed.xml)": "Validation error for malformed URL",
+  "NewsBlur API cancelled. Using RSS feed (limited to ~25 items).": "Info when user cancels NewsBlur API and falls back to RSS",
+  "NewsBlur API is enabled but username not configured. Using RSS feed (limited to ~25 items).": "Warning when NewsBlur API is enabled without username",
+  "Failed to load RSS feed: {0}": {
+    "message": "Failed to load RSS feed: {0}",
+    "comment": ["The error message"]
+  },
+  "Failed to fetch Dew Drop number: {0}": {
+    "message": "Failed to fetch Dew Drop number: {0}",
+    "comment": ["The error message"]
+  },
+  "Save {0}": {
+    "message": "Save {0}",
+    "comment": ["The format name (HTML or Markdown) in uppercase"]
+  },
+  "Would you like to edit this post in the WYSIWYG editor?": "Prompt after export to open in editor",
+  "Open in Editor": "Button to open exported file in WYSIWYG editor",
+  "No Thanks": "Button to decline opening in WYSIWYG editor",
+  "Failed to export blog posts: {0}": {
+    "message": "Failed to export blog posts: {0}",
+    "comment": ["The error message"]
+  },
+  "Application Password setup instructions are ready.": "Info message when WordPress password instructions are available",
+  "View Instructions": "Button to view WordPress Application Password instructions",
+  "Open WordPress Admin": "Button to open WordPress admin panel",
+  "Continue with Setup": "Button to continue credential setup",
+  "Please set your blog URL first": "Error when blog URL is not configured",
+  "WordPress REST API requires an Application Password for secure authentication. Would you like to see setup instructions first?": "Prompt before WordPress credential entry",
+  "Show Instructions": "Button to show setup instructions",
+  "I have my credentials ready": "Button to skip instructions",
+  "Cancel": "Cancel button label",
+  "Ready to enter your credentials?": "Prompt after viewing instructions",
+  "Yes, continue": "Button to continue with setup",
+  "Enter WordPress blog URL (e.g., https://yourblog.com)": "Prompt for WordPress blog URL input",
+  "Invalid blog URL format. Please enter a valid URL (e.g., https://yourblog.com)": "Validation error for invalid blog URL",
+  "Enter WordPress username (same as your login username)": "Prompt for WordPress username input",
+  "Enter WordPress Application Password for user: {0}": {
+    "message": "Enter WordPress Application Password for user: {0}",
+    "comment": ["The WordPress username"]
+  },
+  "WordPress credentials saved successfully! Use \"Test WordPress Connection\" to verify.": "Info after saving WordPress credentials",
+  "Failed to save WordPress credentials: {0}": {
+    "message": "Failed to save WordPress credentials: {0}",
+    "comment": ["The error message"]
+  },
+  "WordPress credentials not configured. Please set them first.": "Error when WordPress credentials are missing",
+  "WordPress REST API endpoint not accessible at {0}/wp-json/wp/v2/. Please check:\n1. WordPress REST API is enabled\n2. Your blog URL is correct\n3. No security plugins are blocking REST API": {
+    "message": "WordPress REST API endpoint not accessible at {0}/wp-json/wp/v2/. Please check:\n1. WordPress REST API is enabled\n2. Your blog URL is correct\n3. No security plugins are blocking REST API",
+    "comment": ["The blog URL"]
+  },
+  "WordPress REST API connection successful!\nWorking authentication methods: {0}": {
+    "message": "WordPress REST API connection successful!\nWorking authentication methods: {0}",
+    "comment": ["Comma-separated list of working auth methods"]
+  },
+  "WordPress connection failed. All authentication methods failed.\n\nTroubleshooting info:\n{0}\n\nCommon solutions:\n1. Create an Application Password in WordPress Admin → Users → Profile\n2. Check if security plugins are blocking REST API\n3. Verify username is correct and user has 'publish_posts' capability\n4. Try temporarily disabling security plugins": {
+    "message": "WordPress connection failed. All authentication methods failed.\n\nTroubleshooting info:\n{0}\n\nCommon solutions:\n1. Create an Application Password in WordPress Admin → Users → Profile\n2. Check if security plugins are blocking REST API\n3. Verify username is correct and user has 'publish_posts' capability\n4. Try temporarily disabling security plugins",
+    "comment": ["The troubleshooting info gathered"]
+  },
+  "Invalid post data: title and content are required": "Error when post data is incomplete",
+  "Post {0} successfully! Post ID: {1}": {
+    "message": "Post {0} successfully! Post ID: {1}",
+    "comment": ["The status (published/saved as draft)", "The WordPress post ID"]
+  },
+  "published": "Post status when published",
+  "saved as draft": "Post status when saved as draft",
+  "Categories: {0}": {
+    "message": "Categories: {0}",
+    "comment": ["Comma-separated list of category names"]
+  },
+  "Tags: {0} detected": {
+    "message": "Tags: {0} detected",
+    "comment": ["The number of detected tags"]
+  },
+  "Failed to create post: No post ID returned": "Error when WordPress API doesn't return a post ID",
+  "Failed to publish post: Could not resolve hostname '{0}'. Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.": {
+    "message": "Failed to publish post: Could not resolve hostname '{0}'. Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.",
+    "comment": ["The hostname that could not be resolved"]
+  },
+  "Failed to publish post: Connection refused. Please verify your WordPress Blog URL and that the site is accessible.": "Error when connection is refused",
+  "Failed to publish post: {0}": {
+    "message": "Failed to publish post: {0}",
+    "comment": ["The error message"]
+  },
+  "This content appears to have already been published to WordPress (Post ID: {0}). Do you want to continue anyway?": {
+    "message": "This content appears to have already been published to WordPress (Post ID: {0}). Do you want to continue anyway?",
+    "comment": ["The WordPress post ID of the existing post"]
+  },
+  "Continue Publishing": "Button to continue publishing despite duplicate",
+  "Use default categories: {0}": {
+    "message": "Use default categories: {0}",
+    "comment": ["Comma-separated list of default category names"]
+  },
+  "Use the categories configured in settings": "Description for using default categories",
+  "Customize categories for this post": "Option to enter custom categories",
+  "Enter custom categories for this specific post": "Description for customizing categories",
+  "No categories": "Option to publish without categories",
+  "Publish without assigning any categories": "Description for no categories option",
+  "Which categories would you like to assign to this post?": "Placeholder for categories quick pick",
+  "Enter categories separated by commas": "Prompt for custom categories input",
+  "Publish immediately": "Option to publish post immediately",
+  "Save as draft": "Option to save post as draft",
+  "How would you like to publish this post?": "Placeholder for publish status quick pick",
+  "Use {0} auto-detected tags": {
+    "message": "Use {0} auto-detected tags",
+    "comment": ["The number of auto-detected tags"]
+  },
+  "Customize tags": "Option to customize detected tags",
+  "Edit the detected tags": "Description for customize tags option",
+  "No tags": "Option to publish without tags",
+  "Publish without tags": "Description for no tags option",
+  "Tags detected automatically from content. How would you like to proceed?": "Placeholder for tags quick pick",
+  "Enter tags separated by commas": "Prompt for custom tags input",
+  "Editing: {0}": {
+    "message": "Editing: {0}",
+    "comment": ["The filename being edited"]
+  },
+  "Dew Drop {0} Editor": {
+    "message": "Dew Drop {0} Editor",
+    "comment": ["The editor type (HTML or Markdown)"]
+  },
+  "No document to save to.": "Error when no document is available to save",
+  "Failed to save changes: {0}": {
+    "message": "Failed to save changes: {0}",
+    "comment": ["The error message"]
+  },
+  "Content saved! Would you like to publish to WordPress?": "Prompt after saving from WYSIWYG editor",
+  "Failed to open document for publishing: {0}": {
+    "message": "Failed to open document for publishing: {0}",
+    "comment": ["The error message"]
+  },
+  "Loading editor...": "Loading text shown while WYSIWYG editor initializes",
+  "Loading Editor...": "Loading text shown while Markdown editor initializes",
+  "Close without saving": "Tooltip for cancel button",
+  "Save changes to file (keep editor open)": "Tooltip for save button",
+  "Save changes and close editor": "Tooltip for save and close button",
+  "Save and prepare for WordPress publishing": "Tooltip for save and publish button",
+  "Save": "Save button label",
+  "Save & Close": "Save and close button label",
+  "Save & Publish": "Save and publish button label",
+  "You have unsaved changes. Are you sure you want to close?": "Confirmation dialog for closing with unsaved changes",
+  "Last saved: {0}": {
+    "message": "Last saved: {0}",
+    "comment": ["The timestamp of the last save"]
+  },
+  "Editor Loading Error": "Title for editor loading error message",
+  "Retry": "Button label for retrying editor load",
+  "Failed to load the markdown editor. Please check your internet connection and try again.": "Error when EasyMDE fails to load",
+  "Failed to initialize the markdown editor: {0}": {
+    "message": "Failed to initialize the markdown editor: {0}",
+    "comment": ["The error message"]
+  }
+}

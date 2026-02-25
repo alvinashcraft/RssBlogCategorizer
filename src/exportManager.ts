@@ -39,7 +39,7 @@ export class ExportManager {
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error('Failed to export as Markdown:', error);
-            vscode.window.showErrorMessage(`Failed to export Markdown: ${errorMessage}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to export Markdown: {0}', errorMessage));
             throw error; // Re-throw to let caller handle if needed
         }
     }
@@ -51,7 +51,7 @@ export class ExportManager {
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error('Failed to export as HTML:', error);
-            vscode.window.showErrorMessage(`Failed to export HTML: ${errorMessage}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to export HTML: {0}', errorMessage));
             throw error; // Re-throw to let caller handle if needed
         }
     }
@@ -264,7 +264,7 @@ export class ExportManager {
             
         } catch (error) {
             console.error('Error fetching latest Dew Drop number:', error);
-            vscode.window.showErrorMessage(`Failed to fetch Dew Drop number: ${error}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to fetch Dew Drop number: {0}', String(error)));
             console.log('Using fallback number 4506');
             return 4506; // Fallback - change this number as needed
         }
@@ -513,7 +513,7 @@ export class ExportManager {
         
         const uri = await vscode.window.showSaveDialog({
             defaultUri: defaultUri,
-            saveLabel: `Save ${format.toUpperCase()}`,
+            saveLabel: vscode.l10n.t('Save {0}', format.toUpperCase()),
             filters: {
                 [format.toUpperCase()]: [extension]
             }
@@ -530,17 +530,17 @@ export class ExportManager {
                 // For HTML and Markdown files, offer to open in WYSIWYG editor
                 if (extension === 'html' || extension === 'md') {
                     const choice = await vscode.window.showInformationMessage(
-                        'Would you like to edit this post in the WYSIWYG editor?',
-                        'Open in Editor',
-                        'No Thanks'
+                        vscode.l10n.t('Would you like to edit this post in the WYSIWYG editor?'),
+                        vscode.l10n.t('Open in Editor'),
+                        vscode.l10n.t('No Thanks')
                     );
                     
-                    if (choice === 'Open in Editor') {
+                    if (choice === vscode.l10n.t('Open in Editor')) {
                         await vscode.commands.executeCommand('rssBlogCategorizer.openWysiwygEditor');
                     }
                 }
             } catch (error) {
-                vscode.window.showErrorMessage(`Failed to export blog posts: ${error}`);
+                vscode.window.showErrorMessage(vscode.l10n.t('Failed to export blog posts: {0}', String(error)));
             }
         }
     }

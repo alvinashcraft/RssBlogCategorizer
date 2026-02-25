@@ -302,6 +302,26 @@ All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the 
 - **[Development Roadmap](docs/ROADMAP.md)** - Planned features and upcoming enhancements
 - **[Development Guide](https://github.com/alvinashcraft/RssBlogCategorizer/blob/main/docs/dev/DEVELOPMENT.md)** - Development setup, building, and contribution information
 
+## Localization
+
+The extension is localized and currently supports:
+
+- **English** (default)
+- **Spanish** (Español)
+
+The UI language is determined by your VS Code display language setting. All commands, settings, tree view labels, messages, and webview editor controls are translated.
+
+### Contributing Translations
+
+To add a new language:
+
+1. Copy `package.nls.json` to `package.nls.LANGID.json` (e.g., `package.nls.fr.json` for French)
+2. Copy `l10n/bundle.l10n.json` to `l10n/bundle.l10n.LANGID.json` (e.g., `l10n/bundle.l10n.fr.json`)
+3. Translate all string values in both files (keep the keys unchanged)
+4. Submit a pull request
+
+See the [VS Code Localization documentation](https://code.visualstudio.com/api/references/vscode-api#l10n) for more details.
+
 ## Development
 
 Interested in contributing or building from source? See [DEVELOPMENT.md](https://github.com/alvinashcraft/RssBlogCategorizer/blob/main/docs/dev/DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.

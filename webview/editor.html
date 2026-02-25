@@ -101,7 +101,7 @@
     </style>
 </head>
 <body>
-    <div id="loading" class="loading">Loading editor...</div>
+    <div id="loading" class="loading">{{i18nLoading}}</div>
     
     <div id="editor-container" style="display: none;">
         <textarea id="editor">{{initialContent}}</textarea>
@@ -110,10 +110,10 @@
     <div class="button-bar">
         <div class="last-saved" id="last-saved"></div>
         <div class="button-group">
-            <button id="cancel-btn" title="Close without saving">Cancel</button>
-            <button id="save-btn" title="Save changes to file (keep editor open)">Save</button>
-            <button id="save-close-btn" title="Save changes and close editor">Save & Close</button>
-            <button id="save-publish-btn" title="Save and prepare for WordPress publishing">Save & Publish</button>
+            <button id="cancel-btn" title="{{i18nCancelTooltip}}">{{i18nCancel}}</button>
+            <button id="save-btn" title="{{i18nSaveTooltip}}">{{i18nSave}}</button>
+            <button id="save-close-btn" title="{{i18nSaveCloseTooltip}}">{{i18nSaveClose}}</button>
+            <button id="save-publish-btn" title="{{i18nSavePublishTooltip}}">{{i18nSavePublish}}</button>
         </div>
     </div>
     
@@ -385,7 +385,7 @@
                     second: '2-digit',
                     hour12: true 
                 });
-                document.getElementById('last-saved').textContent = `Last saved: ${timeString}`;
+                document.getElementById('last-saved').textContent = '{{i18nLastSavedFormat}}'.replace('{time}', timeString);
             }
             
             // Button handlers
@@ -420,7 +420,7 @@
             document.getElementById('cancel-btn').addEventListener('click', function() {
                 const state = vscode.getState();
                 if (state && state.isDirty) {
-                    if (confirm('You have unsaved changes. Are you sure you want to close?')) {
+                    if (confirm('{{i18nUnsavedChanges}}')) {
                         vscode.postMessage({ command: 'cancel' });
                     }
                 } else {

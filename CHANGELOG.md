@@ -4,6 +4,20 @@ All notable changes to the "Dev Feed Curator" extension will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.7.0] - 2026
+
+### Added
+
+- Full extension localization support for **English** and **Spanish**
+- Localized package contribution metadata via `package.nls.json` and `package.nls.es.json`
+- Runtime string localization bundles via `l10n/bundle.l10n.json` and `l10n/bundle.l10n.es.json`
+
+### Changed
+
+- Localized user-facing strings across command flows, notifications, prompts, and tree view labels
+- Localized WYSIWYG editor controls for both TinyMCE HTML and EasyMDE Markdown webviews
+- Updated build pipeline to package localization resources from the `l10n` folder
+
 ## [3.0.0] - 2025
 
 ### Changed

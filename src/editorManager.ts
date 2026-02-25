@@ -35,7 +35,7 @@ export class EditorManager {
     
     private createPanel(content: string, metadata?: { fileName?: string; fileType?: 'html' | 'markdown' }): void {
         const editorTypeLabel = this.editorType === 'markdown' ? 'Markdown' : 'HTML';
-        const title = metadata?.fileName ? `Editing: ${metadata.fileName}` : `Dew Drop ${editorTypeLabel} Editor`;
+        const title = metadata?.fileName ? vscode.l10n.t('Editing: {0}', metadata.fileName) : vscode.l10n.t('Dew Drop {0} Editor', editorTypeLabel);
         
         this.panel = vscode.window.createWebviewPanel(
             'dewDropEditor',
@@ -172,6 +172,19 @@ export class EditorManager {
         html = html.replace(/{{baseUrl}}/g, baseUrl);
         html = html.replace('{{initialContent}}', this.escapeHtml(bodyContent));
         
+        // Replace i18n placeholders
+        html = html.replace(/{{i18nLoading}}/g, vscode.l10n.t('Loading editor...'));
+        html = html.replace(/{{i18nCancel}}/g, vscode.l10n.t('Cancel'));
+        html = html.replace(/{{i18nCancelTooltip}}/g, vscode.l10n.t('Close without saving'));
+        html = html.replace(/{{i18nSave}}/g, vscode.l10n.t('Save'));
+        html = html.replace(/{{i18nSaveTooltip}}/g, vscode.l10n.t('Save changes to file (keep editor open)'));
+        html = html.replace(/{{i18nSaveClose}}/g, vscode.l10n.t('Save & Close'));
+        html = html.replace(/{{i18nSaveCloseTooltip}}/g, vscode.l10n.t('Save changes and close editor'));
+        html = html.replace(/{{i18nSavePublish}}/g, vscode.l10n.t('Save & Publish'));
+        html = html.replace(/{{i18nSavePublishTooltip}}/g, vscode.l10n.t('Save and prepare for WordPress publishing'));
+        html = html.replace(/{{i18nUnsavedChanges}}/g, vscode.l10n.t('You have unsaved changes. Are you sure you want to close?'));
+        html = html.replace(/{{i18nLastSavedFormat}}/g, vscode.l10n.t('Last saved: {0}', '{time}'));
+        
         return html;
     }
     
@@ -208,6 +221,23 @@ export class EditorManager {
         html = html.replace('{{editorCssPath}}', editorCssUri.toString());
         html = html.replace('{{editorJsPath}}', editorJsUri.toString());
         
+        // Replace i18n placeholders (HTML template)
+        html = html.replace(/{{i18nLoading}}/g, vscode.l10n.t('Loading Editor...'));
+        html = html.replace(/{{i18nCancel}}/g, vscode.l10n.t('Cancel'));
+        html = html.replace(/{{i18nCancelTooltip}}/g, vscode.l10n.t('Close without saving'));
+        html = html.replace(/{{i18nSave}}/g, vscode.l10n.t('Save'));
+        html = html.replace(/{{i18nSaveTooltip}}/g, vscode.l10n.t('Save changes to file (keep editor open)'));
+        html = html.replace(/{{i18nSaveClose}}/g, vscode.l10n.t('Save & Close'));
+        html = html.replace(/{{i18nSaveCloseTooltip}}/g, vscode.l10n.t('Save changes and close editor'));
+        html = html.replace(/{{i18nSavePublish}}/g, vscode.l10n.t('Save & Publish'));
+        html = html.replace(/{{i18nSavePublishTooltip}}/g, vscode.l10n.t('Save and prepare for WordPress publishing'));
+        // Replace i18n placeholders (data attributes for external JS)
+        html = html.replace(/{{i18nEditorLoadingError}}/g, this.escapeHtml(vscode.l10n.t('Editor Loading Error')));
+        html = html.replace(/{{i18nRetry}}/g, this.escapeHtml(vscode.l10n.t('Retry')));
+        html = html.replace(/{{i18nFailedToLoadMarkdownEditor}}/g, this.escapeHtml(vscode.l10n.t('Failed to load the markdown editor. Please check your internet connection and try again.')));
+        html = html.replace(/{{i18nFailedToInitMarkdownEditor}}/g, this.escapeHtml(vscode.l10n.t('Failed to initialize the markdown editor: {0}', '{error}')));
+        html = html.replace(/{{i18nLastSavedFormat}}/g, this.escapeHtml(vscode.l10n.t('Last saved: {0}', '{time}')));
+        
         return html;
     }
     
@@ -228,7 +258,7 @@ export class EditorManager {
     
     private async saveContent(content: string, closeAfterSave: boolean = false, formatAfterSave: boolean = false): Promise<void> {
         if (!this.originalDocumentUri) {
-            const error = 'No document to save to.';
+            const error = vscode.l10n.t('No document to save to.');
             console.error(error);
             vscode.window.showErrorMessage(error);
             return;
@@ -292,7 +322,7 @@ export class EditorManager {
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error('Failed to save changes:', errorMessage, error);
-            vscode.window.showErrorMessage(`Failed to save changes: ${errorMessage}`);
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to save changes: {0}', errorMessage));
             throw error; // Re-throw to let caller handle if needed
         }
     }
@@ -344,12 +374,12 @@ export class EditorManager {
         
         // Trigger WordPress publishing
         const result = await vscode.window.showInformationMessage(
-            'Content saved! Would you like to publish to WordPress?',
-            'Yes',
-            'No'
+            vscode.l10n.t('Content saved! Would you like to publish to WordPress?'),
+            vscode.l10n.t('Yes'),
+            vscode.l10n.t('No')
         );
         
-        if (result === 'Yes' && this.originalDocumentUri) {
+        if (result === vscode.l10n.t('Yes') && this.originalDocumentUri) {
             try {
                 // Ensure the original document is open and active before publishing
                 const document = await vscode.workspace.openTextDocument(this.originalDocumentUri);
@@ -358,7 +388,7 @@ export class EditorManager {
                 // Now execute the publish command - it will find the active editor
                 await vscode.commands.executeCommand('rssBlogCategorizer.publishToWordpress');
             } catch (error) {
-                vscode.window.showErrorMessage(`Failed to open document for publishing: ${error}`);
+                vscode.window.showErrorMessage(vscode.l10n.t('Failed to open document for publishing: {0}', String(error)));
             }
         }
         
