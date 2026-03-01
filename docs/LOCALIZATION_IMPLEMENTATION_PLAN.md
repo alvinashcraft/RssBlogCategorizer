@@ -35,8 +35,7 @@ These files localize all runtime messages, prompts, errors, and UI strings:
 1. ✅ `docs/LOCALIZATION.md` - Comprehensive localization documentation
 2. ✅ `README.md` - Updated to list all 6 supported languages
 
-**Total New Files:** 9 files (8 localization + 1 documentation)  
-**Total Lines of Code:** ~720 lines across all localization files
+**Summary:** Added new localization bundles for German, French, Italian, and Portuguese, along with updated localization documentation and README.  
 
 ---
 
