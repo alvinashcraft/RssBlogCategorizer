@@ -43,7 +43,7 @@ Location: `./l10n/` (configurable via `"l10n": "./l10n"` in `package.json`)
 - `l10n/bundle.l10n.it.json` - Italian runtime messages
 - `l10n/bundle.l10n.pt.json` - Portuguese runtime messages
 
-These files contain 107 localized entries (some with message/comment objects) for:
+These files contain 110 localized string entries as flat key/value translation maps. Any message/comment metadata is defined only in the source `bundle.l10n.json` file used at build time. They cover:
 - Error messages and warnings
 - User prompts and input boxes
 - Status messages and notifications
