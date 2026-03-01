@@ -22,7 +22,7 @@ After changing language, verify these key areas:
 ### 1. Explorer Panel (5 seconds)
 - Look for "Dev Blog Posts" (or translated name) in Explorer sidebar
 - Click refresh button
-- Verify category labels appear in correct language
+- Verify the view title and refresh button tooltip appear in the selected language (category names themselves may remain unchanged)
 
 ### 2. Command Palette (10 seconds)
 - Open Command Palette
