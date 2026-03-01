@@ -50,9 +50,17 @@ src/
 └── wordpressManager.ts # WordPress REST API publishing
 l10n/
 ├── bundle.l10n.json    # Runtime default (English) localization bundle
-└── bundle.l10n.es.json # Runtime Spanish localization bundle
+├── bundle.l10n.es.json # Runtime Spanish localization bundle
+├── bundle.l10n.de.json # Runtime German localization bundle
+├── bundle.l10n.fr.json # Runtime French localization bundle
+├── bundle.l10n.it.json # Runtime Italian localization bundle
+└── bundle.l10n.pt.json # Runtime Portuguese localization bundle
 package.nls.json        # Extension manifest default (English) localization
 package.nls.es.json     # Extension manifest Spanish localization
+package.nls.de.json     # Extension manifest German localization
+package.nls.fr.json     # Extension manifest French localization
+package.nls.it.json     # Extension manifest Italian localization
+package.nls.pt.json     # Extension manifest Portuguese localization
 categories.json        # Category configuration
 books.json            # Book recommendations for exports
 package.json          # Extension manifest
@@ -60,7 +68,17 @@ package.json          # Extension manifest
 
 ## Localization
 
-Version 3.7.0 introduces localized UI support for English and Spanish.
+Version 3.7.0 introduced localized UI support for English and Spanish. Version 3.8.0 expanded support to include German, French, Italian, and Portuguese.
+
+### Supported Languages
+
+The extension supports 6 languages:
+- English (en) - Default
+- Spanish (es / Español)
+- German (de / Deutsch)
+- French (fr / Français)
+- Italian (it / Italiano)
+- Portuguese (pt / Português)
 
 ### Localization Surfaces
 
@@ -71,13 +89,17 @@ Version 3.7.0 introduces localized UI support for English and Spanish.
 ### Adding or Updating Localized Strings
 
 1. Add or update the English source string in code (`vscode.l10n.t(...)`) or `package.json` key references
-2. Add corresponding entries in:
-  - `l10n/bundle.l10n.json` and `l10n/bundle.l10n.es.json` for runtime strings
-  - `package.nls.json` and `package.nls.es.json` for contribution metadata
+2. Add corresponding entries in all language files:
+  - `l10n/bundle.l10n.json`, `l10n/bundle.l10n.es.json`, `l10n/bundle.l10n.de.json`, `l10n/bundle.l10n.fr.json`, `l10n/bundle.l10n.it.json`, `l10n/bundle.l10n.pt.json` for runtime strings
+  - `package.nls.json`, `package.nls.es.json`, `package.nls.de.json`, `package.nls.fr.json`, `package.nls.it.json`, `package.nls.pt.json` for contribution metadata
 3. For webview text, update placeholders in:
   - `webview/editor.html` and/or `webview/markdown-editor.html`
   - Replacement logic in `src/editorManager.ts`
-4. Run `npm run compile` and verify UI in both display languages
+4. Run `npm run compile` and verify UI in all display languages
+
+### Localization Documentation
+
+See `docs/LOCALIZATION.md` for comprehensive localization documentation and `docs/LOCALIZATION_TESTING.md` for testing procedures.
 
 ## Testing
 

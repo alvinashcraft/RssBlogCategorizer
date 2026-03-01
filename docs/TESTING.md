@@ -58,7 +58,7 @@ Use this quick checklist when changing user-facing text:
   - Command titles and settings descriptions
   - Tree view labels, prompts, and notifications
   - HTML and Markdown WYSIWYG editor button labels/tooltips
-2. Switch display language to Spanish and repeat the same checks
+2. Switch display language to Spanish, German, French, Italian, or Portuguese and repeat the same checks
 3. Confirm no raw placeholder keys (`%...%` or `{{...}}`) appear in UI
 4. Run compile and basic tests:
 
@@ -67,10 +67,22 @@ npm run compile
 npm run test:basic
 ```
 
-If a string does not localize, verify matching keys exist in both English and Spanish files:
+If a string does not localize, verify matching keys exist in all language files:
 
-- `package.nls.json` and `package.nls.es.json`
-- `l10n/bundle.l10n.json` and `l10n/bundle.l10n.es.json`
+- `package.nls.json`, `package.nls.es.json`, `package.nls.de.json`, `package.nls.fr.json`, `package.nls.it.json`, `package.nls.pt.json`
+- `l10n/bundle.l10n.json`, `l10n/bundle.l10n.es.json`, `l10n/bundle.l10n.de.json`, `l10n/bundle.l10n.fr.json`, `l10n/bundle.l10n.it.json`, `l10n/bundle.l10n.pt.json`
+
+### Supported Languages (3.8.0+)
+
+The extension supports 6 languages:
+- English (en) - Default
+- Spanish (es / Español)
+- German (de / Deutsch)
+- French (fr / Français)
+- Italian (it / Italiano)
+- Portuguese (pt / Português)
+
+See `docs/LOCALIZATION_TESTING.md` for detailed localization testing procedures.
 
 ## Test Coverage Summary
 

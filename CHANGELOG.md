@@ -4,7 +4,22 @@ All notable changes to the "Dev Feed Curator" extension will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [3.7.0] - 2026-02-25
+## [3.8.0] - 2025-03-01
+
+### Added
+
+- **Expanded localization support** - Added German (Deutsch), French (Français), Italian (Italiano), and Portuguese (Português)
+- Extension now supports 6 languages total: English, Spanish, German, French, Italian, and Portuguese
+- All user-facing strings translated including commands, settings, messages, and editor UI
+- Comprehensive localization documentation in `docs/LOCALIZATION.md`
+- Localization testing guide in `docs/LOCALIZATION_TESTING.md`
+
+### Changed
+
+- Updated README to reflect all supported languages
+- Enhanced localization infrastructure with consistent placeholder handling across all languages
+
+## [3.7.0] - 2025-02-25
 
 ### Added
 
