@@ -632,6 +632,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         if (!submissionApiBaseUrl || !submissionApiKey) {
             console.warn('Submission API source is enabled but base URL or secure API key is missing. Skipping secondary source.');
+            await this.showSubmissionApiConfigurationWarning(!!submissionApiBaseUrl, !!submissionApiKey);
             return;
         }
 
@@ -719,6 +720,36 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         } catch {
             await vscode.window.showWarningMessage(vscode.l10n.t('Invalid submissions API base URL: {0}', baseUrl));
             return undefined;
+        }
+    }
+
+    private async showSubmissionApiConfigurationWarning(hasBaseUrl: boolean, hasApiKey: boolean): Promise<void> {
+        const setApiKeyAction = vscode.l10n.t('Set Submissions API Key');
+
+        if (!hasBaseUrl && !hasApiKey) {
+            const selected = await vscode.window.showWarningMessage(
+                vscode.l10n.t('Submission API source is enabled but submission API base URL and submissions API key are missing.'),
+                setApiKeyAction
+            );
+            if (selected === setApiKeyAction) {
+                await vscode.commands.executeCommand('rssBlogCategorizer.setSubmissionApiKey');
+            }
+            return;
+        }
+
+        if (!hasBaseUrl) {
+            await vscode.window.showWarningMessage(
+                vscode.l10n.t('Submission API source is enabled but submission API base URL is missing.')
+            );
+            return;
+        }
+
+        const selected = await vscode.window.showWarningMessage(
+            vscode.l10n.t('Submission API source is enabled but submissions API key is missing.'),
+            setApiKeyAction
+        );
+        if (selected === setApiKeyAction) {
+            await vscode.commands.executeCommand('rssBlogCategorizer.setSubmissionApiKey');
         }
     }
 

@@ -151,13 +151,19 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const setSubmissionApiKeyCommand = vscode.commands.registerCommand('rssBlogCategorizer.setSubmissionApiKey', async () => {
-        const apiKey = await vscode.window.showInputBox({
+        const rawApiKey = await vscode.window.showInputBox({
             prompt: vscode.l10n.t('Enter submissions API key'),
             password: true,
             placeHolder: vscode.l10n.t('Enter your submissions API key')
         });
 
+        if (rawApiKey === undefined) {
+            return;
+        }
+
+        const apiKey = rawApiKey.trim();
         if (!apiKey) {
+            vscode.window.showWarningMessage(vscode.l10n.t('Submissions API key cannot be empty.'));
             return;
         }
 

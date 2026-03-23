@@ -493,6 +493,44 @@ describe('RSSBlogProvider', () => {
   });
 
   describe('Approved Submissions Secondary Source', () => {
+    it('should show warning and launch key setup command when submissions API key is missing', async () => {
+      const configWithMissingKey = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '2025-01-01T00:00:00Z',
+        refreshInterval: 30,
+        useNewsblurApi: false,
+        newsblurUsername: '',
+        enableSubmissionApiSource: true,
+        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net',
+        submissionApiLookbackDays: 0
+      });
+      workspaceGetConfigStub.returns(configWithMissingKey);
+
+      const executeCommandStub = sinon.stub(vscode.commands, 'executeCommand').resolves(undefined);
+      const warningStub = sinon.stub(vscode.window, 'showWarningMessage').resolves('Set Submissions API Key' as any);
+      const httpsRequestStub = sinon.stub(https, 'request');
+
+      const mockRssResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockRssResponse);
+        return { on: sinon.stub() };
+      });
+
+      await provider.refresh();
+
+      expect(warningStub).to.have.been.called;
+      expect(executeCommandStub).to.have.been.calledWith('rssBlogCategorizer.setSubmissionApiKey');
+      expect(httpsRequestStub).to.not.have.been.called;
+    });
+
     it('should warn and skip secondary source when submissions API base URL is not HTTPS', async () => {
       const configWithHttpBaseUrl = new MockConfiguration({
         feedUrl: 'https://example.com/feed.xml',
