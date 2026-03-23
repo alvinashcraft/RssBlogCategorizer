@@ -6,6 +6,7 @@ Streamline your developer link blogging workflow. Fetch RSS feeds, auto-categori
 
 - **RSS Feed Parsing** - Fetches and parses RSS/Atom feeds with robust error handling
 - **NewsBlur API Integration** - Optionally use NewsBlur API for authenticated access to get more than 25 items
+- **Approved Submissions API Source** - Optionally fetch approved user-submitted links from a second API source after the primary feed load
 - **Smart Categorization** - Automatically categorizes posts by technology (JavaScript, Python, DevOps, etc.)
 - **Tree View Integration** - Displays categorized posts in VS Code sidebar with expandable categories
 - **Export Functionality** - Generates HTML and Markdown files with professional templates
@@ -101,6 +102,22 @@ For enhanced functionality, you can configure NewsBlur API access to retrieve mo
 - More reliable access to popular feeds
 - Better handling of feed redirects and updates
 - Date filtering based on when you shared items in NewsBlur (shared_date) rather than original publication date
+
+### Approved Submissions API Source (Optional)
+
+You can optionally add a second source that runs after the primary NewsBlur/RSS retrieval pass:
+
+1. Set `rssBlogCategorizer.enableSubmissionApiSource` to `true`
+1. Configure `rssBlogCategorizer.submissionApiBaseUrl`
+1. Configure `rssBlogCategorizer.submissionApiKey`
+1. Configure `rssBlogCategorizer.submissionApiLookbackDays`
+
+How it works:
+
+- The extension queries `/api/submissions` with `status=approved`
+- Approved links are added to the same in-memory list and run through the same categorization logic
+- After links are added, the extension calls `/api/submissions/status` and marks those consumed IDs as `processed` to avoid duplicates in future refreshes
+- Set `rssBlogCategorizer.submissionApiLookbackDays` to `0` to include all approved submissions
 
 ### Exporting Posts
 
@@ -244,6 +261,10 @@ Access settings via `File > Preferences > Settings` and search for "Dev Feed Cur
 - **Refresh Interval**: Auto-refresh interval in minutes (when auto-refresh is enabled)
 - **Use NewsBlur API**: Enable NewsBlur API integration for enhanced functionality
 - **NewsBlur Username**: Your NewsBlur account username (password stored securely)
+- **Enable Submission API Source**: Enable second-pass retrieval of approved user-submitted links
+- **Submission API Base URL**: Base URL for your submissions API endpoint
+- **Submission API Key**: API key used for submissions API calls
+- **Submission API Lookback Days**: Days to include when querying approved submissions (`0` means all approved submissions)
 - **WordPress Blog URL**: Your WordPress blog URL (e.g., `https://yourblog.com`)
 - **WordPress Username**: Your WordPress account username (password stored securely)
 - **WordPress Categories**: Default categories to assign to published posts (e.g., "Daily Links", "Development")

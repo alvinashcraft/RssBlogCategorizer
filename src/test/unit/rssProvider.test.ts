@@ -11,6 +11,7 @@ import { MockExtensionContext, MockConfiguration } from '../mocks/mockVscode';
 import { mockRssXml, mockAtomXml, mockDewDropRss, mockCategoriesConfig, mockBlogPosts } from '../mocks/testData';
 import * as fs from 'fs';
 import * as https from 'https';
+import { EventEmitter } from 'events';
 
 describe('RSSBlogProvider', () => {
   let provider: RSSBlogProvider;
@@ -487,6 +488,181 @@ describe('RSSBlogProvider', () => {
       });
 
       await provider.refresh();
+    });
+  });
+
+  describe('Approved Submissions Secondary Source', () => {
+    it('should fetch approved submissions and add them as posts', async () => {
+      const configWithSubmissionsApi = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '',
+        refreshInterval: 30,
+        useNewsblurApi: false,
+        newsblurUsername: '',
+        enableSubmissionApiSource: true,
+        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net',
+        submissionApiKey: 'test-key',
+        submissionApiLookbackDays: 0
+      });
+      workspaceGetConfigStub.returns(configWithSubmissionsApi);
+
+      const mockRssResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockRssResponse);
+        return { on: sinon.stub() };
+      });
+
+      const httpsRequestStub = sinon.stub(https, 'request');
+      httpsRequestStub.callsFake((url: any, options: any, callback: any) => {
+        const req = new EventEmitter() as any;
+        req.write = sinon.stub();
+        req.end = () => {
+          const res = new EventEmitter() as any;
+          res.statusCode = 200;
+          callback(res);
+
+          if (url.pathname === '/api/submissions') {
+            const responseBody = JSON.stringify({
+              totalCount: 2,
+              submissions: [
+                {
+                  id: 'sub-1',
+                  url: 'https://contoso.com/dotnet/new-article',
+                  title: 'A new .NET article',
+                  author: 'Alvin',
+                  submittedDateTimeUtc: '2026-03-22T15:30:00Z',
+                  status: 'approved'
+                },
+                {
+                  id: 'sub-2',
+                  url: 'https://example.com/react-typescript',
+                  title: 'Building React Apps with TypeScript',
+                  author: 'John Doe',
+                  submittedDateTimeUtc: '2026-03-22T15:31:00Z',
+                  status: 'approved'
+                }
+              ]
+            });
+            res.emit('data', responseBody);
+            res.emit('end');
+            return;
+          }
+
+          const responseBody = JSON.stringify({
+            success: true,
+            updatedCount: 1,
+            failedIds: []
+          });
+          res.emit('data', responseBody);
+          res.emit('end');
+        };
+        req.on = sinon.stub().returns(req);
+        return req;
+      });
+
+      await provider.refresh();
+      const posts = await provider.getAllPosts();
+
+      const submissionPost = posts.find(p => p.link.includes('contoso.com/dotnet/new-article'));
+      expect(submissionPost).to.exist;
+      expect(submissionPost?.source).to.equal('Approved Submissions');
+      expect(submissionPost?.author).to.equal('Alvin');
+    });
+
+    it('should mark only added submission ids as processed', async () => {
+      const configWithSubmissionsApi = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '',
+        refreshInterval: 30,
+        useNewsblurApi: false,
+        newsblurUsername: '',
+        enableSubmissionApiSource: true,
+        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net',
+        submissionApiKey: 'test-key',
+        submissionApiLookbackDays: 0
+      });
+      workspaceGetConfigStub.returns(configWithSubmissionsApi);
+
+      const mockRssResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockRssResponse);
+        return { on: sinon.stub() };
+      });
+
+      const requestBodies: string[] = [];
+      const httpsRequestStub = sinon.stub(https, 'request');
+      httpsRequestStub.callsFake((url: any, options: any, callback: any) => {
+        const req = new EventEmitter() as any;
+        let payload = '';
+        req.write = (chunk: string) => {
+          payload += chunk;
+        };
+        req.end = () => {
+          if (payload) {
+            requestBodies.push(payload);
+          }
+
+          const res = new EventEmitter() as any;
+          res.statusCode = 200;
+          callback(res);
+
+          if (url.pathname === '/api/submissions') {
+            const responseBody = JSON.stringify({
+              totalCount: 2,
+              submissions: [
+                {
+                  id: 'dup-id',
+                  url: 'https://example.com/react-typescript',
+                  title: 'Building React Apps with TypeScript',
+                  author: 'John Doe',
+                  submittedDateTimeUtc: '2026-03-22T15:31:00Z',
+                  status: 'approved'
+                },
+                {
+                  id: 'new-id',
+                  url: 'https://contoso.com/devops/pipelines',
+                  title: 'CI/CD pipelines deep dive',
+                  author: 'Contoso Author',
+                  submittedDateTimeUtc: '2026-03-22T15:32:00Z',
+                  status: 'approved'
+                }
+              ]
+            });
+            res.emit('data', responseBody);
+            res.emit('end');
+            return;
+          }
+
+          const responseBody = JSON.stringify({ success: true, updatedCount: 1, failedIds: [] });
+          res.emit('data', responseBody);
+          res.emit('end');
+        };
+        req.on = sinon.stub().returns(req);
+        return req;
+      });
+
+      await provider.refresh();
+
+      const patchPayloadRaw = requestBodies.find(body => body.includes('"newStatus":"processed"'));
+      expect(patchPayloadRaw).to.exist;
+      const patchPayload = JSON.parse(patchPayloadRaw || '{}');
+      expect(patchPayload.ids).to.deep.equal(['new-id']);
     });
   });
 

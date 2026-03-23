@@ -3,7 +3,7 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "icon": "images/rssBlogIcon.png",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -197,6 +197,28 @@
           "type": "boolean",
           "default": false,
           "description": "%config.useNewsblurApi.description%"
+        },
+        "rssBlogCategorizer.enableSubmissionApiSource": {
+          "type": "boolean",
+          "default": false,
+          "description": "%config.enableSubmissionApiSource.description%"
+        },
+        "rssBlogCategorizer.submissionApiBaseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "%config.submissionApiBaseUrl.description%"
+        },
+        "rssBlogCategorizer.submissionApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "%config.submissionApiKey.description%"
+        },
+        "rssBlogCategorizer.submissionApiLookbackDays": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 90,
+          "description": "%config.submissionApiLookbackDays.description%"
         },
         "rssBlogCategorizer.wordpressBlogUrl": {
           "type": "string",
