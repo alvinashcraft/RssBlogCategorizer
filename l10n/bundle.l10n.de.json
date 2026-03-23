@@ -17,6 +17,8 @@
   "Enter your submissions API key": "Geben Sie Ihren Submissions-API-Schlüssel ein",
   "Submissions API key saved securely.": "Submissions-API-Schlüssel sicher gespeichert.",
   "Failed to save submissions API key: {0}": "Fehler beim Speichern des Submissions-API-Schlüssels: {0}",
+  "Submission API base URL must use HTTPS: {0}": "Die Basis-URL der Submissions-API muss HTTPS verwenden: {0}",
+  "Invalid submissions API base URL: {0}": "Ungültige Basis-URL der Submissions-API: {0}",
   "No active editor found. Please open an HTML file to publish.": "Kein aktiver Editor gefunden. Bitte öffnen Sie eine HTML-Datei zum Veröffentlichen.",
   "Please open an HTML file to publish to WordPress.": "Bitte öffnen Sie eine HTML-Datei, um auf WordPress zu veröffentlichen.",
   "This doesn't appear to be a Dew Drop post. Do you want to publish it anyway?": "Dies scheint kein Dew Drop-Beitrag zu sein. Möchten Sie ihn trotzdem veröffentlichen?",

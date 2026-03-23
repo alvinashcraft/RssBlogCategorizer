@@ -635,13 +635,18 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             return;
         }
 
+        const validatedBaseUrl = await this.validateSubmissionApiBaseUrl(submissionApiBaseUrl);
+        if (!validatedBaseUrl) {
+            return;
+        }
+
         try {
             const to = this.formatDateForQuery(new Date());
             const from = submissionApiLookbackDays === 0
                 ? '1970-01-01'
                 : this.formatDateForQuery(new Date(Date.now() - (submissionApiLookbackDays * RSSBlogProvider.MILLISECONDS_PER_DAY)));
 
-            const queryUrl = new URL('/api/submissions', submissionApiBaseUrl);
+            const queryUrl = new URL('/api/submissions', validatedBaseUrl);
             queryUrl.searchParams.set('from', from);
             queryUrl.searchParams.set('to', to);
             queryUrl.searchParams.set('status', 'approved');
@@ -695,10 +700,25 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             }
 
             if (addedSubmissionIds.length > 0) {
-                await this.markSubmissionsAsProcessed(submissionApiBaseUrl, submissionApiKey, addedSubmissionIds);
+                await this.markSubmissionsAsProcessed(validatedBaseUrl, submissionApiKey, addedSubmissionIds);
             }
         } catch (error) {
             console.error('Failed to load approved submissions from secondary source:', error);
+        }
+    }
+
+    private async validateSubmissionApiBaseUrl(baseUrl: string): Promise<string | undefined> {
+        try {
+            const parsedUrl = new URL(baseUrl);
+            if (parsedUrl.protocol !== 'https:') {
+                await vscode.window.showWarningMessage(vscode.l10n.t('Submission API base URL must use HTTPS: {0}', baseUrl));
+                return undefined;
+            }
+
+            return parsedUrl.toString();
+        } catch {
+            await vscode.window.showWarningMessage(vscode.l10n.t('Invalid submissions API base URL: {0}', baseUrl));
+            return undefined;
         }
     }
 

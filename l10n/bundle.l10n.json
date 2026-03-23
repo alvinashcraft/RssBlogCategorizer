@@ -41,6 +41,14 @@
     "message": "Failed to save submissions API key: {0}",
     "comment": ["The error message"]
   },
+  "Submission API base URL must use HTTPS: {0}": {
+    "message": "Submission API base URL must use HTTPS: {0}",
+    "comment": ["The configured submissions API base URL"]
+  },
+  "Invalid submissions API base URL: {0}": {
+    "message": "Invalid submissions API base URL: {0}",
+    "comment": ["The configured submissions API base URL"]
+  },
   "No active editor found. Please open an HTML file to publish.": "Error when no editor is open for WordPress publishing",
   "Please open an HTML file to publish to WordPress.": "Error when non-HTML file is open for WordPress publishing",
   "This doesn't appear to be a Dew Drop post. Do you want to publish it anyway?": "Warning prompt for non-Dew Drop posts",

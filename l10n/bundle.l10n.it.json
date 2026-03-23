@@ -17,6 +17,8 @@
   "Enter your submissions API key": "Inserisci la tua chiave API delle segnalazioni",
   "Submissions API key saved securely.": "Chiave API delle segnalazioni salvata in modo sicuro.",
   "Failed to save submissions API key: {0}": "Impossibile salvare la chiave API delle segnalazioni: {0}",
+  "Submission API base URL must use HTTPS: {0}": "L'URL di base dell'API delle segnalazioni deve usare HTTPS: {0}",
+  "Invalid submissions API base URL: {0}": "URL di base dell'API delle segnalazioni non valido: {0}",
   "No active editor found. Please open an HTML file to publish.": "Nessun editor attivo trovato. Apri un file HTML per pubblicare.",
   "Please open an HTML file to publish to WordPress.": "Apri un file HTML per pubblicare su WordPress.",
   "This doesn't appear to be a Dew Drop post. Do you want to publish it anyway?": "Questo non sembra essere un post Dew Drop. Vuoi pubblicarlo comunque?",

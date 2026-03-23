@@ -493,6 +493,43 @@ describe('RSSBlogProvider', () => {
   });
 
   describe('Approved Submissions Secondary Source', () => {
+    it('should warn and skip secondary source when submissions API base URL is not HTTPS', async () => {
+      const configWithHttpBaseUrl = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '2025-01-01T00:00:00Z',
+        refreshInterval: 30,
+        useNewsblurApi: false,
+        newsblurUsername: '',
+        enableSubmissionApiSource: true,
+        submissionApiBaseUrl: 'http://insecure.example.com',
+        submissionApiLookbackDays: 0
+      });
+      workspaceGetConfigStub.returns(configWithHttpBaseUrl);
+      await mockContext.secrets.store(SUBMISSION_API_KEY, 'test-key');
+
+      const warningStub = sinon.stub(vscode.window, 'showWarningMessage').resolves(undefined as any);
+      const httpsRequestStub = sinon.stub(https, 'request');
+
+      const mockRssResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockRssResponse);
+        return { on: sinon.stub() };
+      });
+
+      await provider.refresh();
+
+      expect(warningStub).to.have.been.called;
+      expect(httpsRequestStub).to.not.have.been.called;
+    });
+
     it('should fetch approved submissions and add them as posts', async () => {
       const configWithSubmissionsApi = new MockConfiguration({
         feedUrl: 'https://example.com/feed.xml',
