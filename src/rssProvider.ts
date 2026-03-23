@@ -3,7 +3,7 @@ import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
-import { NEWSBLUR_PASSWORD_KEY } from './constants';
+import { NEWSBLUR_PASSWORD_KEY, SUBMISSION_API_KEY } from './constants';
 
 export interface BlogPost {
     title: string;
@@ -431,6 +431,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return await this.context.secrets.get(NEWSBLUR_PASSWORD_KEY);
     }
 
+    private async getSubmissionApiKey(): Promise<string | undefined> {
+        return await this.context.secrets.get(SUBMISSION_API_KEY);
+    }
+
     private async setNewsblurPassword(password: string): Promise<void> {
         await this.context.secrets.store(NEWSBLUR_PASSWORD_KEY, password);
     }
@@ -618,7 +622,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const enableSubmissionApiSource = config.get<boolean>('enableSubmissionApiSource') || false;
         const submissionApiBaseUrl = (config.get<string>('submissionApiBaseUrl') || '').trim();
-        const submissionApiKey = (config.get<string>('submissionApiKey') || '').trim();
+        const submissionApiKey = (await this.getSubmissionApiKey() || '').trim();
         const configuredLookback = config.get<number>('submissionApiLookbackDays');
         const submissionApiLookbackDays = configuredLookback === undefined ? 0 : Math.max(0, configuredLookback);
 
@@ -627,7 +631,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         }
 
         if (!submissionApiBaseUrl || !submissionApiKey) {
-            console.warn('Submission API source is enabled but base URL or API key is missing. Skipping secondary source.');
+            console.warn('Submission API source is enabled but base URL or secure API key is missing. Skipping secondary source.');
             return;
         }
 

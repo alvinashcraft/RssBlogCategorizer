@@ -7,6 +7,7 @@ use(sinonChai);
 use(chaiAsPromised);
 import * as vscode from 'vscode';
 import { RSSBlogProvider, BlogPost } from '../../rssProvider';
+import { SUBMISSION_API_KEY } from '../../constants';
 import { MockExtensionContext, MockConfiguration } from '../mocks/mockVscode';
 import { mockRssXml, mockAtomXml, mockDewDropRss, mockCategoriesConfig, mockBlogPosts } from '../mocks/testData';
 import * as fs from 'fs';
@@ -502,10 +503,10 @@ describe('RSSBlogProvider', () => {
         newsblurUsername: '',
         enableSubmissionApiSource: true,
         submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net',
-        submissionApiKey: 'test-key',
         submissionApiLookbackDays: 0
       });
       workspaceGetConfigStub.returns(configWithSubmissionsApi);
+      await mockContext.secrets.store(SUBMISSION_API_KEY, 'test-key');
 
       const mockRssResponse = {
         statusCode: 200,
@@ -587,10 +588,10 @@ describe('RSSBlogProvider', () => {
         newsblurUsername: '',
         enableSubmissionApiSource: true,
         submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net',
-        submissionApiKey: 'test-key',
         submissionApiLookbackDays: 0
       });
       workspaceGetConfigStub.returns(configWithSubmissionsApi);
+      await mockContext.secrets.store(SUBMISSION_API_KEY, 'test-key');
 
       const mockRssResponse = {
         statusCode: 200,

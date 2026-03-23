@@ -109,7 +109,7 @@ You can optionally add a second source that runs after the primary NewsBlur/RSS 
 
 1. Set `rssBlogCategorizer.enableSubmissionApiSource` to `true`
 1. Configure `rssBlogCategorizer.submissionApiBaseUrl`
-1. Configure `rssBlogCategorizer.submissionApiKey`
+1. Run `Dev Feed Curator: Set Submissions API Key` to store your API key securely in VS Code SecretStorage
 1. Configure `rssBlogCategorizer.submissionApiLookbackDays`
 
 How it works:
@@ -263,7 +263,6 @@ Access settings via `File > Preferences > Settings` and search for "Dev Feed Cur
 - **NewsBlur Username**: Your NewsBlur account username (password stored securely)
 - **Enable Submission API Source**: Enable second-pass retrieval of approved user-submitted links
 - **Submission API Base URL**: Base URL for your submissions API endpoint
-- **Submission API Key**: API key used for submissions API calls
 - **Submission API Lookback Days**: Days to include when querying approved submissions (`0` means all approved submissions)
 - **WordPress Blog URL**: Your WordPress blog URL (e.g., `https://yourblog.com`)
 - **WordPress Username**: Your WordPress account username (password stored securely)

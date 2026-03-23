@@ -3,7 +3,7 @@ import { RSSBlogProvider } from './rssProvider';
 import { ExportManager } from './exportManager';
 import { WordPressManager } from './wordpressManager';
 import { EditorManager } from './editorManager';
-import { NEWSBLUR_PASSWORD_KEY } from './constants';
+import { NEWSBLUR_PASSWORD_KEY, SUBMISSION_API_KEY } from './constants';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Dev Feed Curator extension is now active!');
@@ -150,6 +150,26 @@ export function activate(context: vscode.ExtensionContext) {
         await wordpressManager.setWordpressCredentials();
     });
 
+    const setSubmissionApiKeyCommand = vscode.commands.registerCommand('rssBlogCategorizer.setSubmissionApiKey', async () => {
+        const apiKey = await vscode.window.showInputBox({
+            prompt: vscode.l10n.t('Enter submissions API key'),
+            password: true,
+            placeHolder: vscode.l10n.t('Enter your submissions API key')
+        });
+
+        if (!apiKey) {
+            return;
+        }
+
+        try {
+            await context.secrets.store(SUBMISSION_API_KEY, apiKey);
+            vscode.window.showInformationMessage(vscode.l10n.t('Submissions API key saved securely.'));
+            await provider.refresh();
+        } catch (error) {
+            vscode.window.showErrorMessage(vscode.l10n.t('Failed to save submissions API key: {0}', String(error)));
+        }
+    });
+
     const testWordpressConnectionCommand = vscode.commands.registerCommand('rssBlogCategorizer.testWordpressConnection', async () => {
         await wordpressManager.testConnection();
     });
@@ -281,6 +301,7 @@ export function activate(context: vscode.ExtensionContext) {
         openPostCommand,
         setFeedCommand,
         setNewsblurCredentialsCommand,
+        setSubmissionApiKeyCommand,
         setWordpressCredentialsCommand,
         testWordpressConnectionCommand,
         publishToWordpressCommand,

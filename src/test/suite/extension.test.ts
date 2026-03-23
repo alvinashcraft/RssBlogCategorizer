@@ -22,7 +22,8 @@ describe('Extension Integration Tests', () => {
       'rssBlogCategorizer.exportMarkdown',
       'rssBlogCategorizer.exportHtml',
       'rssBlogCategorizer.openPost',
-      'rssBlogCategorizer.addFeed'
+      'rssBlogCategorizer.addFeed',
+      'rssBlogCategorizer.setSubmissionApiKey'
     ];
 
     extensionCommands.forEach(command => {

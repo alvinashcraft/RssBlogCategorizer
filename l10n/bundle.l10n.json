@@ -34,6 +34,13 @@
     "message": "Failed to save NewsBlur credentials: {0}",
     "comment": ["The error message"]
   },
+  "Enter submissions API key": "Prompt for submissions API key input",
+  "Enter your submissions API key": "Placeholder text for submissions API key input",
+  "Submissions API key saved securely.": "Info message after saving submissions API key",
+  "Failed to save submissions API key: {0}": {
+    "message": "Failed to save submissions API key: {0}",
+    "comment": ["The error message"]
+  },
   "No active editor found. Please open an HTML file to publish.": "Error when no editor is open for WordPress publishing",
   "Please open an HTML file to publish to WordPress.": "Error when non-HTML file is open for WordPress publishing",
   "This doesn't appear to be a Dew Drop post. Do you want to publish it anyway?": "Warning prompt for non-Dew Drop posts",
