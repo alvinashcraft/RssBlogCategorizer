@@ -3,7 +3,7 @@ import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
-import { NEWSBLUR_PASSWORD_KEY } from './constants';
+import { NEWSBLUR_PASSWORD_KEY, SUBMISSION_API_KEY } from './constants';
 
 export interface BlogPost {
     title: string;
@@ -27,6 +27,27 @@ interface NewsBlurStory {
 
 interface NewsBlurApiResponse {
     stories: NewsBlurStory[];
+}
+
+interface SubmissionItem {
+    id: string;
+    url: string;
+    title: string;
+    author?: string;
+    submittedDateTimeUtc?: string;
+    status?: string;
+}
+
+interface SubmissionsApiResponse {
+    totalCount?: number;
+    submissions?: SubmissionItem[];
+}
+
+interface SubmissionStatusUpdateResponse {
+    success?: boolean;
+    updatedCount?: number;
+    message?: string;
+    failedIds?: string[];
 }
 
 export interface CategoryNode {
@@ -85,6 +106,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
     private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
     private static readonly MILLISECONDS_PER_MINUTE = 1000 * 60;
+    private static readonly MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
     private static readonly MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
     constructor(private context: vscode.ExtensionContext) {}
@@ -409,6 +431,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return await this.context.secrets.get(NEWSBLUR_PASSWORD_KEY);
     }
 
+    private async getSubmissionApiKey(): Promise<string | undefined> {
+        return await this.context.secrets.get(SUBMISSION_API_KEY);
+    }
+
     private async setNewsblurPassword(password: string): Promise<void> {
         await this.context.secrets.store(NEWSBLUR_PASSWORD_KEY, password);
     }
@@ -516,6 +542,11 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const filteredPosts = await this.filterPostsByDate(posts);
             console.log(`Filtered to ${filteredPosts.length} posts after date filtering`);
             this.posts.push(...filteredPosts);
+
+            // Optional second source: approved submissions API.
+            // Pull after primary source retrieval so categorization/export pipeline remains unchanged.
+            await this.loadApprovedSubmissions();
+
             console.log(`Total posts after loading: ${this.posts.length}`);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
@@ -584,6 +615,215 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 console.error(`Error fetching RSS feed ${feedUrl}:`, error);
                 resolve([]);
             });
+        });
+    }
+
+    private async loadApprovedSubmissions(): Promise<void> {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const enableSubmissionApiSource = config.get<boolean>('enableSubmissionApiSource') || false;
+        const submissionApiBaseUrl = (config.get<string>('submissionApiBaseUrl') || '').trim();
+        const submissionApiKey = (await this.getSubmissionApiKey() || '').trim();
+        const configuredLookback = config.get<number>('submissionApiLookbackDays');
+        const submissionApiLookbackDays = configuredLookback === undefined ? 0 : Math.max(0, configuredLookback);
+
+        if (!enableSubmissionApiSource) {
+            return;
+        }
+
+        if (!submissionApiBaseUrl || !submissionApiKey) {
+            console.warn('Submission API source is enabled but base URL or secure API key is missing. Skipping secondary source.');
+            await this.showSubmissionApiConfigurationWarning(!!submissionApiBaseUrl, !!submissionApiKey);
+            return;
+        }
+
+        const validatedBaseUrl = await this.validateSubmissionApiBaseUrl(submissionApiBaseUrl);
+        if (!validatedBaseUrl) {
+            return;
+        }
+
+        try {
+            const to = this.formatDateForQuery(new Date());
+            const from = submissionApiLookbackDays === 0
+                ? '1970-01-01'
+                : this.formatDateForQuery(new Date(Date.now() - (submissionApiLookbackDays * RSSBlogProvider.MILLISECONDS_PER_DAY)));
+
+            const queryUrl = new URL('/api/submissions', validatedBaseUrl);
+            queryUrl.searchParams.set('from', from);
+            queryUrl.searchParams.set('to', to);
+            queryUrl.searchParams.set('status', 'approved');
+
+            const response = await this.callJsonApi<SubmissionsApiResponse>(queryUrl, 'GET', submissionApiKey);
+            const submissions = Array.isArray(response.submissions) ? response.submissions : [];
+
+            if (submissions.length === 0) {
+                console.log('Submission API returned 0 approved submissions.');
+                return;
+            }
+
+            const seenLinks = new Set<string>(this.posts.map(post => post.link));
+            const addedSubmissionIds: string[] = [];
+            const additionalPosts: BlogPost[] = [];
+
+            for (const submission of submissions) {
+                const rawUrl = (submission.url || '').trim();
+                const title = (submission.title || '').trim();
+
+                if (!rawUrl || !title) {
+                    continue;
+                }
+
+                const normalizedLink = this.appendSyncfusionTracking(this.removeTrackingParameters(rawUrl));
+                if (seenLinks.has(normalizedLink)) {
+                    continue;
+                }
+
+                const post: BlogPost = {
+                    title,
+                    link: normalizedLink,
+                    description: '',
+                    pubDate: submission.submittedDateTimeUtc || new Date().toISOString(),
+                    category: this.categorizePost(title, '', rawUrl),
+                    source: 'Approved Submissions',
+                    author: (submission.author || 'unknown').trim() || 'unknown'
+                };
+
+                additionalPosts.push(post);
+                seenLinks.add(normalizedLink);
+
+                if (submission.id) {
+                    addedSubmissionIds.push(submission.id);
+                }
+            }
+
+            if (additionalPosts.length > 0) {
+                this.posts.push(...additionalPosts);
+                console.log(`Added ${additionalPosts.length} approved submission(s) as secondary source posts.`);
+            }
+
+            if (addedSubmissionIds.length > 0) {
+                await this.markSubmissionsAsProcessed(validatedBaseUrl, submissionApiKey, addedSubmissionIds);
+            }
+        } catch (error) {
+            console.error('Failed to load approved submissions from secondary source:', error);
+        }
+    }
+
+    private async validateSubmissionApiBaseUrl(baseUrl: string): Promise<string | undefined> {
+        try {
+            const parsedUrl = new URL(baseUrl);
+            if (parsedUrl.protocol !== 'https:') {
+                await vscode.window.showWarningMessage(vscode.l10n.t('Submission API base URL must use HTTPS: {0}', baseUrl));
+                return undefined;
+            }
+
+            return parsedUrl.toString();
+        } catch {
+            await vscode.window.showWarningMessage(vscode.l10n.t('Invalid submissions API base URL: {0}', baseUrl));
+            return undefined;
+        }
+    }
+
+    private async showSubmissionApiConfigurationWarning(hasBaseUrl: boolean, hasApiKey: boolean): Promise<void> {
+        const setApiKeyAction = vscode.l10n.t('Set Submissions API Key');
+
+        if (!hasBaseUrl && !hasApiKey) {
+            const selected = await vscode.window.showWarningMessage(
+                vscode.l10n.t('Submission API source is enabled but submission API base URL and submissions API key are missing.'),
+                setApiKeyAction
+            );
+            if (selected === setApiKeyAction) {
+                await vscode.commands.executeCommand('rssBlogCategorizer.setSubmissionApiKey');
+            }
+            return;
+        }
+
+        if (!hasBaseUrl) {
+            await vscode.window.showWarningMessage(
+                vscode.l10n.t('Submission API source is enabled but submission API base URL is missing.')
+            );
+            return;
+        }
+
+        const selected = await vscode.window.showWarningMessage(
+            vscode.l10n.t('Submission API source is enabled but submissions API key is missing.'),
+            setApiKeyAction
+        );
+        if (selected === setApiKeyAction) {
+            await vscode.commands.executeCommand('rssBlogCategorizer.setSubmissionApiKey');
+        }
+    }
+
+    private formatDateForQuery(date: Date): string {
+        const year = date.getUTCFullYear();
+        const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+        const day = date.getUTCDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    private async markSubmissionsAsProcessed(baseUrl: string, apiKey: string, ids: string[]): Promise<void> {
+        if (ids.length === 0) {
+            return;
+        }
+
+        const statusUrl = new URL('/api/submissions/status', baseUrl);
+        const response = await this.callJsonApi<SubmissionStatusUpdateResponse>(statusUrl, 'PATCH', apiKey, {
+            ids,
+            newStatus: 'processed'
+        });
+
+        if (Array.isArray(response.failedIds) && response.failedIds.length > 0) {
+            console.warn(`Submission status update partially failed for IDs: ${response.failedIds.join(', ')}`);
+        }
+    }
+
+    private async callJsonApi<T>(url: URL, method: 'GET' | 'PATCH', apiKey: string, body?: unknown): Promise<T> {
+        return new Promise((resolve, reject) => {
+            const payload = body ? JSON.stringify(body) : undefined;
+            const headers: Record<string, string | number> = {
+                'x-api-key': apiKey,
+                'Accept': 'application/json'
+            };
+
+            if (payload) {
+                headers['Content-Type'] = 'application/json';
+                headers['Content-Length'] = Buffer.byteLength(payload);
+            }
+
+            const request = https.request(url, { method, headers }, (response) => {
+                let data = '';
+
+                response.on('data', (chunk) => {
+                    data += chunk;
+                });
+
+                response.on('end', () => {
+                    if (!response.statusCode || response.statusCode < 200 || response.statusCode >= 300) {
+                        reject(new Error(`HTTP ${response.statusCode} from ${url.pathname}`));
+                        return;
+                    }
+
+                    if (!data.trim()) {
+                        resolve({} as T);
+                        return;
+                    }
+
+                    try {
+                        resolve(JSON.parse(data) as T);
+                    } catch (error) {
+                        reject(new Error(`Invalid JSON response from ${url.pathname}: ${String(error)}`));
+                    }
+                });
+            });
+
+            request.on('error', (error) => {
+                reject(error);
+            });
+
+            if (payload) {
+                request.write(payload);
+            }
+
+            request.end();
         });
     }
 

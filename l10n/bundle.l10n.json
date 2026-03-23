@@ -34,6 +34,26 @@
     "message": "Failed to save NewsBlur credentials: {0}",
     "comment": ["The error message"]
   },
+  "Enter submissions API key": "Prompt for submissions API key input",
+  "Enter your submissions API key": "Placeholder text for submissions API key input",
+  "Submissions API key cannot be empty.": "Warning shown when submissions API key input is empty or whitespace",
+  "Submissions API key saved securely.": "Info message after saving submissions API key",
+  "Failed to save submissions API key: {0}": {
+    "message": "Failed to save submissions API key: {0}",
+    "comment": ["The error message"]
+  },
+  "Submission API source is enabled but submission API base URL is missing.": "Warning shown when submission API source is enabled but base URL is not configured",
+  "Submission API source is enabled but submissions API key is missing.": "Warning shown when submission API source is enabled but API key is not configured",
+  "Submission API source is enabled but submission API base URL and submissions API key are missing.": "Warning shown when submission API source is enabled but base URL and API key are not configured",
+  "Set Submissions API Key": "Action label to open command for securely setting submissions API key",
+  "Submission API base URL must use HTTPS: {0}": {
+    "message": "Submission API base URL must use HTTPS: {0}",
+    "comment": ["The configured submissions API base URL"]
+  },
+  "Invalid submissions API base URL: {0}": {
+    "message": "Invalid submissions API base URL: {0}",
+    "comment": ["The configured submissions API base URL"]
+  },
   "No active editor found. Please open an HTML file to publish.": "Error when no editor is open for WordPress publishing",
   "Please open an HTML file to publish to WordPress.": "Error when non-HTML file is open for WordPress publishing",
   "This doesn't appear to be a Dew Drop post. Do you want to publish it anyway?": "Warning prompt for non-Dew Drop posts",
