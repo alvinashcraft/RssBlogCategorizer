@@ -1,232 +1,124 @@
 {
-  "Failed to refresh feeds: {0}": {
-    "message": "Failed to refresh feeds: {0}",
-    "comment": ["The error message from the refresh operation"]
-  },
-  "No posts available to export. Please refresh the feed first.": "Warning shown when trying to export with no posts loaded",
-  "Failed to export Markdown: {0}": {
-    "message": "Failed to export Markdown: {0}",
-    "comment": ["The error message from the export operation"]
-  },
-  "Failed to export HTML: {0}": {
-    "message": "Failed to export HTML: {0}",
-    "comment": ["The error message from the export operation"]
-  },
-  "Set RSS feed URL": "Prompt text for the RSS feed URL input box",
-  "URL cannot be empty": "Validation error when empty URL is entered",
-  "Please enter a valid URL (e.g., https://example.com/feed.xml)": "Validation error for invalid URL format",
-  "RSS feed updated to: {0}": {
-    "message": "RSS feed updated to: {0}",
-    "comment": ["The new feed URL"]
-  },
-  "Failed to update feed URL: {0}": {
-    "message": "Failed to update feed URL: {0}",
-    "comment": ["The error message"]
-  },
-  "Enter NewsBlur username": "Prompt for NewsBlur username input",
-  "Enter NewsBlur password for user: {0}": {
-    "message": "Enter NewsBlur password for user: {0}",
-    "comment": ["The NewsBlur username"]
-  },
-  "Enter your NewsBlur password": "Placeholder text for NewsBlur password input",
-  "NewsBlur credentials saved successfully! API mode enabled.": "Info message after saving NewsBlur credentials",
-  "Failed to save NewsBlur credentials: {0}": {
-    "message": "Failed to save NewsBlur credentials: {0}",
-    "comment": ["The error message"]
-  },
-  "Enter submissions API key": "Prompt for submissions API key input",
-  "Enter your submissions API key": "Placeholder text for submissions API key input",
-  "Submissions API key cannot be empty.": "Warning shown when submissions API key input is empty or whitespace",
-  "Submissions API key saved securely.": "Info message after saving submissions API key",
-  "Failed to save submissions API key: {0}": {
-    "message": "Failed to save submissions API key: {0}",
-    "comment": ["The error message"]
-  },
-  "Submission API source is enabled but submission API base URL is missing.": "Warning shown when submission API source is enabled but base URL is not configured",
-  "Submission API source is enabled but submissions API key is missing.": "Warning shown when submission API source is enabled but API key is not configured",
-  "Submission API source is enabled but submission API base URL and submissions API key are missing.": "Warning shown when submission API source is enabled but base URL and API key are not configured",
-  "Set Submissions API Key": "Action label to open command for securely setting submissions API key",
-  "Received {0} submitted link(s) from the submissions API.": {
-    "message": "Received {0} submitted link(s) from the submissions API.",
-    "comment": ["The number of approved submissions returned by the submissions API"]
-  },
-  "Submission API base URL must use HTTPS: {0}": {
-    "message": "Submission API base URL must use HTTPS: {0}",
-    "comment": ["The configured submissions API base URL"]
-  },
-  "Invalid submissions API base URL: {0}": {
-    "message": "Invalid submissions API base URL: {0}",
-    "comment": ["The configured submissions API base URL"]
-  },
-  "No active editor found. Please open an HTML file to publish.": "Error when no editor is open for WordPress publishing",
-  "Please open an HTML file to publish to WordPress.": "Error when non-HTML file is open for WordPress publishing",
-  "This doesn't appear to be a Dew Drop post. Do you want to publish it anyway?": "Warning prompt for non-Dew Drop posts",
-  "Yes": "Affirmative button label",
-  "No": "Negative button label",
-  "No active editor found. Please open an HTML or Markdown file first.": "Error when no editor is open for WYSIWYG",
-  "Please open an HTML or Markdown file to edit with the WYSIWYG editor.": "Error when unsupported file type is open",
-  "Content updated successfully!": "Info message after WYSIWYG content update",
-  "{0} posts": {
-    "message": "{0} posts",
-    "comment": ["The number of posts in a category"]
-  },
-  "Loading feed data...": "Loading indicator in tree view",
-  "No posts loaded - click refresh to load feeds": "Summary when no posts are loaded",
-  "Total: {0} post(s) fetched and categorized": {
-    "message": "Total: {0} post(s) fetched and categorized",
-    "comment": ["The total number of posts"]
-  },
-  "URL must be a non-empty string": "Validation error for empty URL",
-  "URL must use HTTP or HTTPS protocol": "Validation error for invalid URL protocol",
-  "Invalid URL format. Please provide a valid URL (e.g., https://example.com/feed.xml)": "Validation error for malformed URL",
-  "NewsBlur API cancelled. Using RSS feed (limited to ~25 items).": "Info when user cancels NewsBlur API and falls back to RSS",
-  "NewsBlur API is enabled but username not configured. Using RSS feed (limited to ~25 items).": "Warning when NewsBlur API is enabled without username",
-  "Failed to load RSS feed: {0}": {
-    "message": "Failed to load RSS feed: {0}",
-    "comment": ["The error message"]
-  },
-  "Failed to fetch Dew Drop number: {0}": {
-    "message": "Failed to fetch Dew Drop number: {0}",
-    "comment": ["The error message"]
-  },
-  "Save {0}": {
-    "message": "Save {0}",
-    "comment": ["The format name (HTML or Markdown) in uppercase"]
-  },
-  "Would you like to edit this post in the WYSIWYG editor?": "Prompt after export to open in editor",
-  "Open in Editor": "Button to open exported file in WYSIWYG editor",
-  "No Thanks": "Button to decline opening in WYSIWYG editor",
-  "Failed to export blog posts: {0}": {
-    "message": "Failed to export blog posts: {0}",
-    "comment": ["The error message"]
-  },
-  "Application Password setup instructions are ready.": "Info message when WordPress password instructions are available",
-  "View Instructions": "Button to view WordPress Application Password instructions",
-  "Open WordPress Admin": "Button to open WordPress admin panel",
-  "Continue with Setup": "Button to continue credential setup",
-  "Please set your blog URL first": "Error when blog URL is not configured",
-  "WordPress REST API requires an Application Password for secure authentication. Would you like to see setup instructions first?": "Prompt before WordPress credential entry",
-  "Show Instructions": "Button to show setup instructions",
-  "I have my credentials ready": "Button to skip instructions",
-  "Cancel": "Cancel button label",
-  "Ready to enter your credentials?": "Prompt after viewing instructions",
-  "Yes, continue": "Button to continue with setup",
-  "Enter WordPress blog URL (e.g., https://yourblog.com)": "Prompt for WordPress blog URL input",
-  "Invalid blog URL format. Please enter a valid URL (e.g., https://yourblog.com)": "Validation error for invalid blog URL",
-  "Enter WordPress username (same as your login username)": "Prompt for WordPress username input",
-  "Enter WordPress Application Password for user: {0}": {
-    "message": "Enter WordPress Application Password for user: {0}",
-    "comment": ["The WordPress username"]
-  },
-  "WordPress credentials saved successfully! Use \"Test WordPress Connection\" to verify.": "Info after saving WordPress credentials",
-  "Failed to save WordPress credentials: {0}": {
-    "message": "Failed to save WordPress credentials: {0}",
-    "comment": ["The error message"]
-  },
-  "WordPress credentials not configured. Please set them first.": "Error when WordPress credentials are missing",
-  "WordPress REST API endpoint not accessible at {0}/wp-json/wp/v2/. Please check:\n1. WordPress REST API is enabled\n2. Your blog URL is correct\n3. No security plugins are blocking REST API": {
-    "message": "WordPress REST API endpoint not accessible at {0}/wp-json/wp/v2/. Please check:\n1. WordPress REST API is enabled\n2. Your blog URL is correct\n3. No security plugins are blocking REST API",
-    "comment": ["The blog URL"]
-  },
-  "WordPress REST API connection successful!\nWorking authentication methods: {0}": {
-    "message": "WordPress REST API connection successful!\nWorking authentication methods: {0}",
-    "comment": ["Comma-separated list of working auth methods"]
-  },
-  "WordPress connection failed. All authentication methods failed.\n\nTroubleshooting info:\n{0}\n\nCommon solutions:\n1. Create an Application Password in WordPress Admin → Users → Profile\n2. Check if security plugins are blocking REST API\n3. Verify username is correct and user has 'publish_posts' capability\n4. Try temporarily disabling security plugins": {
-    "message": "WordPress connection failed. All authentication methods failed.\n\nTroubleshooting info:\n{0}\n\nCommon solutions:\n1. Create an Application Password in WordPress Admin → Users → Profile\n2. Check if security plugins are blocking REST API\n3. Verify username is correct and user has 'publish_posts' capability\n4. Try temporarily disabling security plugins",
-    "comment": ["The troubleshooting info gathered"]
-  },
-  "Invalid post data: title and content are required": "Error when post data is incomplete",
-  "Post {0} successfully! Post ID: {1}": {
-    "message": "Post {0} successfully! Post ID: {1}",
-    "comment": ["The status (published/saved as draft)", "The WordPress post ID"]
-  },
-  "published": "Post status when published",
-  "saved as draft": "Post status when saved as draft",
-  "Categories: {0}": {
-    "message": "Categories: {0}",
-    "comment": ["Comma-separated list of category names"]
-  },
-  "Tags: {0} detected": {
-    "message": "Tags: {0} detected",
-    "comment": ["The number of detected tags"]
-  },
-  "Failed to create post: No post ID returned": "Error when WordPress API doesn't return a post ID",
-  "Failed to publish post: Could not resolve hostname '{0}'. Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.": {
-    "message": "Failed to publish post: Could not resolve hostname '{0}'. Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.",
-    "comment": ["The hostname that could not be resolved"]
-  },
-  "Failed to publish post: Connection refused. Please verify your WordPress Blog URL and that the site is accessible.": "Error when connection is refused",
-  "Failed to publish post: {0}": {
-    "message": "Failed to publish post: {0}",
-    "comment": ["The error message"]
-  },
-  "This content appears to have already been published to WordPress (Post ID: {0}). Do you want to continue anyway?": {
-    "message": "This content appears to have already been published to WordPress (Post ID: {0}). Do you want to continue anyway?",
-    "comment": ["The WordPress post ID of the existing post"]
-  },
-  "Continue Publishing": "Button to continue publishing despite duplicate",
-  "Use default categories: {0}": {
-    "message": "Use default categories: {0}",
-    "comment": ["Comma-separated list of default category names"]
-  },
-  "Use the categories configured in settings": "Description for using default categories",
-  "Customize categories for this post": "Option to enter custom categories",
-  "Enter custom categories for this specific post": "Description for customizing categories",
-  "No categories": "Option to publish without categories",
-  "Publish without assigning any categories": "Description for no categories option",
-  "Which categories would you like to assign to this post?": "Placeholder for categories quick pick",
-  "Enter categories separated by commas": "Prompt for custom categories input",
-  "Publish immediately": "Option to publish post immediately",
-  "Save as draft": "Option to save post as draft",
-  "How would you like to publish this post?": "Placeholder for publish status quick pick",
-  "Use {0} auto-detected tags": {
-    "message": "Use {0} auto-detected tags",
-    "comment": ["The number of auto-detected tags"]
-  },
-  "Customize tags": "Option to customize detected tags",
-  "Edit the detected tags": "Description for customize tags option",
-  "No tags": "Option to publish without tags",
-  "Publish without tags": "Description for no tags option",
-  "Tags detected automatically from content. How would you like to proceed?": "Placeholder for tags quick pick",
-  "Enter tags separated by commas": "Prompt for custom tags input",
-  "Editing: {0}": {
-    "message": "Editing: {0}",
-    "comment": ["The filename being edited"]
-  },
-  "Dew Drop {0} Editor": {
-    "message": "Dew Drop {0} Editor",
-    "comment": ["The editor type (HTML or Markdown)"]
-  },
-  "No document to save to.": "Error when no document is available to save",
-  "Failed to save changes: {0}": {
-    "message": "Failed to save changes: {0}",
-    "comment": ["The error message"]
-  },
-  "Content saved! Would you like to publish to WordPress?": "Prompt after saving from WYSIWYG editor",
-  "Failed to open document for publishing: {0}": {
-    "message": "Failed to open document for publishing: {0}",
-    "comment": ["The error message"]
-  },
-  "Loading editor...": "Loading text shown while WYSIWYG editor initializes",
-  "Loading Editor...": "Loading text shown while Markdown editor initializes",
-  "Close without saving": "Tooltip for cancel button",
-  "Save changes to file (keep editor open)": "Tooltip for save button",
-  "Save changes and close editor": "Tooltip for save and close button",
-  "Save and prepare for WordPress publishing": "Tooltip for save and publish button",
-  "Save": "Save button label",
-  "Save & Close": "Save and close button label",
-  "Save & Publish": "Save and publish button label",
-  "You have unsaved changes. Are you sure you want to close?": "Confirmation dialog for closing with unsaved changes",
-  "Last saved: {0}": {
-    "message": "Last saved: {0}",
-    "comment": ["The timestamp of the last save"]
-  },
-  "Editor Loading Error": "Title for editor loading error message",
-  "Retry": "Button label for retrying editor load",
-  "Failed to load the markdown editor. Please check your internet connection and try again.": "Error when EasyMDE fails to load",
-  "Failed to initialize the markdown editor: {0}": {
-    "message": "Failed to initialize the markdown editor: {0}",
-    "comment": ["The error message"]
-  }
+  "Failed to refresh feeds: {0}": "Kunde inte uppdatera floden: {0}",
+  "No posts available to export. Please refresh the feed first.": "Inga inlagg tillgangliga for export. Uppdatera flodet forst.",
+  "Failed to export Markdown: {0}": "Kunde inte exportera Markdown: {0}",
+  "Failed to export HTML: {0}": "Kunde inte exportera HTML: {0}",
+  "Set RSS feed URL": "Ange RSS-flodets URL",
+  "URL cannot be empty": "URL far inte vara tom",
+  "Please enter a valid URL (e.g., https://example.com/feed.xml)": "Ange en giltig URL (t.ex. https://example.com/feed.xml)",
+  "RSS feed updated to: {0}": "RSS-flode uppdaterat till: {0}",
+  "Failed to update feed URL: {0}": "Kunde inte uppdatera flodes-URL: {0}",
+  "Enter NewsBlur username": "Ange NewsBlur-anvandarnamn",
+  "Enter NewsBlur password for user: {0}": "Ange NewsBlur-losenord for anvandare: {0}",
+  "Enter your NewsBlur password": "Ange ditt NewsBlur-losenord",
+  "NewsBlur credentials saved successfully! API mode enabled.": "NewsBlur-uppgifter sparades! API-lage aktiverat.",
+  "Failed to save NewsBlur credentials: {0}": "Kunde inte spara NewsBlur-uppgifter: {0}",
+  "Enter submissions API key": "Ange submissions-API-nyckel",
+  "Enter your submissions API key": "Ange din submissions-API-nyckel",
+  "Submissions API key cannot be empty.": "Submissions-API-nyckel far inte vara tom.",
+  "Submissions API key saved securely.": "Submissions-API-nyckel sparades sakert.",
+  "Failed to save submissions API key: {0}": "Kunde inte spara submissions-API-nyckel: {0}",
+  "Submission API source is enabled but submission API base URL is missing.": "Submissions-API-kallan ar aktiverad men bas-URL saknas.",
+  "Submission API source is enabled but submissions API key is missing.": "Submissions-API-kallan ar aktiverad men API-nyckel saknas.",
+  "Submission API source is enabled but submission API base URL and submissions API key are missing.": "Submissions-API-kallan ar aktiverad men bade bas-URL och API-nyckel saknas.",
+  "Set Submissions API Key": "Ange submissions-API-nyckel",
+  "Received {0} submitted link(s) from the submissions API.": "Tog emot {0} inskickade lank(ar) fran submissions-API.",
+  "Submission API base URL must use HTTPS: {0}": "Submissions-API:ns bas-URL maste anvanda HTTPS: {0}",
+  "Invalid submissions API base URL: {0}": "Ogiltig bas-URL for submissions-API: {0}",
+  "No active editor found. Please open an HTML file to publish.": "Ingen aktiv redigerare hittades. Oppna en HTML-fil for att publicera.",
+  "Please open an HTML file to publish to WordPress.": "Oppna en HTML-fil for att publicera till WordPress.",
+  "This doesn't appear to be a Dew Drop post. Do you want to publish it anyway?": "Detta verkar inte vara ett Dew Drop-inlagg. Vill du publicera anda?",
+  "Yes": "Ja",
+  "No": "Nej",
+  "No active editor found. Please open an HTML or Markdown file first.": "Ingen aktiv redigerare hittades. Oppna forst en HTML- eller Markdown-fil.",
+  "Please open an HTML or Markdown file to edit with the WYSIWYG editor.": "Oppna en HTML- eller Markdown-fil for att redigera med WYSIWYG-redigeraren.",
+  "Content updated successfully!": "Innehallet uppdaterades!",
+  "{0} posts": "{0} inlagg",
+  "Loading feed data...": "Laser in flodesdata...",
+  "No posts loaded - click refresh to load feeds": "Inga inlagg laddade - klicka pa uppdatera for att lasa in floden",
+  "Total: {0} post(s) fetched and categorized": "Totalt: {0} inlagg hamtade och kategoriserade",
+  "URL must be a non-empty string": "URL must be a non-empty string",
+  "URL must use HTTP or HTTPS protocol": "URL must use HTTP or HTTPS protocol",
+  "Invalid URL format. Please provide a valid URL (e.g., https://example.com/feed.xml)": "Invalid URL format. Please provide a valid URL (e.g., https://example.com/feed.xml)",
+  "NewsBlur API cancelled. Using RSS feed (limited to ~25 items).": "NewsBlur API cancelled. Using RSS feed (limited to ~25 items).",
+  "NewsBlur API is enabled but username not configured. Using RSS feed (limited to ~25 items).": "NewsBlur API is enabled but username not configured. Using RSS feed (limited to ~25 items).",
+  "Failed to load RSS feed: {0}": "Failed to load RSS feed: {0}",
+  "Failed to fetch Dew Drop number: {0}": "Failed to fetch Dew Drop number: {0}",
+  "Save {0}": "Spara {0}",
+  "Would you like to edit this post in the WYSIWYG editor?": "Vill du redigera detta inlagg i WYSIWYG-redigeraren?",
+  "Open in Editor": "Oppna i redigeraren",
+  "No Thanks": "Nej tack",
+  "Failed to export blog posts: {0}": "Kunde inte exportera blogginlagg: {0}",
+  "Application Password setup instructions are ready.": "Application Password setup instructions are ready.",
+  "View Instructions": "Visa instruktioner",
+  "Open WordPress Admin": "Oppna WordPress-admin",
+  "Continue with Setup": "Fortsatt med konfigurering",
+  "Please set your blog URL first": "Ange din blogg-URL forst",
+  "WordPress REST API requires an Application Password for secure authentication. Would you like to see setup instructions first?": "WordPress REST API requires an Application Password for secure authentication. Would you like to see setup instructions first?",
+  "Show Instructions": "Visa instruktioner",
+  "I have my credentials ready": "Jag har mina uppgifter redo",
+  "Cancel": "Avbryt",
+  "Ready to enter your credentials?": "Redo att ange dina uppgifter?",
+  "Yes, continue": "Ja, fortsatt",
+  "Enter WordPress blog URL (e.g., https://yourblog.com)": "Ange WordPress-blogg-URL (t.ex. https://yourblog.com)",
+  "Invalid blog URL format. Please enter a valid URL (e.g., https://yourblog.com)": "Invalid blog URL format. Please enter a valid URL (e.g., https://yourblog.com)",
+  "Enter WordPress username (same as your login username)": "Ange WordPress-anvandarnamn (samma som ditt inloggningsnamn)",
+  "Enter WordPress Application Password for user: {0}": "Enter WordPress Application Password for user: {0}",
+  "WordPress credentials saved successfully! Use \"Test WordPress Connection\" to verify.": "WordPress credentials saved successfully! Use \"Test WordPress Connection\" to verify.",
+  "Failed to save WordPress credentials: {0}": "Failed to save WordPress credentials: {0}",
+  "WordPress credentials not configured. Please set them first.": "WordPress-uppgifter ar inte konfigurerade. Ange dem forst.",
+  "WordPress REST API endpoint not accessible at {0}/wp-json/wp/v2/. Please check:\n1. WordPress REST API is enabled\n2. Your blog URL is correct\n3. No security plugins are blocking REST API": "WordPress REST API endpoint not accessible at {0}/wp-json/wp/v2/. Please check:\n1. WordPress REST API is enabled\n2. Your blog URL is correct\n3. No security plugins are blocking REST API",
+  "WordPress REST API connection successful!\nWorking authentication methods: {0}": "WordPress REST API connection successful!\nWorking authentication methods: {0}",
+  "WordPress connection failed. All authentication methods failed.\n\nTroubleshooting info:\n{0}\n\nCommon solutions:\n1. Create an Application Password in WordPress Admin → Users → Profile\n2. Check if security plugins are blocking REST API\n3. Verify username is correct and user has 'publish_posts' capability\n4. Try temporarily disabling security plugins": "WordPress connection failed. All authentication methods failed.\n\nTroubleshooting info:\n{0}\n\nCommon solutions:\n1. Create an Application Password in WordPress Admin → Users → Profile\n2. Check if security plugins are blocking REST API\n3. Verify username is correct and user has 'publish_posts' capability\n4. Try temporarily disabling security plugins",
+  "Invalid post data: title and content are required": "Invalid post data: title and content are required",
+  "Post {0} successfully! Post ID: {1}": "Post {0} successfully! Post ID: {1}",
+  "published": "publicerad",
+  "saved as draft": "sparad som utkast",
+  "Categories: {0}": "Categories: {0}",
+  "Tags: {0} detected": "Tags: {0} detected",
+  "Failed to create post: No post ID returned": "Failed to create post: No post ID returned",
+  "Failed to publish post: Could not resolve hostname '{0}'. Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.": "Failed to publish post: Could not resolve hostname '{0}'. Please verify your WordPress Blog URL in settings (rssBlogCategorizer.wordpressBlogUrl) is correct.",
+  "Failed to publish post: Connection refused. Please verify your WordPress Blog URL and that the site is accessible.": "Failed to publish post: Connection refused. Please verify your WordPress Blog URL and that the site is accessible.",
+  "Failed to publish post: {0}": "Failed to publish post: {0}",
+  "This content appears to have already been published to WordPress (Post ID: {0}). Do you want to continue anyway?": "This content appears to have already been published to WordPress (Post ID: {0}). Do you want to continue anyway?",
+  "Continue Publishing": "Fortsatt publicera",
+  "Use default categories: {0}": "Use default categories: {0}",
+  "Use the categories configured in settings": "Use the categories configured in settings",
+  "Customize categories for this post": "Customize categories for this post",
+  "Enter custom categories for this specific post": "Enter custom categories for this specific post",
+  "No categories": "Inga kategorier",
+  "Publish without assigning any categories": "Publish without assigning any categories",
+  "Which categories would you like to assign to this post?": "Which categories would you like to assign to this post?",
+  "Enter categories separated by commas": "Enter categories separated by commas",
+  "Publish immediately": "Publicera direkt",
+  "Save as draft": "Spara som utkast",
+  "How would you like to publish this post?": "How would you like to publish this post?",
+  "Use {0} auto-detected tags": "Use {0} auto-detected tags",
+  "Customize tags": "Anpassa taggar",
+  "Edit the detected tags": "Edit the detected tags",
+  "No tags": "Inga taggar",
+  "Publish without tags": "Publish without tags",
+  "Tags detected automatically from content. How would you like to proceed?": "Tags detected automatically from content. How would you like to proceed?",
+  "Enter tags separated by commas": "Ange taggar separerade med kommatecken",
+  "Editing: {0}": "Redigerar: {0}",
+  "Dew Drop {0} Editor": "Dew Drop {0} Editor",
+  "No document to save to.": "Inget dokument att spara till.",
+  "Failed to save changes: {0}": "Failed to save changes: {0}",
+  "Content saved! Would you like to publish to WordPress?": "Innehall sparat! Vill du publicera till WordPress?",
+  "Failed to open document for publishing: {0}": "Failed to open document for publishing: {0}",
+  "Loading editor...": "Laser in redigerare...",
+  "Loading Editor...": "Laser in redigerare...",
+  "Close without saving": "Stang utan att spara",
+  "Save changes to file (keep editor open)": "Spara andringar till fil (behall redigeraren oppen)",
+  "Save changes and close editor": "Spara andringar och stang redigeraren",
+  "Save and prepare for WordPress publishing": "Spara och forbered for WordPress-publicering",
+  "Save": "Spara",
+  "Save & Close": "Spara och stang",
+  "Save & Publish": "Spara och publicera",
+  "You have unsaved changes. Are you sure you want to close?": "Du har osparade andringar. Ar du saker pa att du vill stanga?",
+  "Last saved: {0}": "Senast sparad: {0}",
+  "Editor Loading Error": "Fel vid inlasning av redigerare",
+  "Retry": "Forsok igen",
+  "Failed to load the markdown editor. Please check your internet connection and try again.": "Kunde inte lasa in markdown-redigeraren. Kontrollera internetanslutningen och forsok igen.",
+  "Failed to initialize the markdown editor: {0}": "Failed to initialize the markdown editor: {0}"
 }
