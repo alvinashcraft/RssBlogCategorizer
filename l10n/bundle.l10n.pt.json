@@ -33,7 +33,7 @@
   "No active editor found. Please open an HTML or Markdown file first.": "Nenhum editor ativo encontrado. Abra primeiro um arquivo HTML ou Markdown.",
   "Please open an HTML or Markdown file to edit with the WYSIWYG editor.": "Abra um arquivo HTML ou Markdown para editar com o editor WYSIWYG.",
   "Content updated successfully!": "Conteúdo atualizado com sucesso!",
-  "{0} posts": "{0} posts",
+  "{0} posts": "{0} postagens",
   "Loading feed data...": "Carregando dados do feed...",
   "No posts loaded - click refresh to load feeds": "Nenhum post carregado - clique em atualizar para carregar feeds",
   "Total: {0} post(s) fetched and categorized": "Total: {0} post(s) buscado(s) e categorizado(s)",

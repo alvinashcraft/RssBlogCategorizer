@@ -27,7 +27,7 @@
   "config.submissionApiBaseUrl.description": "Basis-URL voor de submissions-API (bijvoorbeeld https://your-api-host.azurewebsites.net)",
   "config.wordpressBlogUrl.description": "WordPress-blog-URL (bijv. https://yourblog.com)",
   "config.wordpressUsername.description": "WordPress-gebruikersnaam voor publiceren. Wachtwoord wordt veilig opgeslagen en indien nodig opgevraagd.",
-  "config.wordpressCategories.description": "Standaard WordPress-categorieen die aan gepubliceerde berichten worden toegewezen",
+  "config.wordpressCategories.description": "Standaard WordPress-categorieën die aan gepubliceerde berichten worden toegewezen",
   "config.openLinksInNewTab.description": "Blogberichtenlinks openen in een nieuw browsertabblad wanneer erop wordt geklikt (voegt target=\"_blank\" toe aan HTML-exports)",
   "config.enableDometrainSection.description": "Dometrain-cursussectie in exports inschakelen (markeert elke dag een andere videotraining van Dometrain)",
   "config.dometrainLastCourseId.description": "Laatst getoonde Dometrain-cursus-ID (gebruikt om door cursussen te bladeren). Synchroniseert tussen computers als VS Code-instellingensynchronisatie is ingeschakeld.",
