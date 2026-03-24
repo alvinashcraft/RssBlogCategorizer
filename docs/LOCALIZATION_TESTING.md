@@ -50,8 +50,8 @@ After changing language, verify these key areas:
   - French: "Aucun article disponible pour l'exportation. Veuillez d'abord actualiser le flux."
   - Italian: "Nessun post disponibile per l'esportazione. Aggiorna prima il feed."
   - Portuguese: "Nenhum post disponível para exportar. Atualize o feed primeiro."
-  - Spanish: "No hay publicaciones disponibles para exportar. Actualice la fuente primero."
-  - Dutch and Swedish locale files are currently seeded from English; localized strings may remain English until translated.
+  - Spanish: "No hay publicaciones disponibles para exportar. Actualice la fonte primero."
+  - Dutch (`nl`) and Swedish (`sv`) locale files currently contain initial/partial translations; any untranslated strings will appear in English.
 
 ## Full Test Checklist
 
