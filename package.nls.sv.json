@@ -27,7 +27,7 @@
   "config.submissionApiBaseUrl.description": "Bas-URL for submissions-API (till exempel https://your-api-host.azurewebsites.net)",
   "config.wordpressBlogUrl.description": "WordPress-blogg-URL (t.ex. https://yourblog.com)",
   "config.wordpressUsername.description": "WordPress-användarnamn for publicering. Losenord lagras säkert och efterfragas vid behov.",
-  "config.wordpressCategories.description": "Ständårdkategorier i WordPress att tilldela publicerade inlägg",
+  "config.wordpressCategories.description": "Standardkategorier i WordPress att tilldela publicerade inlägg",
   "config.openLinksInNewTab.description": "Oppna lankar till blogginlägg i en ny webbläsarflik nar de klickas (lagger till target=\"_blank\" i HTML-exporter)",
   "config.enableDometrainSection.description": "Aktivera Dometrain-kurssektionen i exporter (lyfter fram en annan videokurs fran Dometrain varje dag)",
   "config.dometrainLastCourseId.description": "Senast visade Dometrain-kurs-ID (används for att rotera mellan kurser). Synkroniseras mellan datorer om VS Code-installsynkronisering ar aktiverad.",
