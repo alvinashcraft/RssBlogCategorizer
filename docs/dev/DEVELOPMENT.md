@@ -136,11 +136,11 @@ See [src/test/README.md](src/test/README.md) for detailed testing documentation.
 ## Building VSIX Package
 
 ```bash
-# Install vsce globally if not already installed
-npm install -g vsce
+# Install dependencies (includes pinned @vscode/vsce)
+npm install
 
-# Package the extension
-vsce package
+# Package the extension with local VSCE
+npm run vsce:package
 ```
 
 ## Configuration Schema
@@ -285,7 +285,7 @@ Press `F5` to launch the Extension Development Host with debug capabilities:
 1. Update version in `package.json`
 2. Update CHANGELOG if applicable
 3. Run tests to ensure everything works
-4. Build VSIX package: `vsce package`
+4. Build VSIX package: `npm run vsce:package`
 5. Test the packaged extension
 6. Create release and upload VSIX file
 

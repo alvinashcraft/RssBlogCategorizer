@@ -72,7 +72,7 @@ This is a Visual Studio Code extension called "Dev Feed Curator" that fetches RS
 
 ### Build Process
 - Use `npm run compile` to build TypeScript
-- Use `npx vsce package` to create extension package
+- Use `npm run vsce:package` to create extension package
 - Tests run with `npm run test:basic` (fast) or `npm test` (full)
 
 ## Current Focus Areas
