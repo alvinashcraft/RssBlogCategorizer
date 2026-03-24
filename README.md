@@ -329,6 +329,8 @@ The extension is localized and currently supports:
 - **French** (Français)
 - **Italian** (Italiano)
 - **Portuguese** (Português)
+- **Dutch** (Nederlands) - initial locale file added
+- **Swedish** (Svenska) - initial locale file added
 
 The UI language is determined by your VS Code display language setting. All commands, settings, tree view labels, messages, and webview editor controls are translated.
 

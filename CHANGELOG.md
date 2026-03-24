@@ -4,6 +4,55 @@ All notable changes to the "Dev Feed Curator" extension will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.10.0] - 2026-03-24
+
+### Added
+
+- **Expanded localization support** - Added Dutch (Nederlands) and Swedish (Svenska) locale files
+- Extension now supports 8 languages total: English, Spanish, German, French, Italian, Portuguese, Dutch, and Swedish
+
+### Changed
+
+- Updated packaging workflow to use a pinned local VSCE toolchain via `@vscode/vsce`
+- Added `npm run vsce:package` and `npm run vsce:publish` scripts for consistent packaging and publishing
+- Updated `test:basic` script to run compiled tests with `--no-config` to avoid duplicate test discovery and Node typeless-module warnings
+- Updated localization section in README to reflect newly added locales
+
+## [3.9.1] - 2026-03-24
+
+### Added
+
+- Added secure submissions API key setup command (`rssBlogCategorizer.setSubmissionApiKey`)
+- Added user-facing warnings for missing submissions API configuration with action to set API key
+- Added informational submissions count notification after fetching approved links
+
+### Changed
+
+- Moved submissions API key storage from settings to VS Code SecretStorage
+- Removed insecure plain-text submissions API key setting from extension configuration
+- Simplified submissions API notification dismissal behavior
+- Updated documentation and localization files for secure key setup and warning flows
+
+### Fixed
+
+- Added submissions API base URL validation with HTTPS enforcement and clearer warning messages
+- Improved submissions source handling for invalid or missing configuration scenarios
+- Updated submissions fetch to request the full approved queue without extension-side date filtering
+
+## [3.9.0] - 2026-03-23
+
+### Added
+
+- Added a secondary source pipeline for approved submissions API links
+- Added submissions API integration for retrieving approved links and ingesting them as categorized posts
+- Added automatic submission status updates to mark consumed items as `processed`
+- Added new submissions source settings to enable the feature and configure the submissions API base URL
+
+### Changed
+
+- Extended feed aggregation workflow to merge primary RSS/NewsBlur results with approved submissions
+- Updated README and localization resources for submissions source configuration and behavior
+
 ## [3.8.0] - 2025-03-01
 
 ### Added

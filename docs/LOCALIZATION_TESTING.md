@@ -11,7 +11,9 @@ This guide provides quick steps to test the newly added language support.
    - `es` - Spanish (Español)
    - `fr` - French (Français)
    - `it` - Italian (Italiano)
+  - `nl` - Dutch (Nederlands)
    - `pt` - Portuguese (Português)
+  - `sv` - Swedish (Svenska)
    - `en` - English (back to default)
 4. **Reload VS Code** when prompted
 
@@ -49,6 +51,7 @@ After changing language, verify these key areas:
   - Italian: "Nessun post disponibile per l'esportazione. Aggiorna prima il feed."
   - Portuguese: "Nenhum post disponível para exportar. Atualize o feed primeiro."
   - Spanish: "No hay publicaciones disponibles para exportar. Actualice la fuente primero."
+  - Dutch and Swedish locale files are currently seeded from English; localized strings may remain English until translated.
 
 ## Full Test Checklist
 
@@ -63,19 +66,21 @@ For comprehensive testing, see `LOCALIZATION_IMPLEMENTATION_PLAN.md` in the docs
 | Spanish | `es` | `.es.json` |
 | French | `fr` | `.fr.json` |
 | Italian | `it` | `.it.json` |
+| Dutch | `nl` | `.nl.json` |
 | Portuguese | `pt` | `.pt.json` |
+| Swedish | `sv` | `.sv.json` |
 
 ## Common Test Commands
 
 ```bash
 # Validate all localization JSON files
-node -e "['de','es','fr','it','pt'].forEach(l=>{try{JSON.parse(require('fs').readFileSync(\`package.nls.\${l}.json\`))}catch(e){console.error(\`❌ \${l}:\`,e.message)}}); console.log('✅ All package files valid')"
+node -e "['de','es','fr','it','nl','pt','sv'].forEach(l=>{try{JSON.parse(require('fs').readFileSync(\`package.nls.\${l}.json\`))}catch(e){console.error(\`❌ \${l}:\`,e.message)}}); console.log('✅ All package files valid')"
 
 # Count keys in each language
-node -e "console.log(['de','es','fr','it','pt'].map(l=>l.toUpperCase()+': '+Object.keys(JSON.parse(require('fs').readFileSync(\`package.nls.\${l}.json\`))).length).join(', '))"
+node -e "console.log(['de','es','fr','it','nl','pt','sv'].map(l=>l.toUpperCase()+': '+Object.keys(JSON.parse(require('fs').readFileSync(\`package.nls.\${l}.json\`))).length).join(', '))"
 
 # Check for missing translations (returns empty if all complete)
-node -e "const en=JSON.parse(require('fs').readFileSync('l10n/bundle.l10n.json'));['de','es','fr','it','pt'].forEach(l=>{const t=JSON.parse(require('fs').readFileSync(\`l10n/bundle.l10n.\${l}.json\`));Object.keys(en).forEach(k=>{if(!t[k])console.log(\`❌ \${l}: Missing '\${k}'\`)})})"
+node -e "const en=JSON.parse(require('fs').readFileSync('l10n/bundle.l10n.json'));['de','es','fr','it','nl','pt','sv'].forEach(l=>{const t=JSON.parse(require('fs').readFileSync(\`l10n/bundle.l10n.\${l}.json\`));Object.keys(en).forEach(k=>{if(!t[k])console.log(\`❌ \${l}: Missing '\${k}'\`)})})"
 ```
 
 ## Expected Results
@@ -85,13 +90,14 @@ All tests should show:
 - ✅ All messages display in the selected language  
 - ✅ Placeholders like `{0}` are replaced with actual values
 - ✅ Technical terms (WordPress, RSS, etc.) remain in English
-- ✅ No English fallback text appears
+- ✅ No missing-key fallback text appears
+- ℹ️ Dutch (`nl`) and Swedish (`sv`) currently use initial locale files and may intentionally match English until translated
 
 ## Reporting Issues
 
 If you find translation issues:
 
-1. Note the language code (de, fr, it, pt)
+1. Note the language code (de, es, fr, it, nl, pt, sv)
 2. Note the exact location (command name, setting, message)
 3. Note what was expected vs. what appeared
 4. Check the relevant `.json` file for the incorrect translation
@@ -103,10 +109,14 @@ For package-level issues (commands, settings):
 - `package.nls.de.json`
 - `package.nls.fr.json`
 - `package.nls.it.json`
+- `package.nls.nl.json`
 - `package.nls.pt.json`
+- `package.nls.sv.json`
 
 For runtime issues (messages, prompts):
 - `l10n/bundle.l10n.de.json`
 - `l10n/bundle.l10n.fr.json`
 - `l10n/bundle.l10n.it.json`
+- `l10n/bundle.l10n.nl.json`
 - `l10n/bundle.l10n.pt.json`
+- `l10n/bundle.l10n.sv.json`
