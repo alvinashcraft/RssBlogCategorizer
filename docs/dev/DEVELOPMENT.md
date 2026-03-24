@@ -54,13 +54,17 @@ l10n/
 ├── bundle.l10n.de.json # Runtime German localization bundle
 ├── bundle.l10n.fr.json # Runtime French localization bundle
 ├── bundle.l10n.it.json # Runtime Italian localization bundle
-└── bundle.l10n.pt.json # Runtime Portuguese localization bundle
+├── bundle.l10n.pt.json # Runtime Portuguese localization bundle
+├── bundle.l10n.nl.json # Runtime Dutch localization bundle
+└── bundle.l10n.sv.json # Runtime Swedish localization bundle
 package.nls.json        # Extension manifest default (English) localization
 package.nls.es.json     # Extension manifest Spanish localization
 package.nls.de.json     # Extension manifest German localization
 package.nls.fr.json     # Extension manifest French localization
 package.nls.it.json     # Extension manifest Italian localization
 package.nls.pt.json     # Extension manifest Portuguese localization
+package.nls.nl.json     # Extension manifest Dutch localization
+package.nls.sv.json     # Extension manifest Swedish localization
 categories.json        # Category configuration
 books.json            # Book recommendations for exports
 package.json          # Extension manifest
@@ -68,17 +72,19 @@ package.json          # Extension manifest
 
 ## Localization
 
-Version 3.7.0 introduced localized UI support for English and Spanish. Version 3.8.0 expanded support to include German, French, Italian, and Portuguese.
+Version 3.7.0 introduced localized UI support for English and Spanish. Version 3.8.0 expanded support to include German, French, Italian, and Portuguese. Version 3.10.0 added initial Dutch and Swedish locale files.
 
 ### Supported Languages
 
-The extension supports 6 languages:
+The extension includes 8 locale bundles:
 - English (en) - Default
 - Spanish (es / Español)
 - German (de / Deutsch)
 - French (fr / Français)
 - Italian (it / Italiano)
 - Portuguese (pt / Português)
+- Dutch (nl / Nederlands) - Initial locale file
+- Swedish (sv / Svenska) - Initial locale file
 
 ### Localization Surfaces
 
@@ -90,8 +96,8 @@ The extension supports 6 languages:
 
 1. Add or update the English source string in code (`vscode.l10n.t(...)`) or `package.json` key references
 2. Add corresponding entries in all language files:
-  - `l10n/bundle.l10n.json`, `l10n/bundle.l10n.es.json`, `l10n/bundle.l10n.de.json`, `l10n/bundle.l10n.fr.json`, `l10n/bundle.l10n.it.json`, `l10n/bundle.l10n.pt.json` for runtime strings
-  - `package.nls.json`, `package.nls.es.json`, `package.nls.de.json`, `package.nls.fr.json`, `package.nls.it.json`, `package.nls.pt.json` for contribution metadata
+  - `l10n/bundle.l10n.json`, `l10n/bundle.l10n.es.json`, `l10n/bundle.l10n.de.json`, `l10n/bundle.l10n.fr.json`, `l10n/bundle.l10n.it.json`, `l10n/bundle.l10n.pt.json`, `l10n/bundle.l10n.nl.json`, `l10n/bundle.l10n.sv.json` for runtime strings
+  - `package.nls.json`, `package.nls.es.json`, `package.nls.de.json`, `package.nls.fr.json`, `package.nls.it.json`, `package.nls.pt.json`, `package.nls.nl.json`, `package.nls.sv.json` for contribution metadata
 3. For webview text, update placeholders in:
   - `webview/editor.html` and/or `webview/markdown-editor.html`
   - Replacement logic in `src/editorManager.ts`
@@ -136,11 +142,11 @@ See [src/test/README.md](src/test/README.md) for detailed testing documentation.
 ## Building VSIX Package
 
 ```bash
-# Install vsce globally if not already installed
-npm install -g vsce
+# Install dependencies (includes local @vscode/vsce from package.json)
+npm install
 
-# Package the extension
-vsce package
+# Package the extension with local VSCE
+npm run vsce:package
 ```
 
 ## Configuration Schema
@@ -285,7 +291,7 @@ Press `F5` to launch the Extension Development Host with debug capabilities:
 1. Update version in `package.json`
 2. Update CHANGELOG if applicable
 3. Run tests to ensure everything works
-4. Build VSIX package: `vsce package`
+4. Build VSIX package: `npm run vsce:package`
 5. Test the packaged extension
 6. Create release and upload VSIX file
 

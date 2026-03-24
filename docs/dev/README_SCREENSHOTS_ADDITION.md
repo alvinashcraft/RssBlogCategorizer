@@ -47,7 +47,7 @@ The screenshots will now appear on the VS Code Marketplace extension page, provi
 
 ## Verification
 
-- ✅ Screenshots are included in extension package (verified with `vsce package`)
+- ✅ Screenshots are included in extension package (verified with `npm run vsce:package`)
 - ✅ Image paths are correct for VS Code Marketplace rendering
 - ✅ Code compiles successfully
 - ✅ Tests pass

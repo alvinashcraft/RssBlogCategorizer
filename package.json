@@ -3,7 +3,7 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "icon": "images/rssBlogIcon.png",
-  "version": "3.9.1",
+  "version": "3.10.0",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -263,6 +263,8 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
+    "vsce:package": "vsce package",
+    "vsce:publish": "vsce publish",
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
@@ -270,7 +272,7 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile",
     "test": "node ./out/test/runTest.js",
-    "test:basic": "mocha --require ts-node/register src/test/basic/**/*.test.ts",
+    "test:basic": "npm run compile-tests && mocha --no-config out/test/basic/**/*.test.js",
     "test:unit": "mocha --require ts-node/register src/test/unit/**/*.test.ts",
     "test:unit:compiled": "mocha out/test/unit/**/*.test.js"
   },
@@ -283,6 +285,7 @@
     "@types/sinon": "^17.0.2",
     "@types/sinon-chai": "^3.2.12",
     "@types/vscode": "^1.75.0",
+    "@vscode/vsce": "^3.7.1",
     "@vscode/test-electron": "^2.3.8",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",

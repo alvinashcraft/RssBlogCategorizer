@@ -275,4 +275,4 @@ When adding new user-facing strings to the extension:
 ✅ **Documentation updated**  
 ✅ **Ready for testing and release**
 
-The Dev Feed Curator extension now supports 6 languages with comprehensive localization of all user-facing strings. Users can seamlessly use the extension in English, Spanish, German, French, Italian, or Portuguese based on their VS Code display language setting.
+The Dev Feed Curator extension now includes 8 locale bundles. Full translations are available for English, Spanish, German, French, Italian, and Portuguese, with initial locale files added for Dutch and Swedish based on VS Code display language selection.

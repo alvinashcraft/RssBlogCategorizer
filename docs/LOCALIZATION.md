@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes the implementation of multi-language support for the Dev Feed Curator VS Code extension. The extension now supports 6 languages with full localization of all user-facing strings.
+This document summarizes the implementation of multi-language support for the Dev Feed Curator VS Code extension. The extension currently includes 8 locale bundles; full translations are complete for English, Spanish, German, French, Italian, and Portuguese, and initial locale files are in place for Dutch and Swedish.
 
 ## Supported Languages
 
@@ -12,12 +12,14 @@ This document summarizes the implementation of multi-language support for the De
 4. **French** (fr / Français) - ✅ Newly added
 5. **Italian** (it / Italiano) - ✅ Newly added
 6. **Portuguese** (pt / Português) - ✅ Newly added
+7. **Dutch** (nl / Nederlands) - 🆕 Initial locale file added in 3.10.0
+8. **Swedish** (sv / Svenska) - 🆕 Initial locale file added in 3.10.0
 
 ## Implementation Details
 
 ### Files Created
 
-For each new language (German, French, Italian, Portuguese), two files were created:
+For each added language locale, two files were created:
 
 #### Package-level Localization Files
 Location: `./` (root directory)
@@ -28,6 +30,8 @@ Location: `./` (root directory)
 - `package.nls.fr.json` - French UI contributions
 - `package.nls.it.json` - Italian UI contributions
 - `package.nls.pt.json` - Portuguese UI contributions
+- `package.nls.nl.json` - Dutch UI contributions
+- `package.nls.sv.json` - Swedish UI contributions
 
 These files contain 32 localized strings for:
 - Extension display name and description
@@ -42,6 +46,8 @@ Location: `./l10n/` (configurable via `"l10n": "./l10n"` in `package.json`)
 - `l10n/bundle.l10n.fr.json` - French runtime messages
 - `l10n/bundle.l10n.it.json` - Italian runtime messages
 - `l10n/bundle.l10n.pt.json` - Portuguese runtime messages
+- `l10n/bundle.l10n.nl.json` - Dutch runtime messages
+- `l10n/bundle.l10n.sv.json` - Swedish runtime messages
 
 These files contain 110 localized string entries as flat key/value translation maps. Any message/comment metadata is defined only in the source `bundle.l10n.json` file used at build time. They cover:
 - Error messages and warnings
@@ -191,7 +197,9 @@ When adding new user-facing strings:
    - `l10n/bundle.l10n.es.json`
    - `l10n/bundle.l10n.fr.json`
    - `l10n/bundle.l10n.it.json`
+   - `l10n/bundle.l10n.nl.json`
    - `l10n/bundle.l10n.pt.json`
+   - `l10n/bundle.l10n.sv.json`
 3. If adding package-level strings (commands, settings), update all `package.nls.*.json` files
 4. Use `vscode.l10n.t()` in code for runtime strings
 5. Test in multiple languages before releasing
@@ -208,8 +216,10 @@ When adding new user-facing strings:
 ✅ French (fr) - Complete  
 ✅ Italian (it) - Complete
 ✅ Portuguese (pt) - Complete
+✅ Dutch (nl) - Initial locale file added
+✅ Swedish (sv) - Initial locale file added
 ✅ README.md updated
 ✅ Compilation successful
 ✅ Files correctly packaged
 
-All localization files have been implemented and are ready for use!
+Localization files are implemented and ready for use. Dutch and Swedish currently ship as initial locale files and can be translated incrementally.
