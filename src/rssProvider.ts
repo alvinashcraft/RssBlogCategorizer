@@ -106,7 +106,6 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
     private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
     private static readonly MILLISECONDS_PER_MINUTE = 1000 * 60;
-    private static readonly MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
     private static readonly SUBMISSIONS_QUERY_FROM = '1900-01-01';
     private static readonly SUBMISSIONS_QUERY_TO = '9999-12-31';
     private static readonly MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
