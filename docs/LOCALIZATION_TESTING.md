@@ -11,9 +11,9 @@ This guide provides quick steps to test the newly added language support.
    - `es` - Spanish (Español)
    - `fr` - French (Français)
    - `it` - Italian (Italiano)
-  - `nl` - Dutch (Nederlands)
+   - `nl` - Dutch (Nederlands)
    - `pt` - Portuguese (Português)
-  - `sv` - Swedish (Svenska)
+   - `sv` - Swedish (Svenska)
    - `en` - English (back to default)
 4. **Reload VS Code** when prompted
 
