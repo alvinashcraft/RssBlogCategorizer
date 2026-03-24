@@ -502,8 +502,7 @@ describe('RSSBlogProvider', () => {
         useNewsblurApi: false,
         newsblurUsername: '',
         enableSubmissionApiSource: true,
-        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net',
-        submissionApiLookbackDays: 0
+        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net'
       });
       workspaceGetConfigStub.returns(configWithMissingKey);
 
@@ -540,8 +539,7 @@ describe('RSSBlogProvider', () => {
         useNewsblurApi: false,
         newsblurUsername: '',
         enableSubmissionApiSource: true,
-        submissionApiBaseUrl: 'http://insecure.example.com',
-        submissionApiLookbackDays: 0
+        submissionApiBaseUrl: 'http://insecure.example.com'
       });
       workspaceGetConfigStub.returns(configWithHttpBaseUrl);
       await mockContext.secrets.store(SUBMISSION_API_KEY, 'test-key');
@@ -577,8 +575,7 @@ describe('RSSBlogProvider', () => {
         useNewsblurApi: false,
         newsblurUsername: '',
         enableSubmissionApiSource: true,
-        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net',
-        submissionApiLookbackDays: 0
+        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net'
       });
       workspaceGetConfigStub.returns(configWithSubmissionsApi);
       await mockContext.secrets.store(SUBMISSION_API_KEY, 'test-key');
@@ -662,8 +659,7 @@ describe('RSSBlogProvider', () => {
         useNewsblurApi: false,
         newsblurUsername: '',
         enableSubmissionApiSource: true,
-        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net',
-        submissionApiLookbackDays: 0
+        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net'
       });
       workspaceGetConfigStub.returns(configWithSubmissionsApi);
       await mockContext.secrets.store(SUBMISSION_API_KEY, 'test-key');

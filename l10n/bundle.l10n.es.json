@@ -22,6 +22,7 @@
   "Submission API source is enabled but submissions API key is missing.": "La fuente de API de envíos está habilitada, pero falta la clave de API de envíos.",
   "Submission API source is enabled but submission API base URL and submissions API key are missing.": "La fuente de API de envíos está habilitada, pero faltan la URL base y la clave de API de envíos.",
   "Set Submissions API Key": "Configurar clave de API de envíos",
+  "Received {0} submitted link(s) from the submissions API.": "Se recibieron {0} enlace(s) enviados desde la API de envíos.",
   "Submission API base URL must use HTTPS: {0}": "La URL base de la API de envíos debe usar HTTPS: {0}",
   "Invalid submissions API base URL: {0}": "URL base de la API de envíos no válida: {0}",
   "No active editor found. Please open an HTML file to publish.": "No se encontró un editor activo. Abra un archivo HTML para publicar.",

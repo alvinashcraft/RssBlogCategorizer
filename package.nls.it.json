@@ -25,7 +25,6 @@
   "config.useNewsblurApi.description": "Utilizza l'API NewsBlur invece del feed RSS (consente più di 25 elementi con autenticazione)",
   "config.enableSubmissionApiSource.description": "Abilita la sorgente API delle segnalazioni approvate per recuperare i link inviati dagli utenti con stato approvato dopo il caricamento del feed principale",
   "config.submissionApiBaseUrl.description": "URL di base per l'API delle segnalazioni (ad esempio, https://your-api-host.azurewebsites.net)",
-  "config.submissionApiLookbackDays.description": "Numero di giorni da considerare a ritroso quando si interrogano le segnalazioni approvate (imposta 0 per includere tutte le segnalazioni approvate)",
   "config.wordpressBlogUrl.description": "URL del blog WordPress (ad es. https://tuoblog.it)",
   "config.wordpressUsername.description": "Nome utente WordPress per la pubblicazione. La password viene archiviata in modo sicuro e verrà richiesta quando necessario.",
   "config.wordpressCategories.description": "Categorie WordPress predefinite da assegnare ai post pubblicati",
