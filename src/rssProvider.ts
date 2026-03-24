@@ -754,17 +754,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     private async showSubmissionCountNotification(receivedCount: number): Promise<void> {
         const title = vscode.l10n.t('Received {0} submitted link(s) from the submissions API.', String(receivedCount));
-        await vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                title
-            },
-            async () => {
-                await new Promise<void>((resolve) => {
-                    setTimeout(resolve, 2500);
-                });
-            }
-        );
+        // Use a non-blocking status bar message with a timeout instead of a progress notification with an artificial delay
+        vscode.window.setStatusBarMessage(title, 2500);
     }
 
     private formatDateForQuery(date: Date): string {
