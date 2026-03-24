@@ -22,6 +22,7 @@
   "Submission API source is enabled but submissions API key is missing.": "La sorgente API delle segnalazioni è abilitata, ma manca la chiave API delle segnalazioni.",
   "Submission API source is enabled but submission API base URL and submissions API key are missing.": "La sorgente API delle segnalazioni è abilitata, ma mancano l'URL di base e la chiave API delle segnalazioni.",
   "Set Submissions API Key": "Imposta chiave API segnalazioni",
+  "Received {0} submitted link(s) from the submissions API.": "Ricevuti {0} link inviato/i dall'API delle segnalazioni.",
   "Submission API base URL must use HTTPS: {0}": "L'URL di base dell'API delle segnalazioni deve usare HTTPS: {0}",
   "Invalid submissions API base URL: {0}": "URL di base dell'API delle segnalazioni non valido: {0}",
   "No active editor found. Please open an HTML file to publish.": "Nessun editor attivo trovato. Apri un file HTML per pubblicare.",

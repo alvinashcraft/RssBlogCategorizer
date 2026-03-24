@@ -25,7 +25,6 @@
   "config.useNewsblurApi.description": "Use NewsBlur API instead of RSS feed (allows more than 25 items with authentication)",
   "config.enableSubmissionApiSource.description": "Enable approved-submissions API source to pull approved user-submitted links after the primary feed load",
   "config.submissionApiBaseUrl.description": "Base URL for the submissions API (for example, https://your-api-host.azurewebsites.net)",
-  "config.submissionApiLookbackDays.description": "Number of days to look back when querying approved submissions (set to 0 to include all approved submissions)",
   "config.wordpressBlogUrl.description": "WordPress blog URL (e.g., https://yourblog.com)",
   "config.wordpressUsername.description": "WordPress username for publishing. Password is stored securely and will be prompted when needed.",
   "config.wordpressCategories.description": "Default WordPress categories to assign to published posts",

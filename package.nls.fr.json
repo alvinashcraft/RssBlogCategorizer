@@ -25,7 +25,6 @@
   "config.useNewsblurApi.description": "Utiliser l'API NewsBlur au lieu du flux RSS (permet plus de 25 éléments avec authentification)",
   "config.enableSubmissionApiSource.description": "Activer la source API des soumissions approuvées pour récupérer les liens soumis par les utilisateurs approuvés après le chargement du flux principal",
   "config.submissionApiBaseUrl.description": "URL de base de l'API des soumissions (par exemple, https://your-api-host.azurewebsites.net)",
-  "config.submissionApiLookbackDays.description": "Nombre de jours à remonter lors de la requête des soumissions approuvées (0 pour inclure toutes les soumissions approuvées)",
   "config.wordpressBlogUrl.description": "URL du blog WordPress (par ex. https://votreblog.fr)",
   "config.wordpressUsername.description": "Nom d'utilisateur WordPress pour la publication. Le mot de passe est stocké en toute sécurité et sera demandé si nécessaire.",
   "config.wordpressCategories.description": "Catégories WordPress par défaut à attribuer aux articles publiés",

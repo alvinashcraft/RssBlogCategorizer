@@ -27,6 +27,7 @@ This is a Visual Studio Code extension called "Dev Feed Curator" that fetches RS
 
 - **Never update version (authoring agents only)**: When writing or modifying code/files, do not modify the version number in `package.json` unless explicitly requested
 - **Review agent exception**: For review-only workflows, do not flag or treat `package.json` version changes as a violation unless the user explicitly requests versioning or release-readiness review
+- **Never commit directly to main**: Do not create commits on the `main` branch. Create or use a feature branch and commit there so changes can go through a pull request.
 - **Never auto-publish**: Do not publish to the VS Code Marketplace automatically or suggest doing so without explicit user request
 - **Package updates**: Only check for npm package updates after the project's version number in `package.json` has been explicitly updated
 

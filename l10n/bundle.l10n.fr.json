@@ -22,6 +22,7 @@
   "Submission API source is enabled but submissions API key is missing.": "La source API des soumissions est activée, mais la clé API des soumissions est manquante.",
   "Submission API source is enabled but submission API base URL and submissions API key are missing.": "La source API des soumissions est activée, mais l'URL de base et la clé API des soumissions sont manquantes.",
   "Set Submissions API Key": "Définir la clé API des soumissions",
+  "Received {0} submitted link(s) from the submissions API.": "{0} lien(s) soumis reçus depuis l'API des soumissions.",
   "Submission API base URL must use HTTPS: {0}": "L'URL de base de l'API des soumissions doit utiliser HTTPS : {0}",
   "Invalid submissions API base URL: {0}": "URL de base de l'API des soumissions invalide : {0}",
   "No active editor found. Please open an HTML file to publish.": "Aucun éditeur actif trouvé. Veuillez ouvrir un fichier HTML pour publier.",

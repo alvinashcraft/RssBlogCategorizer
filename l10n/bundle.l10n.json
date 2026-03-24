@@ -46,6 +46,10 @@
   "Submission API source is enabled but submissions API key is missing.": "Warning shown when submission API source is enabled but API key is not configured",
   "Submission API source is enabled but submission API base URL and submissions API key are missing.": "Warning shown when submission API source is enabled but base URL and API key are not configured",
   "Set Submissions API Key": "Action label to open command for securely setting submissions API key",
+  "Received {0} submitted link(s) from the submissions API.": {
+    "message": "Received {0} submitted link(s) from the submissions API.",
+    "comment": ["The number of approved submissions returned by the submissions API"]
+  },
   "Submission API base URL must use HTTPS: {0}": {
     "message": "Submission API base URL must use HTTPS: {0}",
     "comment": ["The configured submissions API base URL"]

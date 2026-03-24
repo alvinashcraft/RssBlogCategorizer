@@ -106,7 +106,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private static readonly NEWSBLUR_RSS_PATTERN = /^https:\/\/[^.]+\.newsblur\.com\/social\/rss\/([^/]+)\/([^/]+)/;
     private static readonly NEWSBLUR_API_PATTERN = /^https:\/\/www\.newsblur\.com\/social\/stories\/([^/]+)\/([^/?]+)/;
     private static readonly MILLISECONDS_PER_MINUTE = 1000 * 60;
-    private static readonly MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+    private static readonly SUBMISSIONS_QUERY_FROM = '1900-01-01';
+    private static readonly SUBMISSIONS_QUERY_TO = '9999-12-31';
     private static readonly MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
     constructor(private context: vscode.ExtensionContext) {}
@@ -623,8 +624,6 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         const enableSubmissionApiSource = config.get<boolean>('enableSubmissionApiSource') || false;
         const submissionApiBaseUrl = (config.get<string>('submissionApiBaseUrl') || '').trim();
         const submissionApiKey = (await this.getSubmissionApiKey() || '').trim();
-        const configuredLookback = config.get<number>('submissionApiLookbackDays');
-        const submissionApiLookbackDays = configuredLookback === undefined ? 0 : Math.max(0, configuredLookback);
 
         if (!enableSubmissionApiSource) {
             return;
@@ -642,18 +641,17 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         }
 
         try {
-            const to = this.formatDateForQuery(new Date());
-            const from = submissionApiLookbackDays === 0
-                ? '1970-01-01'
-                : this.formatDateForQuery(new Date(Date.now() - (submissionApiLookbackDays * RSSBlogProvider.MILLISECONDS_PER_DAY)));
-
             const queryUrl = new URL('/api/submissions', validatedBaseUrl);
-            queryUrl.searchParams.set('from', from);
-            queryUrl.searchParams.set('to', to);
+            // Always request the full approved queue: no extension-side date windowing.
+            queryUrl.searchParams.set('from', RSSBlogProvider.SUBMISSIONS_QUERY_FROM);
+            queryUrl.searchParams.set('to', RSSBlogProvider.SUBMISSIONS_QUERY_TO);
             queryUrl.searchParams.set('status', 'approved');
 
             const response = await this.callJsonApi<SubmissionsApiResponse>(queryUrl, 'GET', submissionApiKey);
             const submissions = Array.isArray(response.submissions) ? response.submissions : [];
+
+            // Show a short-lived notification so users can confirm service response volume.
+            void this.showSubmissionCountNotification(submissions.length);
 
             if (submissions.length === 0) {
                 console.log('Submission API returned 0 approved submissions.');
@@ -751,6 +749,12 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         if (selected === setApiKeyAction) {
             await vscode.commands.executeCommand('rssBlogCategorizer.setSubmissionApiKey');
         }
+    }
+
+    private async showSubmissionCountNotification(receivedCount: number): Promise<void> {
+        const title = vscode.l10n.t('Received {0} submitted link(s) from the submissions API.', String(receivedCount));
+        // Use a non-blocking status bar message with a timeout instead of a progress notification with an artificial delay
+        vscode.window.setStatusBarMessage(title, 2500);
     }
 
     private formatDateForQuery(date: Date): string {

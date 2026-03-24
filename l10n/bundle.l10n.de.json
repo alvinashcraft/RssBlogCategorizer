@@ -22,6 +22,7 @@
   "Submission API source is enabled but submissions API key is missing.": "Die Submissions-API-Quelle ist aktiviert, aber der Submissions-API-Schlüssel fehlt.",
   "Submission API source is enabled but submission API base URL and submissions API key are missing.": "Die Submissions-API-Quelle ist aktiviert, aber die Basis-URL und der Submissions-API-Schlüssel fehlen.",
   "Set Submissions API Key": "Submissions-API-Schlüssel festlegen",
+  "Received {0} submitted link(s) from the submissions API.": "{0} eingereichte Link(s) von der Submissions-API empfangen.",
   "Submission API base URL must use HTTPS: {0}": "Die Basis-URL der Submissions-API muss HTTPS verwenden: {0}",
   "Invalid submissions API base URL: {0}": "Ungültige Basis-URL der Submissions-API: {0}",
   "No active editor found. Please open an HTML file to publish.": "Kein aktiver Editor gefunden. Bitte öffnen Sie eine HTML-Datei zum Veröffentlichen.",

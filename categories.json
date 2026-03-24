@@ -114,6 +114,7 @@
         "anthropic.com",
         "devblogs.microsoft.com/foundry",
         "microsoft-foundry-blog",
+        "openclaw/releases",
         "azure-ai-foundry-blog",
         "microsoft.com/ai",
         "microsoft.com/en-us/ai",
@@ -406,6 +407,9 @@
       ]
     },
     "PowerShell and Terminal": {
+      "urlKeywords": [
+        "copilot-cli/releases"
+      ],
       "titleKeywords": [
         "bash",
         "zsh",
