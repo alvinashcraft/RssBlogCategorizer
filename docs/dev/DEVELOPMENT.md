@@ -142,7 +142,7 @@ See [src/test/README.md](src/test/README.md) for detailed testing documentation.
 ## Building VSIX Package
 
 ```bash
-# Install dependencies (includes pinned @vscode/vsce)
+# Install dependencies (includes local @vscode/vsce from package.json)
 npm install
 
 # Package the extension with local VSCE
