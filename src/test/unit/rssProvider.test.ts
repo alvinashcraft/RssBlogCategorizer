@@ -7,7 +7,7 @@ use(sinonChai);
 use(chaiAsPromised);
 import * as vscode from 'vscode';
 import { RSSBlogProvider, BlogPost } from '../../rssProvider';
-import { SUBMISSION_API_KEY } from '../../constants';
+import { PENDING_SUBMISSION_IDS_KEY, SUBMISSION_API_KEY } from '../../constants';
 import { MockExtensionContext, MockConfiguration } from '../mocks/mockVscode';
 import { mockRssXml, mockAtomXml, mockDewDropRss, mockCategoriesConfig, mockBlogPosts } from '../mocks/testData';
 import * as fs from 'fs';
@@ -650,7 +650,7 @@ describe('RSSBlogProvider', () => {
       expect(submissionPost?.author).to.equal('Alvin');
     });
 
-    it('should mark only added submission ids as processed', async () => {
+    it('should queue only added submission ids and process them after publish', async () => {
       const configWithSubmissionsApi = new MockConfiguration({
         feedUrl: 'https://example.com/feed.xml',
         recordCount: 100,
@@ -731,10 +731,29 @@ describe('RSSBlogProvider', () => {
 
       await provider.refresh();
 
+      const queuedIds = mockContext.workspaceState.get<string[]>(PENDING_SUBMISSION_IDS_KEY, []);
+      expect(queuedIds).to.deep.equal(['new-id']);
+
+      const patchDuringRefresh = requestBodies.find(body => body.includes('"newStatus":"processed"'));
+      expect(patchDuringRefresh).to.not.exist;
+
+      await provider.processPendingSubmissionsAfterPublish();
+
       const patchPayloadRaw = requestBodies.find(body => body.includes('"newStatus":"processed"'));
       expect(patchPayloadRaw).to.exist;
       const patchPayload = JSON.parse(patchPayloadRaw || '{}');
       expect(patchPayload.ids).to.deep.equal(['new-id']);
+
+      const remainingQueuedIds = mockContext.workspaceState.get<string[]>(PENDING_SUBMISSION_IDS_KEY, []);
+      expect(remainingQueuedIds).to.deep.equal([]);
+    });
+
+    it('should gracefully skip pending status update when no queued ids exist', async () => {
+      const httpsRequestStub = sinon.stub(https, 'request');
+
+      await provider.processPendingSubmissionsAfterPublish();
+
+      expect(httpsRequestStub).to.not.have.been.called;
     });
   });
 

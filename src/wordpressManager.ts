@@ -835,7 +835,7 @@ Would you like to open your WordPress admin panel now?
     /**
      * Publish HTML file content to WordPress
      */
-    async publishHtmlFile(document: vscode.TextDocument): Promise<boolean> {
+    async publishHtmlFile(document: vscode.TextDocument): Promise<{ success: boolean; wasPublished: boolean }> {
         const html = document.getText();
         
         // Check if this content has already been published
@@ -852,7 +852,7 @@ Would you like to open your WordPress admin panel now?
                 );
                 
                 if (choice !== vscode.l10n.t('Continue Publishing')) {
-                    return false;
+                    return { success: false, wasPublished: false };
                 }
             }
         } catch (error) {
@@ -892,7 +892,7 @@ Would you like to open your WordPress admin panel now?
         );
 
         if (!categoryChoice) {
-            return false; // User cancelled
+            return { success: false, wasPublished: false }; // User cancelled
         }
 
         let categories: string[] = [];
@@ -906,7 +906,7 @@ Would you like to open your WordPress admin panel now?
             });
 
             if (!customCategoriesInput) {
-                return false; // User cancelled
+                return { success: false, wasPublished: false }; // User cancelled
             }
 
             categories = customCategoriesInput
@@ -928,7 +928,7 @@ Would you like to open your WordPress admin panel now?
         );
 
         if (!status) {
-            return false; // User cancelled
+            return { success: false, wasPublished: false }; // User cancelled
         }
 
         // Auto-detect tags from full HTML content (including title, etc.)
@@ -961,7 +961,7 @@ Would you like to open your WordPress admin panel now?
             );
 
             if (!tagChoice) {
-                return false; // User cancelled
+                return { success: false, wasPublished: false }; // User cancelled
             }
 
             if (tagChoice.value === 'custom') {
@@ -972,7 +972,7 @@ Would you like to open your WordPress admin panel now?
                 });
 
                 if (customTagsInput === undefined) {
-                    return false; // User cancelled
+                    return { success: false, wasPublished: false }; // User cancelled
                 }
 
                 finalTags = customTagsInput
@@ -1030,7 +1030,10 @@ Would you like to open your WordPress admin panel now?
             }
         }
         
-        return publishResult.success;
+        return {
+            success: publishResult.success,
+            wasPublished: publishResult.success && post.status === 'publish'
+        };
     }
 
     /**

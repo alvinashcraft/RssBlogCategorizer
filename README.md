@@ -115,7 +115,7 @@ How it works:
 
 - The extension queries `/api/submissions` with `status=approved`
 - Approved links are added to the same in-memory list and run through the same categorization logic
-- After links are added, the extension calls `/api/submissions/status` and marks those consumed IDs as `processed` to avoid duplicates in future refreshes
+- Consumed submission IDs are queued locally and only sent to `/api/submissions/status` as `processed` after a successful WordPress publish (not just refresh), which avoids losing IDs when a draft is abandoned
 
 ### Exporting Posts
 

@@ -3,7 +3,7 @@ import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
-import { NEWSBLUR_PASSWORD_KEY, SUBMISSION_API_KEY } from './constants';
+import { NEWSBLUR_PASSWORD_KEY, PENDING_SUBMISSION_IDS_KEY, SUBMISSION_API_KEY } from './constants';
 
 export interface BlogPost {
     title: string;
@@ -41,6 +41,11 @@ interface SubmissionItem {
 interface SubmissionsApiResponse {
     totalCount?: number;
     submissions?: SubmissionItem[];
+    items?: SubmissionItem[];
+    results?: SubmissionItem[];
+    value?: SubmissionItem[];
+    data?: unknown;
+    approvedSubmissions?: SubmissionItem[];
 }
 
 interface SubmissionStatusUpdateResponse {
@@ -648,7 +653,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             queryUrl.searchParams.set('status', 'approved');
 
             const response = await this.callJsonApi<SubmissionsApiResponse>(queryUrl, 'GET', submissionApiKey);
-            const submissions = Array.isArray(response.submissions) ? response.submissions : [];
+            const extraction = this.extractSubmissionsFromApiResponse(response);
+            const submissions = extraction.submissions;
 
             // Show a short-lived notification so users can confirm service response volume.
             void this.showSubmissionCountNotification(submissions.length);
@@ -661,17 +667,21 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const seenLinks = new Set<string>(this.posts.map(post => post.link));
             const addedSubmissionIds: string[] = [];
             const additionalPosts: BlogPost[] = [];
+            let skippedMissingRequiredFields = 0;
+            let skippedAlreadySeen = 0;
 
             for (const submission of submissions) {
                 const rawUrl = (submission.url || '').trim();
                 const title = (submission.title || '').trim();
 
                 if (!rawUrl || !title) {
+                    skippedMissingRequiredFields++;
                     continue;
                 }
 
                 const normalizedLink = this.appendSyncfusionTracking(this.removeTrackingParameters(rawUrl));
                 if (seenLinks.has(normalizedLink)) {
+                    skippedAlreadySeen++;
                     continue;
                 }
 
@@ -699,11 +709,67 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             }
 
             if (addedSubmissionIds.length > 0) {
-                await this.markSubmissionsAsProcessed(validatedBaseUrl, submissionApiKey, addedSubmissionIds);
+                await this.queuePendingSubmissionIds(addedSubmissionIds);
             }
         } catch (error) {
             console.error('Failed to load approved submissions from secondary source:', error);
         }
+    }
+
+    async processPendingSubmissionsAfterPublish(): Promise<void> {
+        const pendingIds = this.getPendingSubmissionIds();
+        if (pendingIds.length === 0) {
+            return;
+        }
+
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const submissionApiBaseUrl = (config.get<string>('submissionApiBaseUrl') || '').trim();
+        const submissionApiKey = (await this.getSubmissionApiKey() || '').trim();
+
+        if (!submissionApiBaseUrl || !submissionApiKey) {
+            console.warn('Pending submission IDs exist, but submission API base URL or key is missing. Deferring processed-status update.');
+            return;
+        }
+
+        const validatedBaseUrl = await this.validateSubmissionApiBaseUrl(submissionApiBaseUrl);
+        if (!validatedBaseUrl) {
+            return;
+        }
+
+        try {
+            const failedIds = await this.markSubmissionsAsProcessed(validatedBaseUrl, submissionApiKey, pendingIds);
+            await this.setPendingSubmissionIds(failedIds);
+        } catch (error) {
+            console.error('Failed to process pending submission IDs after publish:', error);
+        }
+    }
+
+    private getPendingSubmissionIds(): string[] {
+        const stored = this.context.workspaceState.get<unknown>(PENDING_SUBMISSION_IDS_KEY, []);
+        if (!Array.isArray(stored)) {
+            return [];
+        }
+
+        const ids = stored
+            .filter((id): id is string => typeof id === 'string')
+            .map((id) => id.trim())
+            .filter((id) => id.length > 0);
+
+        return Array.from(new Set(ids));
+    }
+
+    private async setPendingSubmissionIds(ids: string[]): Promise<void> {
+        const normalized = Array.from(new Set(ids.map((id) => id.trim()).filter((id) => id.length > 0)));
+        await this.context.workspaceState.update(PENDING_SUBMISSION_IDS_KEY, normalized);
+    }
+
+    private async queuePendingSubmissionIds(ids: string[]): Promise<void> {
+        if (ids.length === 0) {
+            return;
+        }
+
+        const existing = this.getPendingSubmissionIds();
+        await this.setPendingSubmissionIds([...existing, ...ids]);
     }
 
     private async validateSubmissionApiBaseUrl(baseUrl: string): Promise<string | undefined> {
@@ -764,9 +830,9 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         return `${year}-${month}-${day}`;
     }
 
-    private async markSubmissionsAsProcessed(baseUrl: string, apiKey: string, ids: string[]): Promise<void> {
+    private async markSubmissionsAsProcessed(baseUrl: string, apiKey: string, ids: string[]): Promise<string[]> {
         if (ids.length === 0) {
-            return;
+            return [];
         }
 
         const statusUrl = new URL('/api/submissions/status', baseUrl);
@@ -777,7 +843,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         if (Array.isArray(response.failedIds) && response.failedIds.length > 0) {
             console.warn(`Submission status update partially failed for IDs: ${response.failedIds.join(', ')}`);
+            return response.failedIds;
         }
+
+        return [];
     }
 
     private async callJsonApi<T>(url: URL, method: 'GET' | 'PATCH', apiKey: string, body?: unknown): Promise<T> {
@@ -812,7 +881,8 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                     }
 
                     try {
-                        resolve(JSON.parse(data) as T);
+                        const parsed = JSON.parse(data) as T;
+                        resolve(parsed);
                     } catch (error) {
                         reject(new Error(`Invalid JSON response from ${url.pathname}: ${String(error)}`));
                     }
@@ -829,6 +899,218 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
             request.end();
         });
+    }
+
+    private extractSubmissionsFromApiResponse(response: SubmissionsApiResponse): {
+        submissions: SubmissionItem[];
+        source: string;
+        arrayCandidates: Record<string, number>;
+        matchedRawArrayLength: number;
+        droppedInvalidEntries: number;
+    } {
+        const topLevel = response as Record<string, unknown>;
+        const arrayCandidates: Record<string, number> = {};
+
+        const normalizeSubmissionItem = (value: unknown): SubmissionItem | undefined => {
+            if (!value || typeof value !== 'object') {
+                return undefined;
+            }
+
+            const item = value as Record<string, unknown>;
+            const id = this.toTrimmedString(
+                item.id ?? item.submissionId ?? item.Id ?? item.SubmissionId
+            );
+            const url = this.toTrimmedString(
+                item.url ?? item.link ?? item.uri ?? item.Url ?? item.Link ?? item.Uri
+            );
+            const title = this.toTrimmedString(
+                item.title ?? item.name ?? item.Title ?? item.Name
+            );
+            const author = this.toTrimmedString(
+                item.author ?? item.submittedBy ?? item.Author ?? item.SubmittedBy
+            );
+            const submittedDateTimeUtc = this.toTrimmedString(
+                item.submittedDateTimeUtc ?? item.submittedAt ?? item.createdAt ?? item.SubmittedDateTimeUtc ?? item.SubmittedAt ?? item.CreatedAt
+            );
+            const status = this.toTrimmedString(item.status ?? item.state ?? item.Status ?? item.State);
+
+            // URL and title are the minimum fields required by the ingestion flow.
+            if (!url || !title) {
+                return undefined;
+            }
+
+            return {
+                id: id || `${url}::${title}`,
+                url,
+                title,
+                author,
+                submittedDateTimeUtc,
+                status
+            };
+        };
+
+        const normalizeSubmissionArray = (value: unknown): {
+            normalized: SubmissionItem[];
+            rawLength: number;
+            dropped: number;
+        } | undefined => {
+            if (!Array.isArray(value)) {
+                return undefined;
+            }
+
+            const normalized: SubmissionItem[] = [];
+            let dropped = 0;
+
+            for (const entry of value) {
+                const normalizedItem = normalizeSubmissionItem(entry);
+                if (normalizedItem) {
+                    normalized.push(normalizedItem);
+                } else {
+                    dropped++;
+                }
+            }
+
+            return {
+                normalized,
+                rawLength: value.length,
+                dropped
+            };
+        };
+
+        const inspectCandidate = (name: string, value: unknown): {
+            submissions: SubmissionItem[];
+            rawLength: number;
+            dropped: number;
+        } | undefined => {
+            const normalized = normalizeSubmissionArray(value);
+            if (normalized) {
+                arrayCandidates[name] = normalized.rawLength;
+                return {
+                    submissions: normalized.normalized,
+                    rawLength: normalized.rawLength,
+                    dropped: normalized.dropped
+                };
+            }
+
+            return undefined;
+        };
+
+        const topLevelCandidates: Array<[string, unknown]> = [
+            ['submissions', topLevel.submissions],
+            ['Submissions', topLevel.Submissions],
+            ['items', topLevel.items],
+            ['results', topLevel.results],
+            ['value', topLevel.value],
+            ['approvedSubmissions', topLevel.approvedSubmissions]
+        ];
+
+        for (const [name, value] of topLevelCandidates) {
+            const result = inspectCandidate(name, value);
+            if (result) {
+                return {
+                    submissions: result.submissions,
+                    source: name,
+                    arrayCandidates,
+                    matchedRawArrayLength: result.rawLength,
+                    droppedInvalidEntries: result.dropped
+                };
+            }
+        }
+
+        if (topLevel.data && typeof topLevel.data === 'object') {
+            const nested = topLevel.data as Record<string, unknown>;
+            const nestedCandidates: Array<[string, unknown]> = [
+                ['data', topLevel.data],
+                ['data.submissions', nested.submissions],
+                ['data.Submissions', nested.Submissions],
+                ['data.items', nested.items],
+                ['data.results', nested.results],
+                ['data.value', nested.value],
+                ['data.approvedSubmissions', nested.approvedSubmissions]
+            ];
+
+            for (const [name, value] of nestedCandidates) {
+                const result = inspectCandidate(name, value);
+                if (result) {
+                    return {
+                        submissions: result.submissions,
+                        source: name,
+                        arrayCandidates,
+                        matchedRawArrayLength: result.rawLength,
+                        droppedInvalidEntries: result.dropped
+                    };
+                }
+            }
+        }
+
+        // Last-resort fallback: recursively scan for arrays that look like submissions payloads.
+        const deepMatch = this.findSubmissionArrayDeep(topLevel, 0, 'root', arrayCandidates, inspectCandidate);
+        if (deepMatch) {
+            return {
+                submissions: deepMatch.submissions,
+                source: deepMatch.source,
+                arrayCandidates,
+                matchedRawArrayLength: deepMatch.rawLength,
+                droppedInvalidEntries: deepMatch.dropped
+            };
+        }
+
+        return {
+            submissions: [],
+            source: 'none',
+            arrayCandidates,
+            matchedRawArrayLength: 0,
+            droppedInvalidEntries: 0
+        };
+    }
+
+    private findSubmissionArrayDeep(
+        value: unknown,
+        depth: number,
+        path: string,
+        arrayCandidates: Record<string, number>,
+        inspectCandidate: (name: string, value: unknown) => { submissions: SubmissionItem[]; rawLength: number; dropped: number } | undefined
+    ): { submissions: SubmissionItem[]; source: string; rawLength: number; dropped: number } | undefined {
+        if (depth > 4 || !value || typeof value !== 'object') {
+            return undefined;
+        }
+
+        if (Array.isArray(value)) {
+            const result = inspectCandidate(path, value);
+            if (result) {
+                // Prefer arrays that contain at least one valid submission.
+                if (result.submissions.length > 0) {
+                    return {
+                        submissions: result.submissions,
+                        source: path,
+                        rawLength: result.rawLength,
+                        dropped: result.dropped
+                    };
+                }
+
+                // Keep exploring nested structures even if this array itself is not usable.
+            }
+        }
+
+        const objectValue = value as Record<string, unknown>;
+        for (const [key, child] of Object.entries(objectValue)) {
+            const childPath = path === 'root' ? key : `${path}.${key}`;
+            const match = this.findSubmissionArrayDeep(child, depth + 1, childPath, arrayCandidates, inspectCandidate);
+            if (match) {
+                return match;
+            }
+        }
+
+        return undefined;
+    }
+
+    private toTrimmedString(value: unknown): string | undefined {
+        if (typeof value !== 'string') {
+            return undefined;
+        }
+
+        const trimmed = value.trim();
+        return trimmed.length > 0 ? trimmed : undefined;
     }
 
     private async fetchNewsBlurApi(feedUrl: string, recordCount: number, username: string, password: string, redirectCount: number = 0): Promise<BlogPost[]> {
