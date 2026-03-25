@@ -4,6 +4,16 @@ All notable changes to the "Dev Feed Curator" extension will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.10.1] - 2026-03-25
+
+### Fixed
+
+- Fixed approved submissions not appearing after feed refresh due to API response field-casing mismatch
+
+### Changed
+
+- Approved submissions are now marked as processed only after a successful WordPress publish, not during feed refresh — abandoned drafts no longer consume submissions
+
 ## [3.10.0] - 2026-03-24
 
 ### Added

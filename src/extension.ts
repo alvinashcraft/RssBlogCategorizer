@@ -207,7 +207,10 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
 
-        await wordpressManager.publishHtmlFile(document);
+        const publishResult = await wordpressManager.publishHtmlFile(document);
+        if (publishResult.success && publishResult.wasPublished) {
+            await provider.processPendingSubmissionsAfterPublish();
+        }
     });
 
     const openWysiwygEditorCommand = vscode.commands.registerCommand('rssBlogCategorizer.openWysiwygEditor', async () => {
