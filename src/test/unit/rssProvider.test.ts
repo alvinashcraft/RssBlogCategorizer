@@ -755,6 +755,155 @@ describe('RSSBlogProvider', () => {
 
       expect(httpsRequestStub).to.not.have.been.called;
     });
+
+    it('should extract submissions from PascalCase API response', async () => {
+      const configWithSubmissionsApi = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '',
+        refreshInterval: 30,
+        useNewsblurApi: false,
+        newsblurUsername: '',
+        enableSubmissionApiSource: true,
+        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net'
+      });
+      workspaceGetConfigStub.returns(configWithSubmissionsApi);
+      await mockContext.secrets.store(SUBMISSION_API_KEY, 'test-key');
+
+      const mockRssResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockRssResponse);
+        return { on: sinon.stub() };
+      });
+
+      const httpsRequestStub = sinon.stub(https, 'request');
+      httpsRequestStub.callsFake((url: any, options: any, callback: any) => {
+        const req = new EventEmitter() as any;
+        req.write = sinon.stub();
+        req.end = () => {
+          const res = new EventEmitter() as any;
+          res.statusCode = 200;
+          callback(res);
+
+          if (url.pathname === '/api/submissions') {
+            const responseBody = JSON.stringify({
+              TotalCount: 1,
+              Submissions: [
+                {
+                  Id: 'pascal-1',
+                  Url: 'https://contoso.com/pascal-case-article',
+                  Title: 'PascalCase API Response',
+                  Author: 'Test Author',
+                  SubmittedDateTimeUtc: '2026-03-22T15:30:00Z',
+                  Status: 'approved'
+                }
+              ]
+            });
+            res.emit('data', responseBody);
+            res.emit('end');
+            return;
+          }
+
+          res.emit('data', JSON.stringify({ success: true, updatedCount: 0, failedIds: [] }));
+          res.emit('end');
+        };
+        req.on = sinon.stub().returns(req);
+        return req;
+      });
+
+      await provider.refresh();
+      const posts = await provider.getAllPosts();
+
+      const pascalPost = posts.find(p => p.link.includes('contoso.com/pascal-case-article'));
+      expect(pascalPost).to.exist;
+      expect(pascalPost?.source).to.equal('Approved Submissions');
+      expect(pascalPost?.author).to.equal('Test Author');
+
+      const queuedIds = mockContext.workspaceState.get<string[]>(PENDING_SUBMISSION_IDS_KEY, []);
+      expect(queuedIds).to.deep.equal(['pascal-1']);
+    });
+
+    it('should extract submissions from nested data.Submissions shape', async () => {
+      const configWithSubmissionsApi = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '',
+        refreshInterval: 30,
+        useNewsblurApi: false,
+        newsblurUsername: '',
+        enableSubmissionApiSource: true,
+        submissionApiBaseUrl: 'https://dew-submitter-fn-ezf7a9h8f4ezdpex.eastus-01.azurewebsites.net'
+      });
+      workspaceGetConfigStub.returns(configWithSubmissionsApi);
+      await mockContext.secrets.store(SUBMISSION_API_KEY, 'test-key');
+
+      const mockRssResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(mockRssXml);
+          if (event === 'end') callback();
+        })
+      };
+
+      httpsGetStub.callsFake((url, options, callback) => {
+        callback(mockRssResponse);
+        return { on: sinon.stub() };
+      });
+
+      const httpsRequestStub = sinon.stub(https, 'request');
+      httpsRequestStub.callsFake((url: any, options: any, callback: any) => {
+        const req = new EventEmitter() as any;
+        req.write = sinon.stub();
+        req.end = () => {
+          const res = new EventEmitter() as any;
+          res.statusCode = 200;
+          callback(res);
+
+          if (url.pathname === '/api/submissions') {
+            const responseBody = JSON.stringify({
+              data: {
+                Submissions: [
+                  {
+                    Id: 'nested-1',
+                    Url: 'https://contoso.com/nested-article',
+                    Title: 'Nested Data Shape',
+                    Author: 'Nested Author',
+                    SubmittedDateTimeUtc: '2026-03-23T10:00:00Z',
+                    Status: 'approved'
+                  }
+                ]
+              }
+            });
+            res.emit('data', responseBody);
+            res.emit('end');
+            return;
+          }
+
+          res.emit('data', JSON.stringify({ success: true, updatedCount: 0, failedIds: [] }));
+          res.emit('end');
+        };
+        req.on = sinon.stub().returns(req);
+        return req;
+      });
+
+      await provider.refresh();
+      const posts = await provider.getAllPosts();
+
+      const nestedPost = posts.find(p => p.link.includes('contoso.com/nested-article'));
+      expect(nestedPost).to.exist;
+      expect(nestedPost?.source).to.equal('Approved Submissions');
+      expect(nestedPost?.author).to.equal('Nested Author');
+
+      const queuedIds = mockContext.workspaceState.get<string[]>(PENDING_SUBMISSION_IDS_KEY, []);
+      expect(queuedIds).to.deep.equal(['nested-1']);
+    });
   });
 
   describe('Tree View Integration', () => {

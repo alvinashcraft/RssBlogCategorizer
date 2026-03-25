@@ -30,7 +30,7 @@ interface NewsBlurApiResponse {
 }
 
 interface SubmissionItem {
-    id: string;
+    id?: string;
     url: string;
     title: string;
     author?: string;
@@ -667,21 +667,17 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             const seenLinks = new Set<string>(this.posts.map(post => post.link));
             const addedSubmissionIds: string[] = [];
             const additionalPosts: BlogPost[] = [];
-            let skippedMissingRequiredFields = 0;
-            let skippedAlreadySeen = 0;
 
             for (const submission of submissions) {
                 const rawUrl = (submission.url || '').trim();
                 const title = (submission.title || '').trim();
 
                 if (!rawUrl || !title) {
-                    skippedMissingRequiredFields++;
                     continue;
                 }
 
                 const normalizedLink = this.appendSyncfusionTracking(this.removeTrackingParameters(rawUrl));
                 if (seenLinks.has(normalizedLink)) {
-                    skippedAlreadySeen++;
                     continue;
                 }
 
@@ -738,7 +734,10 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
         try {
             const failedIds = await this.markSubmissionsAsProcessed(validatedBaseUrl, submissionApiKey, pendingIds);
-            await this.setPendingSubmissionIds(failedIds);
+            const processedIds = new Set(pendingIds.filter(id => !failedIds.includes(id)));
+            const currentQueue = this.getPendingSubmissionIds();
+            const merged = currentQueue.filter(id => !processedIds.has(id));
+            await this.setPendingSubmissionIds([...merged, ...failedIds]);
         } catch (error) {
             console.error('Failed to process pending submission IDs after publish:', error);
         }
@@ -940,7 +939,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             }
 
             return {
-                id: id || `${url}::${title}`,
+                id,
                 url,
                 title,
                 author,
