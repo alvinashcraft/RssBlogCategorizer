@@ -840,9 +840,13 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             newStatus: 'processed'
         });
 
-        if (Array.isArray(response.failedIds) && response.failedIds.length > 0) {
-            console.warn(`Submission status update partially failed for IDs: ${response.failedIds.join(', ')}`);
-            return response.failedIds;
+        // Server may return PascalCase keys — normalize before reading.
+        const raw = response as Record<string, unknown>;
+        const failedIds = response.failedIds ?? raw.FailedIds as string[] | undefined;
+
+        if (Array.isArray(failedIds) && failedIds.length > 0) {
+            console.warn(`Submission status update partially failed for IDs: ${failedIds.join(', ')}`);
+            return failedIds;
         }
 
         return [];
