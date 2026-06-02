@@ -3,7 +3,7 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "icon": "images/rssBlogIcon.png",
-  "version": "3.10.3",
+  "version": "3.10.4",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",

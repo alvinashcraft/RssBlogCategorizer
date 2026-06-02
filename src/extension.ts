@@ -298,16 +298,28 @@ export function activate(context: vscode.ExtensionContext) {
 
         const baseFileName = path.basename(htmlPath);
 
+        let endDisposable: vscode.Disposable | undefined;
         const completion = new Promise<number | undefined>((resolve) => {
-            const endDisposable = vscode.tasks.onDidEndTaskProcess(event => {
+            endDisposable = vscode.tasks.onDidEndTaskProcess(event => {
                 if (event.execution.task === task) {
-                    endDisposable.dispose();
+                    endDisposable?.dispose();
+                    endDisposable = undefined;
                     resolve(event.exitCode);
                 }
             });
         });
 
-        await vscode.tasks.executeTask(task);
+        try {
+            await vscode.tasks.executeTask(task);
+        } catch (error) {
+            endDisposable?.dispose();
+            endDisposable = undefined;
+            const message = error instanceof Error ? error.message : String(error);
+            vscode.window.showErrorMessage(
+                vscode.l10n.t('Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.', baseFileName, message)
+            );
+            return;
+        }
 
         vscode.window.showInformationMessage(
             vscode.l10n.t('Running Morning Dew NextGen import for {0}…', baseFileName)

@@ -4,6 +4,21 @@ All notable changes to the "Dev Feed Curator" extension will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.10.4] - 2026-06-02
+
+### Fixed
+
+- Replaced substring host check (`includes('alvinashcraft.com')`) with an exact-hostname comparison in both `RSSBlogProvider.isAlvinAshcraftBlogConfigured` and `ExportManager.tryGetLatestDewDropNumberFromApi`, so the Morning Dew v1 API fallback no longer triggers for look-alike domains like `notalvinashcraft.com` or `alvinashcraft.com.evil.com` (PR #56 review)
+- `publishToMorningDewNextGen` now wraps `vscode.tasks.executeTask` in try/catch so the `onDidEndTaskProcess` listener is disposed (and the completion promise no longer hangs) when task execution rejects before the process can start (PR #56 review)
+
+### Changed
+
+- Extracted the duplicated `fetchJson` helpers from `rssProvider.ts` and `exportManager.ts` into a shared `src/utils/http.ts` module, alongside the new `isAlvinAshcraftHost` validator (PR #56 review)
+
+### Added
+
+- Unit tests for `isAlvinAshcraftHost` covering exact match, subdomain match, look-alike rejection, bare hostnames, and unparseable input
+
 ## [3.10.3] - 2026-06-01
 
 ### Added

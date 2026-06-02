@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
 import { NEWSBLUR_PASSWORD_KEY, PENDING_SUBMISSION_IDS_KEY, SUBMISSION_API_KEY } from './constants';
+import { fetchJson, isAlvinAshcraftHost } from './utils/http';
 
 export interface BlogPost {
     title: string;
@@ -97,43 +98,9 @@ interface AuthorMappingsConfig {
 }
 
 /**
- * Minimal JSON GET helper used by the Morning Dew v1 API fallback path. Kept
- * local to this module to avoid pulling in a new dependency for a single call.
+ * Minimal JSON GET helper used by the Morning Dew v1 API fallback path lives
+ * in `./utils/http` to be shared with `exportManager.ts`.
  */
-function fetchJson(url: string, timeoutMs: number = 10000): Promise<any> {
-    return new Promise((resolve, reject) => {
-        const options = {
-            timeout: timeoutMs,
-            headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-        };
-
-        const request = https.get(url, options, (response) => {
-            if (!response.statusCode || response.statusCode < 200 || response.statusCode >= 300) {
-                reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
-                response.resume();
-                return;
-            }
-            let data = '';
-            response.on('data', chunk => { data += chunk; });
-            response.on('end', () => {
-                try {
-                    resolve(JSON.parse(data));
-                } catch (err) {
-                    reject(err);
-                }
-            });
-        });
-
-        request.on('error', reject);
-        request.on('timeout', () => {
-            request.destroy();
-            reject(new Error('Request timeout'));
-        });
-    });
-}
 
 export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private _onDidChangeTreeData: vscode.EventEmitter<any | undefined | null | void> = new vscode.EventEmitter<any | undefined | null | void>();
@@ -220,8 +187,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     private isAlvinAshcraftBlogConfigured(): boolean {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
-        const blogUrl = (config.get<string>('wordpressBlogUrl') || '').toLowerCase();
-        return blogUrl.includes('alvinashcraft.com');
+        return isAlvinAshcraftHost(config.get<string>('wordpressBlogUrl'));
     }
 
     private async fetchLatestDewDropFromApi(): Promise<{ title: string; date: Date; number: number | null } | null> {
