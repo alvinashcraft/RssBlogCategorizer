@@ -120,5 +120,15 @@
   "Editor Loading Error": "Fout bij laden van editor",
   "Retry": "Opnieuw proberen",
   "Failed to load the markdown editor. Please check your internet connection and try again.": "Kan de markdown-editor niet laden. Controleer je internetverbinding en probeer opnieuw.",
-  "Failed to initialize the markdown editor: {0}": "Kan de markdown-editor niet initialiseren: {0}"
+  "Failed to initialize the markdown editor: {0}": "Kan markdown-editor niet initialiseren: {0}",
+  "Morning Dew NextGen repo path is not configured. Set \"rssBlogCategorizer.dewNextGenRepoPath\" in settings.": "Het pad naar de Morning Dew NextGen-repository is niet geconfigureerd. Stel \"rssBlogCategorizer.dewNextGenRepoPath\" in bij de instellingen.",
+  "Open Settings": "Instellingen openen",
+  "Import script not found at {0}. Verify the configured Morning Dew NextGen repo path.": "Importscript niet gevonden op {0}. Controleer het geconfigureerde pad naar de Morning Dew NextGen-repository.",
+  "Open the exported Dew Drop HTML file (or its WYSIWYG editor) before running this command.": "Open het geëxporteerde Dew Drop HTML-bestand (of de WYSIWYG-editor) voordat u deze opdracht uitvoert.",
+  "Morning Dew NextGen import requires a file on disk; the current document is not a local file.": "Morning Dew NextGen-import vereist een bestand op schijf; het huidige document is geen lokaal bestand.",
+  "HTML file not found on disk: {0}. Save the file before running this command.": "HTML-bestand niet gevonden op schijf: {0}. Sla het bestand op voordat u deze opdracht uitvoert.",
+  "Morning Dew NextGen Import": "Morning Dew NextGen-import",
+  "Running Morning Dew NextGen import for {0}…": "Morning Dew NextGen-import wordt uitgevoerd voor {0}…",
+  "Morning Dew NextGen import completed for {0}. Review the generated markdown, then commit and push manually.": "Morning Dew NextGen-import voltooid voor {0}. Controleer de gegenereerde markdown en voer daarna handmatig commit en push uit.",
+  "Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.": "Morning Dew NextGen-import mislukt voor {0} (afsluitcode {1}). Zie de terminal voor details."
 }

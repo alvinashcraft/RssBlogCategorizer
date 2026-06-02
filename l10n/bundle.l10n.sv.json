@@ -120,5 +120,15 @@
   "Editor Loading Error": "Fel vid inläsning av redigerare",
   "Retry": "Försök igen",
   "Failed to load the markdown editor. Please check your internet connection and try again.": "Kunde inte läsa in markdown-redigeraren. Kontrollera internetanslutningen och forsok igen.",
-  "Failed to initialize the markdown editor: {0}": "Kunde inte initiera markdown-redigeraren: {0}"
+  "Failed to initialize the markdown editor: {0}": "Kunde inte initiera markdown-redigeraren: {0}",
+  "Morning Dew NextGen repo path is not configured. Set \"rssBlogCategorizer.dewNextGenRepoPath\" in settings.": "Sökvägen till Morning Dew NextGen-arkivet är inte konfigurerad. Ange \"rssBlogCategorizer.dewNextGenRepoPath\" i inställningarna.",
+  "Open Settings": "Öppna inställningar",
+  "Import script not found at {0}. Verify the configured Morning Dew NextGen repo path.": "Importskript hittades inte på {0}. Kontrollera den konfigurerade sökvägen till Morning Dew NextGen-arkivet.",
+  "Open the exported Dew Drop HTML file (or its WYSIWYG editor) before running this command.": "Öppna den exporterade Dew Drop HTML-filen (eller dess WYSIWYG-redigerare) innan du kör det här kommandot.",
+  "Morning Dew NextGen import requires a file on disk; the current document is not a local file.": "Morning Dew NextGen-import kräver en fil på disk; det aktuella dokumentet är inte en lokal fil.",
+  "HTML file not found on disk: {0}. Save the file before running this command.": "HTML-filen hittades inte på disken: {0}. Spara filen innan du kör det här kommandot.",
+  "Morning Dew NextGen Import": "Morning Dew NextGen-import",
+  "Running Morning Dew NextGen import for {0}…": "Morning Dew NextGen-import körs för {0}…",
+  "Morning Dew NextGen import completed for {0}. Review the generated markdown, then commit and push manually.": "Morning Dew NextGen-import slutförd för {0}. Granska den genererade markdown-filen och utför sedan commit och push manuellt.",
+  "Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.": "Morning Dew NextGen-importen misslyckades för {0} (avslutskod {1}). Se terminalen för mer information."
 }

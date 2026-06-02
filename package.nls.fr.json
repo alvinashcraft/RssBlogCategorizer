@@ -12,6 +12,7 @@
   "command.setWordpressCredentials": "Définir les identifiants WordPress",
   "command.testWordpressConnection": "Tester la connexion WordPress",
   "command.publishToWordpress": "Publier sur WordPress",
+  "command.publishToMorningDewNextGen": "Publier sur Morning Dew NextGen",
   "command.openWysiwygEditor": "Dev Feed Curator : Ouvrir dans l'éditeur WYSIWYG",
   "config.title": "Dev Feed Curator",
   "config.feedUrl.description": "URL unique du flux RSS à surveiller",
@@ -31,5 +32,6 @@
   "config.openLinksInNewTab.description": "Ouvrir les liens des articles de blog dans un nouvel onglet du navigateur lors du clic (ajoute target=\"_blank\" aux exports HTML)",
   "config.enableDometrainSection.description": "Activer la section Cours Dometrain dans les exports (met en évidence un cours de formation vidéo différent de Dometrain chaque jour)",
   "config.dometrainLastCourseId.description": "Dernier ID de cours Dometrain affiché (utilisé pour faire défiler les cours). Se synchronise entre les ordinateurs si la synchronisation des paramètres VS Code est activée.",
-  "config.openBlogAfterPublish.description": "Ouvrir automatiquement l'URL de base du blog dans le navigateur par défaut après avoir publié avec succès un article"
+  "config.openBlogAfterPublish.description": "Ouvrir automatiquement l'URL de base du blog dans le navigateur par défaut après avoir publié avec succès un article",
+  "config.dewNextGenRepoPath.description": "Chemin absolu vers la racine du dépôt Morning Dew NextGen (contenant infra/scripts/import-html-post.ps1). Requis pour activer la commande « Publier sur Morning Dew NextGen »."
 }

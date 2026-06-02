@@ -371,6 +371,115 @@ describe('RSSBlogProvider', () => {
       // Should include future posts since we removed future date filtering
       expect(posts.find(p => p.title.includes('Future Post Should Be Included'))).to.exist;
     });
+
+    it('should fall back to Morning Dew v1 API when RSS has no Dew Drop posts and blog is alvinashcraft.com', async () => {
+      const apiDate = new Date('2026-05-29T10:56:41Z');
+
+      const configWithBlog = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '',
+        refreshInterval: 30,
+        wordpressBlogUrl: 'https://www.alvinashcraft.com'
+      });
+      workspaceGetConfigStub.returns(configWithBlog);
+
+      // RSS feed without any Dew Drop entries
+      const noDewDropRss = `<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <item>
+              <title>Some Random Post</title>
+              <link>https://www.alvinashcraft.com/2026/05/29/random</link>
+              <pubDate>Fri, 29 May 2026 10:00:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>`;
+
+      const apiPayload = JSON.stringify({
+        items: [
+          {
+            title: 'Dew Drop - May 29, 2026 (#4679)',
+            date: apiDate.toISOString(),
+            url: 'https://www.alvinashcraft.com/2026/05/29/dew-drop-4679'
+          }
+        ]
+      });
+
+      const rssResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(noDewDropRss);
+          if (event === 'end') callback();
+        })
+      };
+      const apiResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(apiPayload);
+          if (event === 'end') callback();
+        }),
+        resume: sinon.stub()
+      };
+
+      let apiHit = false;
+      httpsGetStub.callsFake((url: string, options: any, callback: any) => {
+        if (url.includes('/v1/posts')) {
+          apiHit = true;
+          callback(apiResponse);
+        } else if (url.includes('alvinashcraft.com')) {
+          callback(rssResponse);
+        }
+        return { on: sinon.stub() };
+      });
+
+      await provider.refresh();
+
+      expect(apiHit, 'expected Morning Dew v1 API to be queried as fallback').to.be.true;
+    });
+
+    it('should NOT call Morning Dew v1 API when blog URL is not alvinashcraft.com', async () => {
+      const configWithOtherBlog = new MockConfiguration({
+        feedUrl: 'https://example.com/feed.xml',
+        recordCount: 100,
+        minimumDateTime: '',
+        refreshInterval: 30,
+        wordpressBlogUrl: 'https://example.com'
+      });
+      workspaceGetConfigStub.returns(configWithOtherBlog);
+
+      const noDewDropRss = `<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <item>
+              <title>Some Random Post</title>
+              <link>https://example.com/random</link>
+              <pubDate>Fri, 29 May 2026 10:00:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>`;
+
+      const rssResponse = {
+        statusCode: 200,
+        on: sinon.stub().callsFake((event, callback) => {
+          if (event === 'data') callback(noDewDropRss);
+          if (event === 'end') callback();
+        })
+      };
+
+      let apiHit = false;
+      httpsGetStub.callsFake((url: string, options: any, callback: any) => {
+        if (url.includes('/v1/posts')) {
+          apiHit = true;
+        }
+        callback(rssResponse);
+        return { on: sinon.stub() };
+      });
+
+      await provider.refresh();
+
+      expect(apiHit, 'API should not be queried when blog URL is not alvinashcraft.com').to.be.false;
+    });
   });
 
   describe('Buffer Configuration', () => {

@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { XMLParser } from 'fast-xml-parser';
 import { NEWSBLUR_PASSWORD_KEY, PENDING_SUBMISSION_IDS_KEY, SUBMISSION_API_KEY } from './constants';
+import { fetchJson, isAlvinAshcraftHost } from './utils/http';
 
 export interface BlogPost {
     title: string;
@@ -96,6 +97,11 @@ interface AuthorMappingsConfig {
     authorExact: AuthorMapping[];
 }
 
+/**
+ * Minimal JSON GET helper used by the Morning Dew v1 API fallback path lives
+ * in `./utils/http` to be shared with `exportManager.ts`.
+ */
+
 export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
     private _onDidChangeTreeData: vscode.EventEmitter<any | undefined | null | void> = new vscode.EventEmitter<any | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<any | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -134,45 +140,84 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
         try {
             console.log('Fetching latest Dew Drop post date from Alvin\'s blog...');
             const posts = await this.fetchFeed('https://www.alvinashcraft.com/feed/');
-            
-            if (posts.length === 0) {
-                console.log('No posts found in blog RSS feed');
-                return null;
-            }
-            
-            // Find the most recent post with title starting with "Dew D"
-            // Handle HTML entities in titles (like &#8211; for em-dash)
+
             const dewDropPosts = posts.filter(post => {
                 const cleanTitle = post.title.toLowerCase()
-                    .replace(/&#8211;/g, '-')  // em-dash
-                    .replace(/&#8212;/g, '-')  // em-dash variant
-                    .replace(/&[a-z]+;/g, '')  // other HTML entities
+                    .replace(/&#8211;/g, '-')
+                    .replace(/&#8212;/g, '-')
+                    .replace(/&[a-z]+;/g, '')
                     .trim();
                 return cleanTitle.startsWith('dew d');
             });
-            
-            if (dewDropPosts.length === 0) {
-                console.log('No Dew Drop posts found in blog RSS feed (searched in first 20 posts)');
+
+            if (dewDropPosts.length > 0) {
+                dewDropPosts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+                const latestDewDrop = dewDropPosts[0];
+                const latestDate = new Date(latestDewDrop.pubDate);
+
+                if (!isNaN(latestDate.getTime())) {
+                    console.log(`✅ Latest Dew Drop post found via RSS: "${latestDewDrop.title}" from ${latestDate.toISOString()}`);
+                    return latestDate;
+                }
+                console.log('Invalid date found in latest Dew Drop post from RSS');
+            } else if (posts.length === 0) {
+                console.log('No posts found in blog RSS feed');
+            } else {
+                console.log('No Dew Drop posts found in blog RSS feed');
                 console.log('Available post titles:', posts.slice(0, 5).map(p => `"${p.title}"`).join(', '));
-                return null;
             }
 
-            // Posts should already be sorted by date (newest first) from RSS feed
-            // But let's sort them to be sure
-            dewDropPosts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
-            
-            const latestDewDrop = dewDropPosts[0];
-            const latestDate = new Date(latestDewDrop.pubDate);
-            
-            if (isNaN(latestDate.getTime())) {
-                console.log('Invalid date found in latest Dew Drop post');
-                return null;
+            // Fallback: query the read-only Morning Dew API when the configured
+            // WordPress blog URL points at alvinashcraft.com.
+            if (this.isAlvinAshcraftBlogConfigured()) {
+                console.log('Falling back to Morning Dew v1 API for latest Dew Drop date...');
+                const apiPost = await this.fetchLatestDewDropFromApi();
+                if (apiPost?.date && !isNaN(apiPost.date.getTime())) {
+                    console.log(`✅ Latest Dew Drop post found via API: "${apiPost.title}" from ${apiPost.date.toISOString()}`);
+                    return apiPost.date;
+                }
             }
 
-            console.log(`✅ Latest Dew Drop post found: "${latestDewDrop.title}" from ${latestDate.toISOString()}`);
-            return latestDate;
+            return null;
         } catch (error) {
             console.error('❌ Error fetching latest Dew Drop date:', error);
+            return null;
+        }
+    }
+
+    private isAlvinAshcraftBlogConfigured(): boolean {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        return isAlvinAshcraftHost(config.get<string>('wordpressBlogUrl'));
+    }
+
+    private async fetchLatestDewDropFromApi(): Promise<{ title: string; date: Date; number: number | null } | null> {
+        try {
+            const json = await fetchJson('https://alvinashcraft.com/v1/posts?limit=20');
+            if (!json || !Array.isArray(json.items)) {
+                console.log('Morning Dew API returned no items');
+                return null;
+            }
+
+            const items = json.items as Array<{ title?: string; date?: string }>;
+            const dewDrop = items.find(item => {
+                const t = (item.title || '').toLowerCase();
+                return t.startsWith('dew d');
+            });
+
+            if (!dewDrop || !dewDrop.title || !dewDrop.date) {
+                console.log('Morning Dew API returned no Dew Drop posts in first 20 items');
+                return null;
+            }
+
+            const date = new Date(dewDrop.date);
+            const numberMatch = dewDrop.title.match(/#(\d+)\)/);
+            return {
+                title: dewDrop.title,
+                date,
+                number: numberMatch ? parseInt(numberMatch[1], 10) : null
+            };
+        } catch (error) {
+            console.error('Error fetching latest Dew Drop from Morning Dew API:', error);
             return null;
         }
     }

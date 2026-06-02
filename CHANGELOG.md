@@ -4,6 +4,30 @@ All notable changes to the "Dev Feed Curator" extension will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.10.4] - 2026-06-02
+
+### Fixed
+
+- Replaced substring host check (`includes('alvinashcraft.com')`) with an exact-hostname comparison in both `RSSBlogProvider.isAlvinAshcraftBlogConfigured` and `ExportManager.tryGetLatestDewDropNumberFromApi`, so the Morning Dew v1 API fallback no longer triggers for look-alike domains like `notalvinashcraft.com` or `alvinashcraft.com.evil.com` (PR #56 review)
+- `publishToMorningDewNextGen` now wraps `vscode.tasks.executeTask` in try/catch so the `onDidEndTaskProcess` listener is disposed (and the completion promise no longer hangs) when task execution rejects before the process can start (PR #56 review)
+
+### Changed
+
+- Extracted the duplicated `fetchJson` helpers from `rssProvider.ts` and `exportManager.ts` into a shared `src/utils/http.ts` module, alongside the new `isAlvinAshcraftHost` validator (PR #56 review)
+
+### Added
+
+- Unit tests for `isAlvinAshcraftHost` covering exact match, subdomain match, look-alike rejection, bare hostnames, and unparseable input
+
+## [3.10.3] - 2026-06-01
+
+### Added
+
+- Fallback to the read-only Morning Dew v1 API (`https://alvinashcraft.com/v1/posts`) for resolving the latest Dew Drop date and post number when the configured WordPress Blog URL points at `alvinashcraft.com` and the RSS feed does not surface a Dew Drop post
+- New command `Dev Feed Curator: Publish to Morning Dew NextGen` that runs the `infra/scripts/import-html-post.ps1` script in the configured `dew-nextgen` repository against the currently open Dew Drop HTML file (active editor or WYSIWYG panel)
+- New setting `rssBlogCategorizer.dewNextGenRepoPath` to specify the absolute path to the local `dew-nextgen` repository clone (required to enable the Morning Dew NextGen publish command)
+- On successful Morning Dew NextGen import: pending approved submissions are marked as processed (same behavior as the WordPress publish flow), the WYSIWYG editor panel is closed if it is open, and the configured `wordpressBlogUrl` is opened in the default browser when `openBlogAfterPublish` is enabled
+
 ## [3.10.1] - 2026-03-25
 
 ### Fixed

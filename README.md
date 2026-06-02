@@ -264,10 +264,11 @@ Access settings via `File > Preferences > Settings` and search for "Dev Feed Cur
 - **WordPress Blog URL**: Your WordPress blog URL (e.g., `https://yourblog.com`)
 - **WordPress Username**: Your WordPress account username (password stored securely)
 - **WordPress Categories**: Default categories to assign to published posts (e.g., "Daily Links", "Development")
-- **Open Blog After Publish**: Automatically open the blog's base URL in the default browser after successfully publishing a post (enabled by default, only for published posts, not drafts)
+- **Open Blog After Publish**: Automatically open the blog's base URL in the default browser after successfully publishing a post (enabled by default, only for published posts, not drafts). Also applies to the Morning Dew NextGen publish command.
 - **Open Links in New Tab**: Control whether exported links open in a new browser tab (disabled by default)
 - **Enable Post Filtering Buffer**: Enable buffer time when filtering posts by date (enabled by default)
 - **Post Filtering Buffer Minutes**: Number of minutes to add as buffer when filtering posts (default: 5 minutes, range: 0-60)
+- **Morning Dew NextGen Repo Path**: Absolute path to the local clone of the `dew-nextgen` repository. Required to enable the `Publish to Morning Dew NextGen` command, which runs `infra/scripts/import-html-post.ps1` against the open HTML file.
 
 **Note**: Tags are automatically detected from content and don't require configuration - the system analyzes your blog post and suggests relevant technology tags during publishing.
 
@@ -277,6 +278,7 @@ The extension uses intelligent date filtering to ensure you get the most relevan
 
 - **Automatic Mode** (default): Uses the publication date of the latest "Dew Drop" post from alvinashcraft.com
 - **Fallback**: If unavailable, filters to posts from the last 24 hours (UTC)
+- **API Fallback**: When the configured **WordPress Blog URL** points at `alvinashcraft.com` and the RSS feed does not surface a Dew Drop post, the extension falls back to the read-only Morning Dew v1 API (`https://alvinashcraft.com/v1/posts`) to fetch the latest Dew Drop date and post number.
 - **Manual Override**: Set a custom UTC datetime in settings
 - **Buffer Time**: Optional configurable buffer (default 5 minutes) added to avoid edge cases with timing differences
 
@@ -308,6 +310,7 @@ See [CATEGORIES.md](docs/CATEGORIES.md) for detailed configuration instructions.
 | `Dev Feed Curator: Set NewsBlur Credentials` | Securely configure NewsBlur API credentials |
 | `Dev Feed Curator: Set WordPress Credentials` | Securely configure WordPress publishing credentials |
 | `Dev Feed Curator: Publish to WordPress` | Publish HTML file to WordPress blog |
+| `Dev Feed Curator: Publish to Morning Dew NextGen` | Run the Morning Dew NextGen `import-html-post.ps1` script against the open HTML file (requires `rssBlogCategorizer.dewNextGenRepoPath`) |
 | `Dev Feed Curator: Open in WYSIWYG Editor` | Open HTML or Markdown file in WYSIWYG editor |
 
 All commands are accessible through the Command Palette (`Ctrl+Shift+P`) or the extension's tree view interface.

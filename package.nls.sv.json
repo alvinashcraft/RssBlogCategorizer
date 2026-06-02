@@ -12,6 +12,7 @@
   "command.setWordpressCredentials": "Ange WordPress-uppgifter",
   "command.testWordpressConnection": "Testa WordPress-anslutning",
   "command.publishToWordpress": "Publicera till WordPress",
+  "command.publishToMorningDewNextGen": "Publicera till Morning Dew NextGen",
   "command.openWysiwygEditor": "Dev Feed Curator: Öppna i WYSIWYG-redigerare",
   "config.title": "Dev Feed Curator",
   "config.feedUrl.description": "En enda RSS-flödes-URL att övervaka",
@@ -31,5 +32,6 @@
   "config.openLinksInNewTab.description": "Öppna länkar till blogginlägg i en ny webbläsarflik när de klickas (lägger till target=\"_blank\" i HTML-exporter)",
   "config.enableDometrainSection.description": "Aktivera Dometrain-kurssektionen i exporter (lyfter fram en annan videokurs från Dometrain varje dag)",
   "config.dometrainLastCourseId.description": "Senast visade Dometrain-kurs-ID (används för att rotera mellan kurser). Synkroniseras mellan datorer om VS Code-inställningssynkronisering är aktiverad.",
-  "config.openBlogAfterPublish.description": "Öppna automatiskt bloggens bas-URL i standardwebbläsaren efter att ett inlägg har publicerats"
+  "config.openBlogAfterPublish.description": "Öppna automatiskt bloggens bas-URL i standardwebbläsaren efter att ett inlägg har publicerats",
+  "config.dewNextGenRepoPath.description": "Absolut sökväg till Morning Dew NextGen-arkivets rot (innehåller infra/scripts/import-html-post.ps1). Krävs för att aktivera kommandot 'Publicera till Morning Dew NextGen'."
 }
