@@ -254,20 +254,98 @@ export class ExportManager {
                 const match = title.match(/#(\d+)\)/);
                 if (match && title.toLowerCase().includes('dew drop')) {
                     const postNumber = parseInt(match[1], 10);
-                    console.log(`✓ Latest Dew Drop post found: "${title}" (number: ${postNumber})`);
+                    console.log(`✓ Latest Dew Drop post found via RSS: "${title}" (number: ${postNumber})`);
                     return postNumber;
                 }
             }
             
-            console.warn('No Dew Drop posts with numbers found in first 10 items, using fallback number 4506');
+            console.warn('No Dew Drop posts with numbers found in RSS feed');
+            const apiNumber = await this.tryGetLatestDewDropNumberFromApi();
+            if (apiNumber !== null) {
+                return apiNumber;
+            }
+            console.warn('Using fallback number 4506');
             return 4506; // Fallback - change this number as needed
             
         } catch (error) {
-            console.error('Error fetching latest Dew Drop number:', error);
+            console.error('Error fetching latest Dew Drop number from RSS:', error);
+            const apiNumber = await this.tryGetLatestDewDropNumberFromApi();
+            if (apiNumber !== null) {
+                return apiNumber;
+            }
             vscode.window.showErrorMessage(vscode.l10n.t('Failed to fetch Dew Drop number: {0}', String(error)));
             console.log('Using fallback number 4506');
             return 4506; // Fallback - change this number as needed
         }
+    }
+
+    /**
+     * Fallback: query the read-only Morning Dew v1 API for the latest Dew Drop
+     * post number. Only invoked when the configured WordPress blog URL points
+     * at alvinashcraft.com.
+     */
+    private async tryGetLatestDewDropNumberFromApi(): Promise<number | null> {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const blogUrl = (config.get<string>('wordpressBlogUrl') || '').toLowerCase();
+        if (!blogUrl.includes('alvinashcraft.com')) {
+            return null;
+        }
+
+        try {
+            console.log('Falling back to Morning Dew v1 API for latest Dew Drop number...');
+            const data = await this.fetchJson('https://alvinashcraft.com/v1/posts?limit=20');
+            const items: Array<{ title?: string }> = Array.isArray(data?.items) ? data.items : [];
+            for (const item of items) {
+                const title = item.title || '';
+                if (!title.toLowerCase().includes('dew drop')) {
+                    continue;
+                }
+                const match = title.match(/#(\d+)\)/);
+                if (match) {
+                    const postNumber = parseInt(match[1], 10);
+                    console.log(`✓ Latest Dew Drop post found via API: "${title}" (number: ${postNumber})`);
+                    return postNumber;
+                }
+            }
+            console.warn('Morning Dew API returned no Dew Drop posts with parseable numbers');
+            return null;
+        } catch (error) {
+            console.error('Error fetching latest Dew Drop number from API:', error);
+            return null;
+        }
+    }
+
+    private fetchJson(url: string, timeoutMs: number = 10000): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const options = {
+                timeout: timeoutMs,
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+            };
+            const request = https.get(url, options, (response) => {
+                if (!response.statusCode || response.statusCode < 200 || response.statusCode >= 300) {
+                    reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
+                    response.resume();
+                    return;
+                }
+                let data = '';
+                response.on('data', chunk => { data += chunk; });
+                response.on('end', () => {
+                    try {
+                        resolve(JSON.parse(data));
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            });
+            request.on('error', reject);
+            request.on('timeout', () => {
+                request.destroy();
+                reject(new Error('Request timeout'));
+            });
+        });
     }
 
     private async fetchRssFeed(url: string): Promise<string> {

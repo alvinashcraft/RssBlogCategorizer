@@ -120,5 +120,15 @@
   "Editor Loading Error": "Errore di caricamento editor",
   "Retry": "Riprova",
   "Failed to load the markdown editor. Please check your internet connection and try again.": "Impossibile caricare l'editor markdown. Verifica la tua connessione Internet e riprova.",
-  "Failed to initialize the markdown editor: {0}": "Impossibile inizializzare l'editor markdown: {0}"
+  "Failed to initialize the markdown editor: {0}": "Impossibile inizializzare l'editor markdown: {0}",
+  "Morning Dew NextGen repo path is not configured. Set \"rssBlogCategorizer.dewNextGenRepoPath\" in settings.": "Il percorso del repository Morning Dew NextGen non è configurato. Imposta \"rssBlogCategorizer.dewNextGenRepoPath\" nelle impostazioni.",
+  "Open Settings": "Apri impostazioni",
+  "Import script not found at {0}. Verify the configured Morning Dew NextGen repo path.": "Script di importazione non trovato in {0}. Verifica il percorso del repository Morning Dew NextGen configurato.",
+  "Open the exported Dew Drop HTML file (or its WYSIWYG editor) before running this command.": "Apri il file HTML Dew Drop esportato (o il suo editor WYSIWYG) prima di eseguire questo comando.",
+  "Morning Dew NextGen import requires a file on disk; the current document is not a local file.": "L'importazione Morning Dew NextGen richiede un file su disco; il documento corrente non è un file locale.",
+  "HTML file not found on disk: {0}. Save the file before running this command.": "File HTML non trovato sul disco: {0}. Salva il file prima di eseguire questo comando.",
+  "Morning Dew NextGen Import": "Importazione Morning Dew NextGen",
+  "Running Morning Dew NextGen import for {0}…": "Esecuzione dell'importazione Morning Dew NextGen per {0}…",
+  "Morning Dew NextGen import completed for {0}. Review the generated markdown, then commit and push manually.": "Importazione Morning Dew NextGen completata per {0}. Rivedi il markdown generato, quindi esegui commit e push manualmente.",
+  "Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.": "Importazione Morning Dew NextGen fallita per {0} (codice di uscita {1}). Consulta il terminale per i dettagli."
 }

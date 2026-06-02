@@ -120,5 +120,15 @@
   "Editor Loading Error": "Editor-Ladefehler",
   "Retry": "Wiederholen",
   "Failed to load the markdown editor. Please check your internet connection and try again.": "Fehler beim Laden des Markdown-Editors. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
-  "Failed to initialize the markdown editor: {0}": "Fehler beim Initialisieren des Markdown-Editors: {0}"
+  "Failed to initialize the markdown editor: {0}": "Fehler beim Initialisieren des Markdown-Editors: {0}",
+  "Morning Dew NextGen repo path is not configured. Set \"rssBlogCategorizer.dewNextGenRepoPath\" in settings.": "Der Repository-Pfad für Morning Dew NextGen ist nicht konfiguriert. Setzen Sie \"rssBlogCategorizer.dewNextGenRepoPath\" in den Einstellungen.",
+  "Open Settings": "Einstellungen öffnen",
+  "Import script not found at {0}. Verify the configured Morning Dew NextGen repo path.": "Importskript nicht gefunden unter {0}. Überprüfen Sie den konfigurierten Morning Dew NextGen-Repository-Pfad.",
+  "Open the exported Dew Drop HTML file (or its WYSIWYG editor) before running this command.": "Öffnen Sie die exportierte Dew Drop-HTML-Datei (oder ihren WYSIWYG-Editor), bevor Sie diesen Befehl ausführen.",
+  "Morning Dew NextGen import requires a file on disk; the current document is not a local file.": "Der Morning Dew NextGen-Import erfordert eine Datei auf der Festplatte; das aktuelle Dokument ist keine lokale Datei.",
+  "HTML file not found on disk: {0}. Save the file before running this command.": "HTML-Datei auf der Festplatte nicht gefunden: {0}. Speichern Sie die Datei, bevor Sie diesen Befehl ausführen.",
+  "Morning Dew NextGen Import": "Morning Dew NextGen-Import",
+  "Running Morning Dew NextGen import for {0}…": "Morning Dew NextGen-Import für {0} wird ausgeführt…",
+  "Morning Dew NextGen import completed for {0}. Review the generated markdown, then commit and push manually.": "Morning Dew NextGen-Import für {0} abgeschlossen. Überprüfen Sie das generierte Markdown und führen Sie Commit und Push manuell aus.",
+  "Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.": "Morning Dew NextGen-Import für {0} fehlgeschlagen (Exit-Code {1}). Details finden Sie im Terminal."
 }

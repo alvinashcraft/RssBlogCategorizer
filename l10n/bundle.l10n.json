@@ -228,5 +228,30 @@
   "Failed to initialize the markdown editor: {0}": {
     "message": "Failed to initialize the markdown editor: {0}",
     "comment": ["The error message"]
+  },
+  "Morning Dew NextGen repo path is not configured. Set \"rssBlogCategorizer.dewNextGenRepoPath\" in settings.": "Error when the dewNextGenRepoPath setting is empty",
+  "Open Settings": "Button to open the Settings UI",
+  "Import script not found at {0}. Verify the configured Morning Dew NextGen repo path.": {
+    "message": "Import script not found at {0}. Verify the configured Morning Dew NextGen repo path.",
+    "comment": ["The full path to the missing import script"]
+  },
+  "Open the exported Dew Drop HTML file (or its WYSIWYG editor) before running this command.": "Error when no HTML file is open for the NextGen import",
+  "Morning Dew NextGen import requires a file on disk; the current document is not a local file.": "Error when the active document is not a file:// URI",
+  "HTML file not found on disk: {0}. Save the file before running this command.": {
+    "message": "HTML file not found on disk: {0}. Save the file before running this command.",
+    "comment": ["The absolute path to the missing HTML file"]
+  },
+  "Morning Dew NextGen Import": "Terminal/task name for the NextGen import",
+  "Running Morning Dew NextGen import for {0}…": {
+    "message": "Running Morning Dew NextGen import for {0}…",
+    "comment": ["The HTML file name being imported"]
+  },
+  "Morning Dew NextGen import completed for {0}. Review the generated markdown, then commit and push manually.": {
+    "message": "Morning Dew NextGen import completed for {0}. Review the generated markdown, then commit and push manually.",
+    "comment": ["The HTML file name that finished importing"]
+  },
+  "Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.": {
+    "message": "Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.",
+    "comment": ["The HTML file name", "The PowerShell exit code"]
   }
 }

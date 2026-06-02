@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
 import { RSSBlogProvider } from './rssProvider';
 import { ExportManager } from './exportManager';
 import { WordPressManager } from './wordpressManager';
@@ -213,6 +215,138 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    const publishToMorningDewNextGenCommand = vscode.commands.registerCommand('rssBlogCategorizer.publishToMorningDewNextGen', async () => {
+        const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
+        const repoPath = (config.get<string>('dewNextGenRepoPath') || '').trim();
+
+        if (!repoPath) {
+            const choice = await vscode.window.showErrorMessage(
+                vscode.l10n.t('Morning Dew NextGen repo path is not configured. Set "rssBlogCategorizer.dewNextGenRepoPath" in settings.'),
+                vscode.l10n.t('Open Settings')
+            );
+            if (choice === vscode.l10n.t('Open Settings')) {
+                await vscode.commands.executeCommand('workbench.action.openSettings', 'rssBlogCategorizer.dewNextGenRepoPath');
+            }
+            return;
+        }
+
+        const scriptRelativePath = path.join('infra', 'scripts', 'import-html-post.ps1');
+        const scriptFullPath = path.join(repoPath, scriptRelativePath);
+        if (!fs.existsSync(scriptFullPath)) {
+            vscode.window.showErrorMessage(
+                vscode.l10n.t('Import script not found at {0}. Verify the configured Morning Dew NextGen repo path.', scriptFullPath)
+            );
+            return;
+        }
+
+        // Resolve the HTML file: prefer the active text editor, then fall back
+        // to the document backing the WYSIWYG editor panel.
+        let htmlUri: vscode.Uri | undefined;
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor && activeEditor.document.fileName.toLowerCase().endsWith('.html')) {
+            htmlUri = activeEditor.document.uri;
+        } else {
+            const wysiwygUri = editorManager.getCurrentFileUri();
+            if (wysiwygUri && wysiwygUri.fsPath.toLowerCase().endsWith('.html')) {
+                htmlUri = wysiwygUri;
+            }
+        }
+
+        if (!htmlUri) {
+            vscode.window.showErrorMessage(vscode.l10n.t('Open the exported Dew Drop HTML file (or its WYSIWYG editor) before running this command.'));
+            return;
+        }
+
+        if (htmlUri.scheme !== 'file') {
+            vscode.window.showErrorMessage(vscode.l10n.t('Morning Dew NextGen import requires a file on disk; the current document is not a local file.'));
+            return;
+        }
+
+        const htmlPath = htmlUri.fsPath;
+        if (!fs.existsSync(htmlPath)) {
+            vscode.window.showErrorMessage(vscode.l10n.t('HTML file not found on disk: {0}. Save the file before running this command.', htmlPath));
+            return;
+        }
+
+        const terminalName = vscode.l10n.t('Morning Dew NextGen Import');
+        const shellArgs = [
+            '-NoProfile',
+            '-File', scriptFullPath,
+            '-Path', htmlPath
+        ];
+
+        const task = new vscode.Task(
+            { type: 'shell', task: 'morning-dew-nextgen-import' },
+            vscode.TaskScope.Workspace,
+            terminalName,
+            'Dev Feed Curator',
+            new vscode.ShellExecution(
+                'pwsh',
+                shellArgs,
+                { cwd: repoPath }
+            )
+        );
+        task.presentationOptions = {
+            reveal: vscode.TaskRevealKind.Always,
+            panel: vscode.TaskPanelKind.Dedicated,
+            focus: false,
+            echo: true,
+            clear: true,
+            showReuseMessage: false
+        };
+        task.isBackground = false;
+
+        const baseFileName = path.basename(htmlPath);
+
+        const completion = new Promise<number | undefined>((resolve) => {
+            const endDisposable = vscode.tasks.onDidEndTaskProcess(event => {
+                if (event.execution.task === task) {
+                    endDisposable.dispose();
+                    resolve(event.exitCode);
+                }
+            });
+        });
+
+        await vscode.tasks.executeTask(task);
+
+        vscode.window.showInformationMessage(
+            vscode.l10n.t('Running Morning Dew NextGen import for {0}…', baseFileName)
+        );
+
+        const exitCode = await completion;
+        if (exitCode === 0) {
+            try {
+                await provider.processPendingSubmissionsAfterPublish();
+            } catch (error) {
+                console.error('Failed to mark pending submissions as processed after Morning Dew NextGen import:', error);
+            }
+
+            // Close the WYSIWYG editor panel if the user invoked the command from it.
+            editorManager.closePanel();
+
+            // Mirror the WordPress publish flow: optionally open the blog URL.
+            const openBlogAfterPublish = config.get<boolean>('openBlogAfterPublish', true);
+            if (openBlogAfterPublish) {
+                const blogUrl = (config.get<string>('wordpressBlogUrl') || '').trim();
+                if (blogUrl) {
+                    try {
+                        await vscode.env.openExternal(vscode.Uri.parse(blogUrl));
+                    } catch (error) {
+                        console.error('Failed to open blog URL after Morning Dew NextGen import:', error);
+                    }
+                }
+            }
+
+            vscode.window.showInformationMessage(
+                vscode.l10n.t('Morning Dew NextGen import completed for {0}. Review the generated markdown, then commit and push manually.', baseFileName)
+            );
+        } else {
+            vscode.window.showErrorMessage(
+                vscode.l10n.t('Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.', baseFileName, String(exitCode ?? 'unknown'))
+            );
+        }
+    });
+
     const openWysiwygEditorCommand = vscode.commands.registerCommand('rssBlogCategorizer.openWysiwygEditor', async () => {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) {
@@ -314,6 +448,7 @@ export function activate(context: vscode.ExtensionContext) {
         setWordpressCredentialsCommand,
         testWordpressConnectionCommand,
         publishToWordpressCommand,
+        publishToMorningDewNextGenCommand,
         openWysiwygEditorCommand,
         treeView,
         configChangeHandler,

@@ -18,6 +18,7 @@ test-*.js
 docs/dev/**
 release-notes/**
 .github/**
+scripts/**
 !media/**
 !webview/**
 !l10n/**

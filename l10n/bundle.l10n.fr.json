@@ -120,5 +120,15 @@
   "Editor Loading Error": "Erreur de chargement de l'éditeur",
   "Retry": "Réessayer",
   "Failed to load the markdown editor. Please check your internet connection and try again.": "Échec du chargement de l'éditeur markdown. Veuillez vérifier votre connexion Internet et réessayer.",
-  "Failed to initialize the markdown editor: {0}": "Échec de l'initialisation de l'éditeur markdown : {0}"
+  "Failed to initialize the markdown editor: {0}": "Échec de l'initialisation de l'éditeur markdown : {0}",
+  "Morning Dew NextGen repo path is not configured. Set \"rssBlogCategorizer.dewNextGenRepoPath\" in settings.": "Le chemin du dépôt Morning Dew NextGen n'est pas configuré. Définissez \"rssBlogCategorizer.dewNextGenRepoPath\" dans les paramètres.",
+  "Open Settings": "Ouvrir les paramètres",
+  "Import script not found at {0}. Verify the configured Morning Dew NextGen repo path.": "Script d'importation introuvable à {0}. Vérifiez le chemin du dépôt Morning Dew NextGen configuré.",
+  "Open the exported Dew Drop HTML file (or its WYSIWYG editor) before running this command.": "Ouvrez le fichier HTML Dew Drop exporté (ou son éditeur WYSIWYG) avant d'exécuter cette commande.",
+  "Morning Dew NextGen import requires a file on disk; the current document is not a local file.": "L'importation Morning Dew NextGen nécessite un fichier sur le disque ; le document actuel n'est pas un fichier local.",
+  "HTML file not found on disk: {0}. Save the file before running this command.": "Fichier HTML introuvable sur le disque : {0}. Enregistrez le fichier avant d'exécuter cette commande.",
+  "Morning Dew NextGen Import": "Importation Morning Dew NextGen",
+  "Running Morning Dew NextGen import for {0}…": "Importation Morning Dew NextGen en cours pour {0}…",
+  "Morning Dew NextGen import completed for {0}. Review the generated markdown, then commit and push manually.": "Importation Morning Dew NextGen terminée pour {0}. Vérifiez le markdown généré, puis effectuez le commit et le push manuellement.",
+  "Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.": "Échec de l'importation Morning Dew NextGen pour {0} (code de sortie {1}). Consultez le terminal pour plus de détails."
 }

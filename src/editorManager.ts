@@ -20,10 +20,10 @@ export class EditorManager {
         if (activeEditor) {
             this.originalDocumentUri = activeEditor.document.uri;
         }
-        
+
         return new Promise((resolve) => {
             this.resolvePromise = resolve;
-            
+
             if (this.panel) {
                 this.panel.reveal(vscode.ViewColumn.One);
                 this.updateContent(content);
@@ -31,6 +31,27 @@ export class EditorManager {
                 this.createPanel(content, metadata);
             }
         });
+    }
+
+    /**
+     * URI of the document currently loaded into the WYSIWYG editor panel,
+     * or undefined when the panel is closed. Used by commands that operate
+     * on the file backing the panel when no text editor is active.
+     */
+    public getCurrentFileUri(): vscode.Uri | undefined {
+        return this.panel ? this.originalDocumentUri : undefined;
+    }
+
+    /**
+     * Programmatically close the WYSIWYG editor panel if it is currently open.
+     * Returns true if a panel was disposed, false if no panel was open.
+     */
+    public closePanel(): boolean {
+        if (!this.panel) {
+            return false;
+        }
+        this.panel.dispose();
+        return true;
     }
     
     private createPanel(content: string, metadata?: { fileName?: string; fileType?: 'html' | 'markdown' }): void {

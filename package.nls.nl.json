@@ -12,6 +12,7 @@
   "command.setWordpressCredentials": "WordPress-inloggegevens instellen",
   "command.testWordpressConnection": "WordPress-verbinding testen",
   "command.publishToWordpress": "Publiceren naar WordPress",
+  "command.publishToMorningDewNextGen": "Publiceren naar Morning Dew NextGen",
   "command.openWysiwygEditor": "Dev Feed Curator: Openen in WYSIWYG-editor",
   "config.title": "Dev Feed Curator",
   "config.feedUrl.description": "Enkele RSS-feed-URL om te volgen",
@@ -31,5 +32,6 @@
   "config.openLinksInNewTab.description": "Blogberichtenlinks openen in een nieuw browsertabblad wanneer erop wordt geklikt (voegt target=\"_blank\" toe aan HTML-exports)",
   "config.enableDometrainSection.description": "Dometrain-cursussectie in exports inschakelen (markeert elke dag een andere videotraining van Dometrain)",
   "config.dometrainLastCourseId.description": "Laatst getoonde Dometrain-cursus-ID (gebruikt om door cursussen te bladeren). Synchroniseert tussen computers als VS Code-instellingensynchronisatie is ingeschakeld.",
-  "config.openBlogAfterPublish.description": "Automatisch de basis-URL van de blog openen in de standaardbrowser na het succesvol publiceren van een bericht"
+  "config.openBlogAfterPublish.description": "Automatisch de basis-URL van de blog openen in de standaardbrowser na het succesvol publiceren van een bericht",
+  "config.dewNextGenRepoPath.description": "Absoluut pad naar de root van de Morning Dew NextGen-repository (bevat infra/scripts/import-html-post.ps1). Vereist om de opdracht 'Publiceren naar Morning Dew NextGen' in te schakelen."
 }

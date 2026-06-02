@@ -12,6 +12,7 @@
   "command.setWordpressCredentials": "Set WordPress Credentials",
   "command.testWordpressConnection": "Test WordPress Connection",
   "command.publishToWordpress": "Publish to WordPress",
+  "command.publishToMorningDewNextGen": "Publish to Morning Dew NextGen",
   "command.openWysiwygEditor": "Dev Feed Curator: Open in WYSIWYG Editor",
   "config.title": "Dev Feed Curator",
   "config.feedUrl.description": "Single RSS feed URL to monitor",
@@ -31,5 +32,6 @@
   "config.openLinksInNewTab.description": "Open blog post links in a new browser tab when clicked (adds target=\"_blank\" to HTML exports)",
   "config.enableDometrainSection.description": "Enable Dometrain Course section in exports (highlights a different video training course from Dometrain every day)",
   "config.dometrainLastCourseId.description": "Last Dometrain course ID shown (used for cycling through courses). Syncs across computers if VS Code settings sync is enabled.",
-  "config.openBlogAfterPublish.description": "Automatically open the blog's base URL in the default browser after successfully publishing a post"
+  "config.openBlogAfterPublish.description": "Automatically open the blog's base URL in the default browser after successfully publishing a post",
+  "config.dewNextGenRepoPath.description": "Absolute path to the Morning Dew NextGen repository root (containing infra/scripts/import-html-post.ps1). Required to enable the 'Publish to Morning Dew NextGen' command."
 }

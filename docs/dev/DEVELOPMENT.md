@@ -149,6 +149,24 @@ npm install
 npm run vsce:package
 ```
 
+## Publishing
+
+The extension can be published to both the VS Code Marketplace and the Open VSX Registry. Personal Access Tokens are read from environment variables: `VSCE_PAT` for the VS Code Marketplace and `OVSX_PAT` for Open VSX.
+
+```bash
+# Publish to the VS Code Marketplace only (uses VSCE_PAT)
+npm run vsce:publish
+
+# Publish to the Open VSX Registry only (uses OVSX_PAT)
+npm run ovsx:publish
+
+# Publish to both marketplaces from a single .vsix
+npm run vsce:package
+npm run publish:all
+```
+
+`publish:all` runs [scripts/publish-all.mjs](../../scripts/publish-all.mjs), which locates the most recent `rss-blog-categorizer-*.vsix` in the repo root and uploads that exact artifact to the VS Code Marketplace (via `vsce publish --packagePath`) and then to Open VSX (via `ovsx publish`). It fails fast: if the Marketplace publish fails, Open VSX is skipped so the registries don't drift out of sync. Pre-release variants (`vsce:package:prerelease`, `vsce:publish:prerelease`, `ovsx:publish:prerelease`, `publish:all:prerelease`) are also provided.
+
 ## Configuration Schema
 
 The extension uses the following configuration schema:
@@ -244,6 +262,14 @@ See [CATEGORIES.md](CATEGORIES.md) for detailed configuration instructions.
 | `npm run watch` | Watch for changes and recompile |
 | `npm run package` | Build production package |
 | `npm run vscode:prepublish` | Pre-publish script (runs package) |
+| `npm run vsce:package` | Build a `.vsix` package with `@vscode/vsce` |
+| `npm run vsce:package:prerelease` | Build a pre-release `.vsix` |
+| `npm run vsce:publish` | Publish to the VS Code Marketplace (uses `VSCE_PAT`) |
+| `npm run vsce:publish:prerelease` | Publish a pre-release to the VS Code Marketplace |
+| `npm run ovsx:publish` | Publish to the Open VSX Registry (uses `OVSX_PAT`) |
+| `npm run ovsx:publish:prerelease` | Publish a pre-release to Open VSX |
+| `npm run publish:all` | Publish the latest local `.vsix` to both registries |
+| `npm run publish:all:prerelease` | Publish a pre-release `.vsix` to both registries |
 
 ## Contributing
 
