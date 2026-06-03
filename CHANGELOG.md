@@ -4,6 +4,12 @@ All notable changes to the "Dev Feed Curator" extension will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.10.5] - 2026-06-03
+
+### Fixed
+
+- `publishToMorningDewNextGen` no longer relies on `vscode.tasks` / `ShellExecution`, which failed to launch in an empty workspace with the error: `The terminal process failed to launch: Cannot launch a terminal process in an empty workspace with cwd <repoPath> different from userHome <home>`. The command now spawns `pwsh` directly via `child_process.spawn` and streams stdout/stderr to a dedicated "Morning Dew NextGen Import" output channel, so it works whether or not a workspace is open
+
 ## [3.10.4] - 2026-06-02
 
 ### Fixed

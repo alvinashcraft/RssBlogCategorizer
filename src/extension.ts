@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { spawn } from 'child_process';
 import { RSSBlogProvider } from './rssProvider';
 import { ExportManager } from './exportManager';
 import { WordPressManager } from './wordpressManager';
@@ -215,10 +216,11 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    const morningDewNextGenChannel = vscode.window.createOutputChannel(vscode.l10n.t('Morning Dew NextGen Import'));
+
     const publishToMorningDewNextGenCommand = vscode.commands.registerCommand('rssBlogCategorizer.publishToMorningDewNextGen', async () => {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
         const repoPath = (config.get<string>('dewNextGenRepoPath') || '').trim();
-
         if (!repoPath) {
             const choice = await vscode.window.showErrorMessage(
                 vscode.l10n.t('Morning Dew NextGen repo path is not configured. Set "rssBlogCategorizer.dewNextGenRepoPath" in settings.'),
@@ -268,64 +270,44 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        const terminalName = vscode.l10n.t('Morning Dew NextGen Import');
-        const shellArgs = [
-            '-NoProfile',
-            '-File', scriptFullPath,
-            '-Path', htmlPath
-        ];
-
-        const task = new vscode.Task(
-            { type: 'shell', task: 'morning-dew-nextgen-import' },
-            vscode.TaskScope.Workspace,
-            terminalName,
-            'Dev Feed Curator',
-            new vscode.ShellExecution(
-                'pwsh',
-                shellArgs,
-                { cwd: repoPath }
-            )
-        );
-        task.presentationOptions = {
-            reveal: vscode.TaskRevealKind.Always,
-            panel: vscode.TaskPanelKind.Dedicated,
-            focus: false,
-            echo: true,
-            clear: true,
-            showReuseMessage: false
-        };
-        task.isBackground = false;
-
         const baseFileName = path.basename(htmlPath);
-
-        let endDisposable: vscode.Disposable | undefined;
-        const completion = new Promise<number | undefined>((resolve) => {
-            endDisposable = vscode.tasks.onDidEndTaskProcess(event => {
-                if (event.execution.task === task) {
-                    endDisposable?.dispose();
-                    endDisposable = undefined;
-                    resolve(event.exitCode);
-                }
-            });
-        });
-
-        try {
-            await vscode.tasks.executeTask(task);
-        } catch (error) {
-            endDisposable?.dispose();
-            endDisposable = undefined;
-            const message = error instanceof Error ? error.message : String(error);
-            vscode.window.showErrorMessage(
-                vscode.l10n.t('Morning Dew NextGen import failed for {0} (exit code {1}). See the terminal for details.', baseFileName, message)
-            );
-            return;
-        }
+        const outputChannel = morningDewNextGenChannel;
+        outputChannel.clear();
+        outputChannel.show(true);
+        outputChannel.appendLine(`> pwsh -NoProfile -File "${scriptFullPath}" -Path "${htmlPath}"`);
+        outputChannel.appendLine(`  cwd: ${repoPath}`);
+        outputChannel.appendLine('');
 
         vscode.window.showInformationMessage(
             vscode.l10n.t('Running Morning Dew NextGen import for {0}…', baseFileName)
         );
 
-        const exitCode = await completion;
+        const exitCode = await new Promise<number | null>((resolve) => {
+            let child;
+            try {
+                child = spawn('pwsh', ['-NoProfile', '-File', scriptFullPath, '-Path', htmlPath], {
+                    cwd: repoPath,
+                    windowsHide: true
+                });
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                outputChannel.appendLine(`Failed to start pwsh: ${message}`);
+                resolve(null);
+                return;
+            }
+
+            child.stdout.on('data', (chunk: Buffer) => outputChannel.append(chunk.toString()));
+            child.stderr.on('data', (chunk: Buffer) => outputChannel.append(chunk.toString()));
+            child.on('error', (error) => {
+                outputChannel.appendLine(`\n[error] ${error.message}`);
+                resolve(null);
+            });
+            child.on('close', (code) => {
+                outputChannel.appendLine(`\n[exit] ${code ?? 'null'}`);
+                resolve(code);
+            });
+        });
+
         if (exitCode === 0) {
             try {
                 await provider.processPendingSubmissionsAfterPublish();
@@ -461,6 +443,7 @@ export function activate(context: vscode.ExtensionContext) {
         testWordpressConnectionCommand,
         publishToWordpressCommand,
         publishToMorningDewNextGenCommand,
+        morningDewNextGenChannel,
         openWysiwygEditorCommand,
         treeView,
         configChangeHandler,
