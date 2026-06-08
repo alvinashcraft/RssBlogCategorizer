@@ -1,7 +1,7 @@
 import * as https from 'https';
 
 /**
- * Minimal JSON GET helper used by the Morning Dew v1 API fallback paths.
+ * Minimal JSON GET helper used by the Morning Dew feeds fallback paths.
  * Kept dependency-free to avoid pulling in a new module for one-off calls.
  */
 export function fetchJson(url: string, timeoutMs: number = 10000): Promise<any> {

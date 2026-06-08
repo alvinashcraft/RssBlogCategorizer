@@ -372,7 +372,7 @@ describe('RSSBlogProvider', () => {
       expect(posts.find(p => p.title.includes('Future Post Should Be Included'))).to.exist;
     });
 
-    it('should fall back to Morning Dew v1 API when RSS has no Dew Drop posts and blog is alvinashcraft.com', async () => {
+    it('should fall back to the Morning Dew feeds endpoint when RSS has no Dew Drop posts and blog is alvinashcraft.com', async () => {
       const apiDate = new Date('2026-05-29T10:56:41Z');
 
       const configWithBlog = new MockConfiguration({
@@ -397,7 +397,7 @@ describe('RSSBlogProvider', () => {
         </rss>`;
 
       const apiPayload = JSON.stringify({
-        items: [
+        posts: [
           {
             title: 'Dew Drop - May 29, 2026 (#4679)',
             date: apiDate.toISOString(),
@@ -424,7 +424,7 @@ describe('RSSBlogProvider', () => {
 
       let apiHit = false;
       httpsGetStub.callsFake((url: string, options: any, callback: any) => {
-        if (url.includes('/v1/posts')) {
+        if (url.includes('/feeds/index-recent.json')) {
           apiHit = true;
           callback(apiResponse);
         } else if (url.includes('alvinashcraft.com')) {
@@ -435,10 +435,10 @@ describe('RSSBlogProvider', () => {
 
       await provider.refresh();
 
-      expect(apiHit, 'expected Morning Dew v1 API to be queried as fallback').to.be.true;
+      expect(apiHit, 'expected Morning Dew feeds endpoint to be queried as fallback').to.be.true;
     });
 
-    it('should NOT call Morning Dew v1 API when blog URL is not alvinashcraft.com', async () => {
+    it('should NOT call the Morning Dew feeds endpoint when blog URL is not alvinashcraft.com', async () => {
       const configWithOtherBlog = new MockConfiguration({
         feedUrl: 'https://example.com/feed.xml',
         recordCount: 100,
@@ -469,7 +469,7 @@ describe('RSSBlogProvider', () => {
 
       let apiHit = false;
       httpsGetStub.callsFake((url: string, options: any, callback: any) => {
-        if (url.includes('/v1/posts')) {
+        if (url.includes('/feeds/index-recent.json')) {
           apiHit = true;
         }
         callback(rssResponse);
@@ -478,7 +478,7 @@ describe('RSSBlogProvider', () => {
 
       await provider.refresh();
 
-      expect(apiHit, 'API should not be queried when blog URL is not alvinashcraft.com').to.be.false;
+      expect(apiHit, 'feeds endpoint should not be queried when blog URL is not alvinashcraft.com').to.be.false;
     });
   });
 

@@ -281,9 +281,9 @@ export class ExportManager {
     }
 
     /**
-     * Fallback: query the read-only Morning Dew v1 API for the latest Dew Drop
-     * post number. Only invoked when the configured WordPress blog URL points
-     * at alvinashcraft.com.
+     * Fallback: query the read-only Morning Dew feeds endpoint for the latest
+     * Dew Drop post number. Only invoked when the configured WordPress blog
+     * URL points at alvinashcraft.com.
      */
     private async tryGetLatestDewDropNumberFromApi(): Promise<number | null> {
         const config = vscode.workspace.getConfiguration('rssBlogCategorizer');
@@ -303,7 +303,7 @@ export class ExportManager {
                 const match = title.match(/#(\d+)\)/);
                 if (match) {
                     const postNumber = parseInt(match[1], 10);
-                    console.log(`✓ Latest Dew Drop post found via API: "${title}" (number: ${postNumber})`);
+                    console.log(`✓ Latest Dew Drop post found via feeds endpoint: "${title}" (number: ${postNumber})`);
                     return postNumber;
                 }
             }

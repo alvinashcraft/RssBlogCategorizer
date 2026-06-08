@@ -98,7 +98,7 @@ interface AuthorMappingsConfig {
 }
 
 /**
- * Minimal JSON GET helper used by the Morning Dew v1 API fallback path lives
+ * Minimal JSON GET helper used by the Morning Dew feeds fallback path lives
  * in `./utils/http` to be shared with `exportManager.ts`.
  */
 
@@ -167,13 +167,13 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 console.log('Available post titles:', posts.slice(0, 5).map(p => `"${p.title}"`).join(', '));
             }
 
-            // Fallback: query the read-only Morning Dew API when the configured
-            // WordPress blog URL points at alvinashcraft.com.
+            // Fallback: query the read-only Morning Dew feeds endpoint when the
+            // configured WordPress blog URL points at alvinashcraft.com.
             if (this.isAlvinAshcraftBlogConfigured()) {
                 console.log('Falling back to Morning Dew feeds endpoint for latest Dew Drop date...');
                 const apiPost = await this.fetchLatestDewDropFromApi();
                 if (apiPost?.date && !isNaN(apiPost.date.getTime())) {
-                    console.log(`✅ Latest Dew Drop post found via API: "${apiPost.title}" from ${apiPost.date.toISOString()}`);
+                    console.log(`✅ Latest Dew Drop post found via feeds endpoint: "${apiPost.title}" from ${apiPost.date.toISOString()}`);
                     return apiPost.date;
                 }
             }
@@ -205,7 +205,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             });
 
             if (!dewDrop || !dewDrop.title || !dewDrop.date) {
-                console.log('Morning Dew feeds endpoint returned no Dew Drop posts in first items');
+                console.log('Morning Dew feeds endpoint returned no Dew Drop posts in the returned posts list');
                 return null;
             }
 
@@ -217,7 +217,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
                 number: numberMatch ? parseInt(numberMatch[1], 10) : null
             };
         } catch (error) {
-            console.error('Error fetching latest Dew Drop from Morning Dew API:', error);
+            console.error('Error fetching latest Dew Drop from Morning Dew feeds endpoint:', error);
             return null;
         }
     }
