@@ -170,7 +170,7 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
             // Fallback: query the read-only Morning Dew API when the configured
             // WordPress blog URL points at alvinashcraft.com.
             if (this.isAlvinAshcraftBlogConfigured()) {
-                console.log('Falling back to Morning Dew v1 API for latest Dew Drop date...');
+                console.log('Falling back to Morning Dew feeds endpoint for latest Dew Drop date...');
                 const apiPost = await this.fetchLatestDewDropFromApi();
                 if (apiPost?.date && !isNaN(apiPost.date.getTime())) {
                     console.log(`✅ Latest Dew Drop post found via API: "${apiPost.title}" from ${apiPost.date.toISOString()}`);
@@ -192,20 +192,20 @@ export class RSSBlogProvider implements vscode.TreeDataProvider<any> {
 
     private async fetchLatestDewDropFromApi(): Promise<{ title: string; date: Date; number: number | null } | null> {
         try {
-            const json = await fetchJson('https://alvinashcraft.com/v1/posts?limit=20');
-            if (!json || !Array.isArray(json.items)) {
-                console.log('Morning Dew API returned no items');
+            const json = await fetchJson('https://alvinashcraft.com/feeds/index-recent.json');
+            if (!json || !Array.isArray(json.posts)) {
+                console.log('Morning Dew feeds endpoint returned no posts');
                 return null;
             }
 
-            const items = json.items as Array<{ title?: string; date?: string }>;
+            const items = json.posts as Array<{ title?: string; date?: string }>;
             const dewDrop = items.find(item => {
                 const t = (item.title || '').toLowerCase();
                 return t.startsWith('dew d');
             });
 
             if (!dewDrop || !dewDrop.title || !dewDrop.date) {
-                console.log('Morning Dew API returned no Dew Drop posts in first 20 items');
+                console.log('Morning Dew feeds endpoint returned no Dew Drop posts in first items');
                 return null;
             }
 

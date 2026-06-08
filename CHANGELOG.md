@@ -4,6 +4,12 @@ All notable changes to the "Dev Feed Curator" extension will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.11.0] - 2026-06-08
+
+### Fixed
+
+- Replaced the removed Azure Functions `v1/posts` API (`https://alvinashcraft.com/v1/posts?limit=20`) with the new static Blazor Static Web App feed endpoint (`https://alvinashcraft.com/feeds/index-recent.json`) in both the latest Dew Drop date fallback (`rssProvider.ts`) and the latest Dew Drop number fallback (`exportManager.ts`). Updated response parsing from `data.items[]` to `data.posts[]` to match the new JSON shape
+
 ## [3.10.5] - 2026-06-03
 
 ### Fixed

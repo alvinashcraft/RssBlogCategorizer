@@ -292,9 +292,9 @@ export class ExportManager {
         }
 
         try {
-            console.log('Falling back to Morning Dew v1 API for latest Dew Drop number...');
-            const data = await fetchJson('https://alvinashcraft.com/v1/posts?limit=20');
-            const items: Array<{ title?: string }> = Array.isArray(data?.items) ? data.items : [];
+            console.log('Falling back to Morning Dew feeds endpoint for latest Dew Drop number...');
+            const data = await fetchJson('https://alvinashcraft.com/feeds/index-recent.json');
+            const items: Array<{ title?: string }> = Array.isArray(data?.posts) ? data.posts : [];
             for (const item of items) {
                 const title = item.title || '';
                 if (!title.toLowerCase().includes('dew drop')) {
@@ -307,10 +307,10 @@ export class ExportManager {
                     return postNumber;
                 }
             }
-            console.warn('Morning Dew API returned no Dew Drop posts with parseable numbers');
+            console.warn('Morning Dew feeds endpoint returned no Dew Drop posts with parseable numbers');
             return null;
         } catch (error) {
-            console.error('Error fetching latest Dew Drop number from API:', error);
+            console.error('Error fetching latest Dew Drop number from feeds endpoint:', error);
             return null;
         }
     }
