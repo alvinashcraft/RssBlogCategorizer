@@ -15,6 +15,7 @@
         "rest",
         "graphql",
         "azure",
+        "openapi",
         "aws",
         "aspire",
         "gcp",
@@ -36,6 +37,8 @@
         "blazor",
         "kendo",
         "php",
+        "passkey",
+        "webhook",
         "ruby on rails",
         "webstorm",
         "nodejs",
@@ -51,6 +54,7 @@
       "urlKeywords": [
         "devblogs.microsoft.com/oldnewthing",
         "windows/apps",
+        "insidemsix",
         "blogs.windows.com/windowsdeveloper"
       ],
       "titleKeywords": [
@@ -107,6 +111,7 @@
         "gemini.google.com",
         "ollama.com",
         "huggingface.co",
+        "copilot-sdk",
         "warp.dev",
         "ai.google",
         "claude.com",
@@ -182,6 +187,7 @@
         "ci/cd",
         "deployment",
         "terraform",
+        "compliance",
         "algorithm",
         "bdd",
         "tdd",
@@ -198,6 +204,7 @@
         "leadership",
         "ux",
         "teamcity",
+        "sdlc",
         "octopus",
         "estimation",
         "agile",
