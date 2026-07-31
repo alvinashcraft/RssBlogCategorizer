@@ -15,18 +15,18 @@
       "description": "A modern approach to building faster, more responsive, and asynchronous .NET applications using C#."
     },
     {
-      "title": "Microsoft Copilot for Power Apps",
-      "author": "Rezwanur Rahman",
-      "imageUrl": "https://m.media-amazon.com/images/I/41JA1ZGtI0L._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/B0D6LCB348/?tag=amavin-20",
-      "description": "Transforming App Development with AI Assistance (Inside Copilot)."
+      "title": "Real-World Web Development with .NET 10",
+      "author": "Mark J. Price",
+      "imageUrl": "https://m.media-amazon.com/images/I/41Xc0HeWAzL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1835888925/?tag=amavin-20",
+      "description": "Build websites and services using mature and proven ASP.NET Core MVC, Web API, and Umbraco CMS."
     },
     {
-      "title": "Blazor Web Development Cookbook",
-      "author": "Pawel Bazyluk",
-      "imageUrl": "https://m.media-amazon.com/images/I/41T-v0E03TL._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/183546078X/?tag=amavin-20",
-      "description": "Tested recipes for advanced single-page application scenarios in .NET 9."
+      "title": "Web Development with Blazor",
+      "author": "Jimmy Engström",
+      "imageUrl": "https://m.media-amazon.com/images/I/51zwEhx0VTL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1806112892/?tag=amavin-20",
+      "description": "A practical guide to building interactive UIs with C# 14 and .NET 10."
     },
     {
       "title": ".NET MAUI Cookbook",
@@ -50,11 +50,11 @@
       "description": "Get the career you want with good practices and patterns to design, debug, and test your solutions."
     },
     {
-      "title": "Programming APIs with C# and .NET",
-      "author": "Jesse Liberty & Joseph Dluzen",
-      "imageUrl": "https://m.media-amazon.com/images/I/41EQbec1QWL._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/1835468853/?tag=amavin-20",
-      "description": "Develop high-performance APIs that ensure seamless application communication and enhanced security."
+      "title": "Getting Started with Visual Studio 2026",
+      "author": "Gerald Versluis",
+      "imageUrl": "https://m.media-amazon.com/images/I/41O-Q-UTQRL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/B0GPHTZXYG/?tag=amavin-20",
+      "description": "Master the New Era of Visual Studio, AI, and Productivity."
     },
     {
       "title": "C# 14 and .NET 10 - Modern Cross-Platform Development Fundamentals",
