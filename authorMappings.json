@@ -246,6 +246,7 @@
     { "keyword": "fabiensanglard.net", "author": "Fabien Sanglard" },
     { "keyword": "tabsoverspaces.com", "author": "Jiří {x2} Činčura" },
     { "keyword": "seangoedecke.com", "author": "Sean Goedecke" },
+    { "keyword": "madskristensen.net", "author": "Mads Kristensen" },
     { "keyword": "iosdevweekly.com", "author": "Dave Verwer" },
     { "keyword": "androidweekly.net", "author": "Gyuri Grell, Martin Cremerius-Gauer & Sebastian Deutsch" },
     { "keyword": "thecsspodcast", "author": "Una Kravets & Bramus Van Damme" }
@@ -268,6 +269,8 @@
     { "keyword": "jamie_maguire", "author": "Jamie Maguire" },
     { "keyword": "jasonhaley", "author": "Jason Haley" },
     { "keyword": "steve jones", "author": "Steve Jones" },
+    { "keyword": "kunal chowdhury", "author": "Kunal Chowdhury" },
+    { "keyword": "pamela_fox", "author": "Pamela Fox" },
     { "keyword": "jschementi", "author": "Jimmy Schementi" },
     { "keyword": "lapointe", "author": "Gary Lapointe" },
     { "keyword": "milan@milanjovanovic.tech", "author": "Milan Jovanović" },
