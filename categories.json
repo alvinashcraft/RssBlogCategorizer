@@ -78,6 +78,12 @@
       ]
     },
     ".NET and Visual Studio": {
+      "urlKeywords": [
+        "devblogs.microsoft.com/dotnet",
+        "learn.microsoft.com/dotnet",
+        "learn.microsoft.com/en-us/dotnet",
+        "madskristensen.net"
+      ],
       "titleKeywords": [
         ".net",
         "c#",
