@@ -15,11 +15,11 @@
       "description": "A modern approach to building faster, more responsive, and asynchronous .NET applications using C#."
     },
     {
-      "title": "Real-World Web Development with .NET 10",
+      "title": "ChatGPT Visual Bible",
       "author": "Mark J. Price",
-      "imageUrl": "https://m.media-amazon.com/images/I/41Xc0HeWAzL._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/1835888925/?tag=amavin-20",
-      "description": "Build websites and services using mature and proven ASP.NET Core MVC, Web API, and Umbraco CMS."
+      "imageUrl": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T3/images/I/51zPpVLBHrL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/180865515X/?tag=amavin-20",
+      "description": "A step-by-step, screenshot-by-screenshot guide to writing, researching, analyzing, and automating with ChatGPT"
     },
     {
       "title": "Web Development with Blazor",
@@ -43,11 +43,11 @@
       "description": "This is the unfiltered, blood-smeared, inbox-exploding truth about what happens when you step out of the safe zone of your IDE and into the jungle of tech leadership."
     },
     {
-      "title": "Tools and Skills for .NET 10",
-      "author": "Mark J. Price",
-      "imageUrl": "https://m.media-amazon.com/images/I/411QG6IUzjL._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/1835882501/?tag=amavin-20",
-      "description": "Get the career you want with good practices and patterns to design, debug, and test your solutions."
+      "title": "Fabulous Adventures in Data Structures and Algorithms",
+      "author": "Eric Lippert",
+      "imageUrl": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T3/images/I/41V1nOH-YmL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1633435032/?tag=amavin-20",
+      "description": "This book invites you to step off the beaten path and explore interesting, unfamiliar, and even exotic algorithms that will challenge your perspective and elevate your code."
     },
     {
       "title": "Getting Started with Visual Studio 2026",
