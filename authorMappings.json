@@ -254,6 +254,7 @@
   "authorContains": [
     { "keyword": "sam gentile", "author": "Sam Gentile" },
     { "keyword": "ayende", "author": "Oren Eini" },
+    { "keyword": "frank boucher", "author": "Frank Boucher" },
     { "keyword": "mahesh chand", "author": "Mahesh Chand" },
     { "keyword": "ssw tv", "author": "SSW TV" },
     { "keyword": "ray vernagus", "author": "Ray Vernagus" },
