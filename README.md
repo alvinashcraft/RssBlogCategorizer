@@ -352,6 +352,9 @@ See the [VS Code Localization documentation](https://code.visualstudio.com/api/r
 
 Interested in contributing or building from source? See [DEVELOPMENT.md](https://github.com/alvinashcraft/RssBlogCategorizer/blob/main/docs/dev/DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.
 
+For Marketplace icon requirements and package rebuilding instructions, see the
+[VSIX packaging guide](https://github.com/alvinashcraft/RssBlogCategorizer/blob/main/docs/dev/DEVELOPMENT.md#building-vsix-package).
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

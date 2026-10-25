@@ -141,6 +141,11 @@ See [src/test/README.md](src/test/README.md) for detailed testing documentation.
 
 ## Building VSIX Package
 
+The Marketplace icon, `images/rssBlogIcon.png`, is a 256 x 256 PNG.
+Keep it below the Marketplace's 1024 KB file-size limit when replacing it.
+Run `npm run test:basic` to check the configured icon's size and dimensions.
+After changing the icon, rebuild the VSIX; existing packages retain the old image.
+
 ```bash
 # Install dependencies (includes local @vscode/vsce from package.json)
 npm install
