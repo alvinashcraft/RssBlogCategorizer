@@ -29,11 +29,11 @@
       "description": "A practical guide to building interactive UIs with C# 14 and .NET 10."
     },
     {
-      "title": ".NET MAUI Cookbook",
-      "author": "Alexander Russkov",
-      "imageUrl": "https://m.media-amazon.com/images/I/51im4psup7L._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/1835461123/?tag=amavin-20",
-      "description": "Build a full-featured app swiftly with MVVM, CRUD, AI, authentication, real-time updates, and more."
+      "title": "Building Agentic Applications with MCP and .NET",
+      "author": "Alvin Ashcraft and Deepak Kamboj",
+      "imageUrl": "https://m.media-amazon.com/images/I/41lOPLZ14SL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1806380153/?tag=amavin-20",
+      "description": "Build distributed, AI-ready apps on Azure with .NET and MCP."
     },
     {
       "title": "So You Want To Be a Tech Lead",
@@ -57,11 +57,11 @@
       "description": "Master the New Era of Visual Studio, AI, and Productivity."
     },
     {
-      "title": "C# 14 and .NET 10 - Modern Cross-Platform Development Fundamentals",
+      "title": "C# 15 and .NET 11 - Modern Cross-Platform Development Fundamentals",
       "author": "Mark J. Price",
-      "imageUrl": "https://m.media-amazon.com/images/I/412cLAnjeiL._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/1836206631/?tag=amavin-20",
-      "description": "Build modern websites and services with ASP.NET Core, Blazor, and EF Core using Visual Studio 2026."
+      "imageUrl": "https://m.media-amazon.com/images/I/41wbRc2OT1L._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1807306690/?tag=amavin-20",
+      "description": "Learn C# from scratch and build websites and web services with .NET 11 using Visual Studio 2027."
     },
     {
       "title": "Unity 2022 by Example",

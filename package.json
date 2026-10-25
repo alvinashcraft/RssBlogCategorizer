@@ -3,7 +3,7 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "icon": "images/rssBlogIcon.png",
-  "version": "3.11.6",
+  "version": "3.11.7",
   "publisher": "alvinashcraft",
   "repository": {
     "type": "git",
@@ -32,9 +32,6 @@
   "categories": [
     "Other",
     "Snippets"
-  ],
-  "activationEvents": [
-    "onView:rssBlogCategorizerView"
   ],
   "main": "./dist/extension.js",
   "l10n": "./l10n",
