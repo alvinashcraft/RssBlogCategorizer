@@ -22,11 +22,11 @@
       "description": "A step-by-step, screenshot-by-screenshot guide to writing, researching, analyzing, and automating with ChatGPT"
     },
     {
-      "title": "Web Development with Blazor",
-      "author": "Jimmy Engström",
-      "imageUrl": "https://m.media-amazon.com/images/I/51zwEhx0VTL._SS135_.jpg",
-      "productUrl": "https://www.amazon.com/dp/1806112892/?tag=amavin-20",
-      "description": "A practical guide to building interactive UIs with C# 14 and .NET 10."
+      "title": "C, C++, and C# Programming for Beginners",
+      "author": "Mark J. Price",
+      "imageUrl": "https://m.media-amazon.com/images/W/BW_MEDIAX_AVIF_MEASUREMENT_1306696-T4/images/I/41RIRdTsuyL._SS135_.jpg",
+      "productUrl": "https://www.amazon.com/dp/1806021293/?tag=amavin-20",
+      "description": "Write real programs, master memory management, and build your first web apps and 3D games with AI."
     },
     {
       "title": "Building Agentic Applications with MCP and .NET",

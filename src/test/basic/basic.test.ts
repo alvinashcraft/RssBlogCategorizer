@@ -1,8 +1,91 @@
 import { expect } from 'chai';
+import { XMLParser } from 'fast-xml-parser';
 import { BlogPost } from '../../rssProvider';
 import type { WordPressPost } from '../../wordpressManager';
 
 describe('Basic Tests', () => {
+  describe('Feed XML Parsing', () => {
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_'
+    });
+
+    it('should preserve RSS entities, CDATA, namespaced authors, and repeated items', () => {
+      const parsed: unknown = parser.parse(`
+        <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+          <channel>
+            <title>Developer Blog</title>
+            <item>
+              <title>React &amp; TypeScript</title>
+              <description><![CDATA[<p>A <b>guide</b>.</p>]]></description>
+              <dc:creator>Test Author</dc:creator>
+              <link>https://example.com/react</link>
+            </item>
+            <item>
+              <title>Dew Drop &#8211; Daily Links</title>
+              <link>https://example.com/daily</link>
+            </item>
+          </channel>
+        </rss>
+      `);
+
+      expect(parsed).to.deep.equal({
+        rss: {
+          '@_version': '2.0',
+          '@_xmlns:dc': 'http://purl.org/dc/elements/1.1/',
+          channel: {
+            title: 'Developer Blog',
+            item: [
+              {
+                title: 'React & TypeScript',
+                description: '<p>A <b>guide</b>.</p>',
+                'dc:creator': 'Test Author',
+                link: 'https://example.com/react'
+              },
+              {
+                title: 'Dew Drop &#8211; Daily Links',
+                link: 'https://example.com/daily'
+              }
+            ]
+          }
+        }
+      });
+    });
+
+    it('should preserve Atom link attributes, typed content, and nested authors', () => {
+      const parsed: unknown = parser.parse(`
+        <feed xmlns="http://www.w3.org/2005/Atom">
+          <title>Developer Feed</title>
+          <entry>
+            <title type="text">TypeScript &amp; XML</title>
+            <link rel="self" href="https://example.com/post.atom" />
+            <link rel="alternate" href="https://example.com/post" />
+            <summary type="html">&lt;p&gt;A guide.&lt;/p&gt;</summary>
+            <author><name>Test Author</name></author>
+            <published>2026-11-10T10:00:00Z</published>
+          </entry>
+        </feed>
+      `);
+
+      expect(parsed).to.deep.equal({
+        feed: {
+          '@_xmlns': 'http://www.w3.org/2005/Atom',
+          title: 'Developer Feed',
+          entry: {
+            title: { '#text': 'TypeScript & XML', '@_type': 'text' },
+            link: [
+              { '@_rel': 'self', '@_href': 'https://example.com/post.atom' },
+              { '@_rel': 'alternate', '@_href': 'https://example.com/post' }
+            ],
+            summary: { '#text': '<p>A guide.</p>', '@_type': 'html' },
+            author: { name: 'Test Author' },
+            published: '2026-11-10T10:00:00Z'
+          }
+        }
+      });
+    });
+  });
+
   describe('BlogPost Interface', () => {
     it('should create a valid blog post object', () => {
       const post: BlogPost = {
