@@ -4,7 +4,7 @@ This guide contains developer-specific instructions for building, testing, and c
 
 ## Prerequisites
 
-- Node.js (16.x or later)
+- Node.js (20 or later, required by the VSCE 3.x packaging toolchain)
 - Visual Studio Code
 - TypeScript
 
@@ -153,6 +153,14 @@ npm install
 # Package the extension with local VSCE
 npm run vsce:package
 ```
+
+For dependency-only updates, run `npm run compile`, `npm run test:basic`,
+and `npm run vsce:package`. The basic tests cover RSS and Atom XML parsing
+contracts as well as Marketplace assets. Packaging builds a local VSIX
+without publishing it.
+
+The project intentionally ignores `package-lock.json`. Update dependency
+minimums in `package.json` so clean installs receive the intended fixes.
 
 ## Publishing
 

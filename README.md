@@ -350,6 +350,10 @@ See the [VS Code Localization documentation](https://code.visualstudio.com/api/r
 
 ## Development
 
+Use Node.js 20 or later for development and VSIX packaging.
+For dependency-only updates, run `npm run compile`, `npm run test:basic`,
+and `npm run vsce:package` before release.
+
 Interested in contributing or building from source? See [DEVELOPMENT.md](https://github.com/alvinashcraft/RssBlogCategorizer/blob/main/docs/dev/DEVELOPMENT.md) for detailed development setup, building instructions, testing guidelines, and contribution information.
 
 For Marketplace icon requirements and package rebuilding instructions, see the
