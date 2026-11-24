@@ -175,6 +175,7 @@
         "python",
         "django",
         "flask",
+        "pycharm",
         "fastapi",
         "pandas",
         "numpy"
